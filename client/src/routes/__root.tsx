@@ -87,7 +87,7 @@ export const Route = createRootRoute({
 
         <AppShell.Navbar>
           <NavLink
-            label="Dashboard"
+            label="File"
             component={Link}
             to="/"
             activeProps={{
