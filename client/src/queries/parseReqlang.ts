@@ -56,7 +56,7 @@ export const useRunRequest = () =>
         },
       });
 
-      const data = (await response.json()) as HttpResponse;
+      const data = (await response.json()) as [HttpResponse, string];
 
       return data;
     },

@@ -26,9 +26,10 @@ use hyper_util::{
 };
 use reqlang::{
     ast::Ast,
+    export::ResponseFormat,
     fetch::{Fetch, HttpRequestFetcher},
     parser::parse,
-    types::{ParseResult, RequestParamsFromClient},
+    types::{ParseResult, RequestParamsFromClient, http::HttpResponse},
 };
 use serde::Deserialize;
 use serde_json::from_str;
@@ -274,6 +275,7 @@ pub async fn init_server(
     let app = Router::new()
         .route("/api/parse", post(parse_request_file))
         .route("/api/run", post(run_request))
+        .route("/api/export_response", post(export_response))
         .route("/api/calendar", post(view_calendar))
         .route("/api/timeline", get(get_timeline))
         .route("/api/debug/backup", post(backup_db))
@@ -322,6 +324,12 @@ pub async fn init_server(
     Ok(AppServer(listener, app))
 }
 
+async fn export_response(Json(body): Json<HttpResponse>) -> (StatusCode, Result<String, String>) {
+    let r = reqlang::export::export_response(&body, ResponseFormat::HttpMessage);
+
+    (StatusCode::OK, Ok(r))
+}
+
 #[derive(Deserialize)]
 struct ParseRequestFile {
     payload: String,
@@ -351,7 +359,7 @@ async fn parse_request_file(
 
 async fn run_request(
     Json(from_client_params): Json<RequestParamsFromClient>,
-) -> (StatusCode, String) {
+) -> (StatusCode, Json<(HttpResponse, String)>) {
     let mut provider_values: HashMap<String, String> = HashMap::new();
 
     let env = from_client_params.env.as_deref();
@@ -365,10 +373,10 @@ async fn run_request(
         .await
         .expect("Request should have succeeded");
 
-    (
-        StatusCode::OK,
-        serde_json::to_string_pretty(&response).unwrap(),
-    )
+    let response_exported =
+        reqlang::export::export_response(&response, ResponseFormat::HttpMessage);
+
+    (StatusCode::OK, Json((response, response_exported)))
 }
 
 async fn connect_to_db(db_path: String) -> Pool<Sqlite> {

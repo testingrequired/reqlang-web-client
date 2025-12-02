@@ -201,7 +201,7 @@ export const RunRequestForm: React.FC<Props> = ({ result }) => {
             <Text mb={0} pb={0}>
               Actual Response
             </Text>
-            <Code block>{JSON.stringify(runRequest.data, null, 2)}</Code>
+            <Code block>{runRequest.data[1]}</Code>
           </Card>
         )}
 
