@@ -68,12 +68,14 @@ function RouteComponent() {
     <Stack>
       <Uploader onUpload={handleDropDrop} />
 
-      <Group align="top" mt="xl">
-        <Text m={0}>{fileStore.file!.fileName}</Text>
-        <ButtonGroup>
-          <CloseRequestFileButton onClick={fileStore.unsetFile} />
-        </ButtonGroup>
-      </Group>
+      {fileStore.file && (
+        <Group align="top" mt="xl">
+          <Text m={0}>{fileStore.file.fileName}</Text>
+          <ButtonGroup>
+            <CloseRequestFileButton onClick={fileStore.unsetFile} />
+          </ButtonGroup>
+        </Group>
+      )}
 
       {typeof data !== "undefined" && (
         <>
