@@ -21,14 +21,8 @@ export const RunRequestForm: React.FC<Props> = ({ result }) => {
   const fileStore = useFileStore();
   const runRequest = useRunRequest();
 
-  function runOnMount({ value }: any) {
-    form.validateAllFields("change");
-    return value;
-  }
-
   const form = useForm({
     ...formOptions({
-      validators: { onMount: runOnMount },
       defaultValues: Object.fromEntries([
         ["env", result.envs.length === 1 ? result.envs.at(0) : undefined],
         ...result.secrets.map((secret) => [`secret-${secret}`, ""]),
@@ -84,7 +78,14 @@ export const RunRequestForm: React.FC<Props> = ({ result }) => {
   }
 
   return (
-    <form onSubmit={form.handleSubmit}>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        form.handleSubmit(e);
+      }}
+    >
       <Stack>
         <Card>
           <Text mb={0} pb={0}>
@@ -98,10 +99,6 @@ export const RunRequestForm: React.FC<Props> = ({ result }) => {
             <Stack>
               <form.Field
                 name="env"
-                validators={{
-                  onChange: ({ value }) =>
-                    value.length === 0 ? "This field is required" : undefined,
-                }}
                 children={(field) => (
                   <Select
                     label="Environment"
@@ -149,6 +146,8 @@ export const RunRequestForm: React.FC<Props> = ({ result }) => {
                 name={`prompt-${prompts}`}
                 key={i}
                 validators={{
+                  onMount: ({ value }) =>
+                    value.length === 0 ? "This field is required" : undefined,
                   onChange: ({ value }) =>
                     value.length === 0 ? "This field is required" : undefined,
                 }}
@@ -174,6 +173,8 @@ export const RunRequestForm: React.FC<Props> = ({ result }) => {
                 name={`secret-${secret}`}
                 key={i}
                 validators={{
+                  onMount: ({ value }) =>
+                    value.length === 0 ? "This field is required" : undefined,
                   onChange: ({ value }) =>
                     value.length === 0 ? "This field is required" : undefined,
                 }}
@@ -191,15 +192,9 @@ export const RunRequestForm: React.FC<Props> = ({ result }) => {
           </Card>
         )}
 
-        <form.Subscribe
-          selector={(state) => state.isValid && !state.isPristine}
-        >
-          {(canSubmit) => (
-            <Button type="submit" disabled={!canSubmit}>
-              Run Request
-            </Button>
-          )}
-        </form.Subscribe>
+        <Button type="submit" disabled={runRequest.isPending}>
+          Run Request
+        </Button>
 
         {runRequest.isSuccess && (
           <Card>
