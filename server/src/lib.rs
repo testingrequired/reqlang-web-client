@@ -1,4 +1,5 @@
 use std::{
+    collections::HashMap,
     env::{current_dir, home_dir},
     path::PathBuf,
     sync::Arc,
@@ -23,7 +24,12 @@ use hyper_util::{
     rt::{TokioExecutor, TokioIo},
     server,
 };
-use reqlang::{ast::Ast, parser::parse, types::ParseResult};
+use reqlang::{
+    ast::Ast,
+    fetch::{Fetch, HttpRequestFetcher},
+    parser::parse,
+    types::{ParseResult, RequestParamsFromClient},
+};
 use serde::Deserialize;
 use serde_json::from_str;
 use sqlx::{Pool, Sqlite, SqlitePool, migrate::Migrator, sqlite::SqliteConnectOptions};
@@ -267,6 +273,7 @@ pub async fn init_server(
 
     let app = Router::new()
         .route("/api/parse", post(parse_request_file))
+        .route("/api/run", post(run_request))
         .route("/api/calendar", post(view_calendar))
         .route("/api/timeline", get(get_timeline))
         .route("/api/debug/backup", post(backup_db))
@@ -338,6 +345,28 @@ async fn parse_request_file(Json(body): Json<ParseRequestFile>) -> (StatusCode, 
             Err(err) => (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()),
         },
     }
+}
+
+async fn run_request(
+    Json(from_client_params): Json<RequestParamsFromClient>,
+) -> (StatusCode, String) {
+    let mut provider_values: HashMap<String, String> = HashMap::new();
+
+    let env = from_client_params.env.as_deref();
+
+    if let Some(env) = env {
+        provider_values.insert("env".to_string(), env.to_string());
+    }
+
+    let response = Into::<HttpRequestFetcher>::into(from_client_params)
+        .fetch()
+        .await
+        .expect("Request should have succeeded");
+
+    (
+        StatusCode::OK,
+        serde_json::to_string_pretty(&response).unwrap(),
+    )
 }
 
 async fn connect_to_db(db_path: String) -> Pool<Sqlite> {

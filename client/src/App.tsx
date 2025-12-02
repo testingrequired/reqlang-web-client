@@ -36,7 +36,7 @@ export const router = createRouter({
 });
 
 export const theme = createTheme({
-  primaryColor: "green",
+  primaryColor: "blue",
 });
 
 const queryClient = new QueryClient();
