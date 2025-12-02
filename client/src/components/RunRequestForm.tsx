@@ -21,8 +21,14 @@ export const RunRequestForm: React.FC<Props> = ({ result }) => {
   const fileStore = useFileStore();
   const runRequest = useRunRequest();
 
+  function runOnMount({ value }: any) {
+    form.validateAllFields("change");
+    return value;
+  }
+
   const form = useForm({
     ...formOptions({
+      validators: { onMount: runOnMount },
       defaultValues: Object.fromEntries([
         ["env", result.envs.length === 1 ? result.envs.at(0) : undefined],
         ...result.secrets.map((secret) => [`secret-${secret}`, ""]),
@@ -92,22 +98,24 @@ export const RunRequestForm: React.FC<Props> = ({ result }) => {
             <Stack>
               <form.Field
                 name="env"
-                children={(field) => {
-                  return (
-                    <Select
-                      label="Environment"
-                      required={result.envs.length > 1}
-                      disabled={result.envs.length === 1}
-                      data={result.envs}
-                      value={field.state.value}
-                      onChange={(value) => {
-                        if (value !== null) {
-                          field.setValue(value);
-                        }
-                      }}
-                    />
-                  );
+                validators={{
+                  onChange: ({ value }) =>
+                    value.length === 0 ? "This field is required" : undefined,
                 }}
+                children={(field) => (
+                  <Select
+                    label="Environment"
+                    required={result.envs.length > 1}
+                    disabled={result.envs.length === 1}
+                    data={result.envs}
+                    value={field.state.value}
+                    onChange={(value) => {
+                      if (value !== null) {
+                        field.setValue(value);
+                      }
+                    }}
+                  />
+                )}
               />
 
               {Object.keys(envVarValues || {}).length > 0 && (
@@ -120,14 +128,12 @@ export const RunRequestForm: React.FC<Props> = ({ result }) => {
                   </Table.Thead>
 
                   <Table.Tbody>
-                    {Object.entries(envVarValues || {}).map(([key, value]) => {
-                      return (
-                        <Table.Tr>
-                          <Table.Td>{key}</Table.Td>
-                          <Table.Td>{value}</Table.Td>
-                        </Table.Tr>
-                      );
-                    })}
+                    {Object.entries(envVarValues || {}).map(([key, value]) => (
+                      <Table.Tr>
+                        <Table.Td>{key}</Table.Td>
+                        <Table.Td>{value}</Table.Td>
+                      </Table.Tr>
+                    ))}
                   </Table.Tbody>
                 </Table>
               )}
@@ -138,60 +144,62 @@ export const RunRequestForm: React.FC<Props> = ({ result }) => {
         {result.prompts.length > 0 && (
           <Card>
             <Text>Prompts</Text>
-            {result.prompts.map((prompts, i) => {
-              return (
-                <form.Field
-                  name={`prompt-${prompts}`}
-                  key={i}
-                  children={(field) => {
-                    return (
-                      <>
-                        <TextInput
-                          label={prompts}
-                          value={field.state.value}
-                          onBlur={field.handleBlur}
-                          required
-                          onChange={(e) => field.handleChange(e.target.value)}
-                        />
-                      </>
-                    );
-                  }}
-                />
-              );
-            })}
+            {result.prompts.map((prompts, i) => (
+              <form.Field
+                name={`prompt-${prompts}`}
+                key={i}
+                validators={{
+                  onChange: ({ value }) =>
+                    value.length === 0 ? "This field is required" : undefined,
+                }}
+                children={(field) => (
+                  <TextInput
+                    label={prompts}
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    required
+                    onChange={(e) => field.handleChange(e.target.value)}
+                  />
+                )}
+              />
+            ))}
           </Card>
         )}
 
         {result.secrets.length > 0 && (
           <Card>
             <Text>Secrets</Text>
-            {result.secrets.map((secret, i) => {
-              return (
-                <form.Field
-                  name={`secret-${secret}`}
-                  key={i}
-                  children={(field) => {
-                    return (
-                      <>
-                        <TextInput
-                          label={secret}
-                          value={field.state.value}
-                          required
-                          onBlur={field.handleBlur}
-                          onChange={(e) => field.handleChange(e.target.value)}
-                        />
-                      </>
-                    );
-                  }}
-                />
-              );
-            })}
+            {result.secrets.map((secret, i) => (
+              <form.Field
+                name={`secret-${secret}`}
+                key={i}
+                validators={{
+                  onChange: ({ value }) =>
+                    value.length === 0 ? "This field is required" : undefined,
+                }}
+                children={(field) => (
+                  <TextInput
+                    label={secret}
+                    value={field.state.value}
+                    required
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                  />
+                )}
+              />
+            ))}
           </Card>
         )}
 
-        <Button type="submit" disabled={runRequest.isPending}>
-          Run Request
-        </Button>
+        <form.Subscribe
+          selector={(state) => state.isValid && !state.isPristine}
+        >
+          {(canSubmit) => (
+            <Button type="submit" disabled={!canSubmit}>
+              Run Request
+            </Button>
+          )}
+        </form.Subscribe>
 
         {runRequest.isSuccess && (
           <Card>
