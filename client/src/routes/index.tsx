@@ -1,6 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import Uploader from "@/components/Uploader";
-import { ButtonGroup, Code, Group, Stack, Tabs, Text } from "@mantine/core";
+import {
+  Alert,
+  ButtonGroup,
+  Code,
+  Group,
+  Stack,
+  Tabs,
+  Text,
+} from "@mantine/core";
 import { CloseRequestFileButton } from "@/components/CloseRequestFileButton";
 import { useFileStore } from "@/stores/loadedRequestFile";
 import { useParsedRequestFileQuery } from "@/queries/parseReqlang";
@@ -28,7 +36,22 @@ function RouteComponent() {
 
   if (!query.isIdle) {
     if (query.isError) {
-      return <p>Error: {query.error.message}</p>;
+      return (
+        <Stack>
+          <Uploader onUpload={fileStore.setFile} />
+
+          <Alert
+            color="red"
+            title={`Error loading '${fileStore.file?.fileName}'`}
+          >
+            <Text size="sm">{query.error.message}</Text>
+
+            {query.error.cause! && (
+              <Code block>{JSON.stringify(query.error.cause, null, 2)}</Code>
+            )}
+          </Alert>
+        </Stack>
+      );
     }
   }
 

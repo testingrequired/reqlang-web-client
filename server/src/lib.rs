@@ -327,7 +327,9 @@ struct ParseRequestFile {
     payload: String,
 }
 
-async fn parse_request_file(Json(body): Json<ParseRequestFile>) -> (StatusCode, String) {
+async fn parse_request_file(
+    Json(body): Json<ParseRequestFile>,
+) -> (StatusCode, Result<String, String>) {
     let ast = Ast::from(&body.payload);
     let result = parse(&ast);
 
@@ -336,13 +338,13 @@ async fn parse_request_file(Json(body): Json<ParseRequestFile>) -> (StatusCode, 
             let result: ParseResult = result.clone().into();
 
             match serde_json::to_string_pretty(&result) {
-                Ok(result) => (StatusCode::OK, result),
-                Err(err) => (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()),
+                Ok(result) => (StatusCode::OK, Ok(result)),
+                Err(err) => (StatusCode::INTERNAL_SERVER_ERROR, Err(err.to_string())),
             }
         }
         Err(err) => match serde_json::to_string_pretty(err) {
-            Ok(result) => (StatusCode::BAD_REQUEST, result),
-            Err(err) => (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()),
+            Ok(result) => (StatusCode::BAD_REQUEST, Err(result)),
+            Err(err) => (StatusCode::INTERNAL_SERVER_ERROR, Err(err.to_string())),
         },
     }
 }
