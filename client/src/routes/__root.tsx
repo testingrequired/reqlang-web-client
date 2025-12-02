@@ -7,7 +7,6 @@ import "@mantine/dates/styles.css";
 import "@mantine/spotlight/styles.css";
 import { useDisclosure } from "@mantine/hooks";
 import { useState } from "react";
-import { useGetBillsQuery } from "@/queries/bills";
 import { useServerWebSocket } from "@/hooks/useServerWebSocket";
 import { notifications } from "@mantine/notifications";
 import { useReward } from "react-rewards";
@@ -51,16 +50,6 @@ export const Route = createRootRoute({
       },
     });
 
-    const billsQuery = useGetBillsQuery();
-
-    if (billsQuery.isPending) {
-      return <p>Loading...</p>;
-    }
-
-    if (billsQuery.isError) {
-      return <p>Error: {billsQuery.error.message}</p>;
-    }
-
     return (
       <AppShell
         header={{ height: 70 }}
@@ -87,7 +76,7 @@ export const Route = createRootRoute({
 
         <AppShell.Navbar>
           <NavLink
-            label="File"
+            label="Request"
             component={Link}
             to="/"
             activeProps={{

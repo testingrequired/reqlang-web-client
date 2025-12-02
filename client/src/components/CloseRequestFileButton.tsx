@@ -6,4 +6,15 @@ export type CloseRequestFileButtonProps = {
 
 export const CloseRequestFileButton: React.FC<CloseRequestFileButtonProps> = (
   props
-) => <Button onClick={props.onClick}>Close</Button>;
+) => (
+  <Button
+    onClick={props.onClick}
+    color="red"
+    size="compact-xs"
+    style={{
+      cursor: "pointer",
+    }}
+  >
+    Close
+  </Button>
+);

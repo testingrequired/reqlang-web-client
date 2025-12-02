@@ -23,6 +23,8 @@ use hyper_util::{
     rt::{TokioExecutor, TokioIo},
     server,
 };
+use reqlang::{ast::Ast, parser::parse, types::ParseResult};
+use serde::Deserialize;
 use serde_json::from_str;
 use sqlx::{Pool, Sqlite, SqlitePool, migrate::Migrator, sqlite::SqliteConnectOptions};
 use tokio::{
@@ -264,6 +266,7 @@ pub async fn init_server(
         CompressionLayer::new().br(true).deflate(true).gzip(true);
 
     let app = Router::new()
+        .route("/api/parse", post(parse_request_file))
         .route("/api/calendar", post(view_calendar))
         .route("/api/timeline", get(get_timeline))
         .route("/api/debug/backup", post(backup_db))
@@ -310,6 +313,31 @@ pub async fn init_server(
         );
 
     Ok(AppServer(listener, app))
+}
+
+#[derive(Deserialize)]
+struct ParseRequestFile {
+    payload: String,
+}
+
+async fn parse_request_file(Json(body): Json<ParseRequestFile>) -> (StatusCode, String) {
+    let ast = Ast::from(&body.payload);
+    let result = parse(&ast);
+
+    match &result {
+        Ok(result) => {
+            let result: ParseResult = result.clone().into();
+
+            match serde_json::to_string_pretty(&result) {
+                Ok(result) => (StatusCode::OK, result),
+                Err(err) => (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()),
+            }
+        }
+        Err(err) => match serde_json::to_string_pretty(err) {
+            Ok(result) => (StatusCode::BAD_REQUEST, result),
+            Err(err) => (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()),
+        },
+    }
 }
 
 async fn connect_to_db(db_path: String) -> Pool<Sqlite> {

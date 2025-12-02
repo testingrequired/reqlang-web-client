@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./Uploader.css";
+import { Card, Text } from "@mantine/core";
 
 export type UploadedFile = {
   fileName: string;
@@ -44,11 +45,13 @@ const DragDropFileReader: React.FC<Props> = (props) => {
         dragging ? "border-blue-500" : "border-gray-300"
       }`}
     >
-      <>
-        <p>📄 Drag & drop a request file</p>
+      <Card p="xl" withBorder>
+        <Text m={0} style={{ cursor: "default" }}>
+          📄 Drag & drop to load a request file
+        </Text>
 
         <input type="file" className="hidden" data-testid="uploader" />
-      </>
+      </Card>
     </div>
   );
 };
