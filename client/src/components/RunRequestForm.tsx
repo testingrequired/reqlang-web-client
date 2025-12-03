@@ -1,6 +1,7 @@
 import { ParseResult } from "reqlang-types";
 import { formOptions, useForm, useStore } from "@tanstack/react-form";
 import {
+  Alert,
   Button,
   Card,
   Code,
@@ -87,10 +88,7 @@ export const RunRequestForm: React.FC<Props> = ({ result }) => {
       }}
     >
       <Stack>
-        <Card>
-          <Text mb={0} pb={0}>
-            Request
-          </Text>
+        <Card p="xs">
           <Code block>{requestText}</Code>
         </Card>
 
@@ -115,7 +113,7 @@ export const RunRequestForm: React.FC<Props> = ({ result }) => {
                 )}
               />
 
-              {Object.keys(envVarValues || {}).length > 0 && (
+              {Object.keys(envVarValues || {}).length > 0 ? (
                 <Table>
                   <Table.Thead>
                     <Table.Tr>
@@ -133,6 +131,31 @@ export const RunRequestForm: React.FC<Props> = ({ result }) => {
                     ))}
                   </Table.Tbody>
                 </Table>
+              ) : (
+                result.vars.length > 0 && (
+                  <>
+                    <Alert>Select an environment to view variable values</Alert>
+                    <Table>
+                      <Table.Thead>
+                        <Table.Tr>
+                          <Table.Th>Variable</Table.Th>
+                          <Table.Th>Value</Table.Th>
+                        </Table.Tr>
+                      </Table.Thead>
+
+                      <Table.Tbody>
+                        {result.vars.map((key) => {
+                          return (
+                            <Table.Tr>
+                              <Table.Td>{key}</Table.Td>
+                              <Table.Td>...</Table.Td>
+                            </Table.Tr>
+                          );
+                        })}
+                      </Table.Tbody>
+                    </Table>
+                  </>
+                )
               )}
             </Stack>
           </Card>
@@ -197,21 +220,23 @@ export const RunRequestForm: React.FC<Props> = ({ result }) => {
         </Button>
 
         {runRequest.isSuccess && (
-          <Card>
-            <Text mb={0} pb={0}>
-              Actual Response
-            </Text>
-            <Code block>{runRequest.data[1]}</Code>
-          </Card>
-        )}
+          <>
+            <Card>
+              <Text mb={0} pb={0}>
+                {responseSpan ? "Actual Response" : "Response"}
+              </Text>
+              <Code block>{runRequest.data[1]}</Code>
+            </Card>
 
-        {responseSpan && (
-          <Card>
-            <Text mb={0} pb={0}>
-              Expected Response
-            </Text>
-            <Code block>{responseText}</Code>
-          </Card>
+            {responseSpan && (
+              <Card>
+                <Text mb={0} pb={0}>
+                  Expected Response
+                </Text>
+                <Code block>{responseText}</Code>
+              </Card>
+            )}
+          </>
         )}
       </Stack>
     </form>

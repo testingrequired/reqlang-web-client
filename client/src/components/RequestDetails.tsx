@@ -129,6 +129,23 @@ export const RequestDetails: React.FC<Props> = ({ result }) => {
         )}
       </Card>
 
+      {result.full.comments.length > 0 && (
+        <Card p="xs">
+          <Title order={4} mb={0}>
+            Comments
+          </Title>
+
+          <Code
+            block
+            style={{
+              textWrap: "wrap",
+            }}
+          >
+            {result.full.comments.map(([comment]) => comment).join("")}
+          </Code>
+        </Card>
+      )}
+
       <Title order={3} onClick={toggleConfiguration}>
         Configuration
       </Title>

@@ -3,7 +3,6 @@ import {
   HttpResponse,
   ParseResult,
   RequestParamsFromClient,
-  ReqlangError,
 } from "reqlang-types";
 
 export const PARSE_KEYS = {
@@ -27,10 +26,7 @@ export const useParsedRequestFileQuery = () =>
 
       if (!response.ok) {
         if (response.status === 400) {
-          const errs = (await response.json()) as [
-            ReqlangError,
-            { start: number; end: number },
-          ][];
+          const errs = (await response.json()) as [string];
 
           throw new Error("Unable to parse request file", {
             cause: errs,
