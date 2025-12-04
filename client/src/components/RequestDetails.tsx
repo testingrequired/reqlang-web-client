@@ -10,8 +10,9 @@ export const RequestDetails: React.FC<Props> = ({ result }) => {
   const [expectedResponseOpened, { toggle: toggleExpectedResponse }] =
     useDisclosure(false);
 
-  const [configurationOpened, { toggle: toggleConfiguration }] =
-    useDisclosure(false);
+  const providerReferences = result.full.refs
+    .filter((ref) => Object.keys(ref[0]).at(0) === "Provider")
+    .map((e) => Object.values(e[0]).at(0));
 
   return (
     <Stack>
@@ -146,94 +147,108 @@ export const RequestDetails: React.FC<Props> = ({ result }) => {
         </Card>
       )}
 
-      <Title order={3} onClick={toggleConfiguration}>
-        Configuration
-      </Title>
+      <Title order={3}>Configuration</Title>
 
-      <Collapse in={configurationOpened}>
-        <Title order={4}>Environments</Title>
+      <Title order={4}>Environments</Title>
 
-        {result.envs.length > 0 ? (
-          <Table>
-            <Table.Tbody>
-              {result.envs.map((env, i) => {
-                return (
-                  <Table.Tr key={i}>
-                    <Table.Td>{env}</Table.Td>
-                  </Table.Tr>
-                );
-              })}
-            </Table.Tbody>
-          </Table>
-        ) : (
-          <Text>No environments defined</Text>
-        )}
+      {result.envs.length > 0 ? (
+        <Table>
+          <Table.Tbody>
+            {result.envs.map((env, i) => {
+              return (
+                <Table.Tr key={i}>
+                  <Table.Td>{env}</Table.Td>
+                </Table.Tr>
+              );
+            })}
+          </Table.Tbody>
+        </Table>
+      ) : (
+        <Text>No environments defined</Text>
+      )}
 
-        <Title order={4}>Parameters</Title>
+      <Title order={4}>Parameters</Title>
 
-        <Title order={5}>Variables</Title>
+      <Title order={5}>Variables</Title>
 
-        {result.vars.length > 0 ? (
-          <Table>
-            <Table.Tbody>
-              {result.vars.map((v, i) => {
-                return (
-                  <Table.Tr key={i}>
-                    <Table.Td>{v}</Table.Td>
-                  </Table.Tr>
-                );
-              })}
-            </Table.Tbody>
-          </Table>
-        ) : (
-          <Text>No variables defined</Text>
-        )}
+      {result.vars.length > 0 ? (
+        <Table>
+          <Table.Tbody>
+            {result.vars.map((v, i) => {
+              return (
+                <Table.Tr key={i}>
+                  <Table.Td>{v}</Table.Td>
+                </Table.Tr>
+              );
+            })}
+          </Table.Tbody>
+        </Table>
+      ) : (
+        <Text>No variables defined</Text>
+      )}
 
-        <Title order={5}>Prompts</Title>
+      <Title order={5}>Prompts</Title>
 
-        {result.prompts.length > 0 ? (
-          <Table>
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th>Prompt</Table.Th>
-                <Table.Th>Default Value</Table.Th>
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
-              {result.prompts.map((prompt, i) => {
-                return (
-                  <Table.Tr key={i}>
-                    <Table.Td>{prompt}</Table.Td>
-                    <Table.Td>
-                      {result.default_prompt_values[prompt] ?? "No default"}
-                    </Table.Td>
-                  </Table.Tr>
-                );
-              })}
-            </Table.Tbody>
-          </Table>
-        ) : (
-          <Text>No prompts defined</Text>
-        )}
+      {result.prompts.length > 0 ? (
+        <Table>
+          <Table.Thead>
+            <Table.Tr>
+              <Table.Th>Prompt</Table.Th>
+              <Table.Th>Default Value</Table.Th>
+            </Table.Tr>
+          </Table.Thead>
+          <Table.Tbody>
+            {result.prompts.map((prompt, i) => {
+              return (
+                <Table.Tr key={i}>
+                  <Table.Td>{prompt}</Table.Td>
+                  <Table.Td>
+                    {result.default_prompt_values[prompt] ?? "No default"}
+                  </Table.Td>
+                </Table.Tr>
+              );
+            })}
+          </Table.Tbody>
+        </Table>
+      ) : (
+        <Text>No prompts defined</Text>
+      )}
 
-        <Title order={5}>Secrets</Title>
+      <Title order={5}>Secrets</Title>
 
-        {result.secrets.length > 0 ? (
-          <Table>
-            <Table.Tbody>
-              {result.secrets.map((secret, i) => {
-                return (
-                  <Table.Tr key={i}>
-                    <Table.Td>{secret}</Table.Td>
-                  </Table.Tr>
-                );
-              })}
-            </Table.Tbody>
-          </Table>
-        ) : (
-          <Text>No secrets defined</Text>
-        )}
-      </Collapse>
+      {result.secrets.length > 0 ? (
+        <Table>
+          <Table.Tbody>
+            {result.secrets.map((secret, i) => {
+              return (
+                <Table.Tr key={i}>
+                  <Table.Td>{secret}</Table.Td>
+                </Table.Tr>
+              );
+            })}
+          </Table.Tbody>
+        </Table>
+      ) : (
+        <Text>No secrets defined</Text>
+      )}
+
+      <Title order={3}>Client Context Referenced</Title>
+
+      {providerReferences.length > 0 ? (
+        <Table>
+          <Table.Tbody>
+            {providerReferences.map((key, i) => {
+              return (
+                <Table.Tr key={i}>
+                  <Table.Td>{key}</Table.Td>
+                </Table.Tr>
+              );
+            })}
+          </Table.Tbody>
+        </Table>
+      ) : (
+        <Text>No client context referenced</Text>
+      )}
     </Stack>
   );
 };

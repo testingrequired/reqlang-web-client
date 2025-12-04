@@ -71,6 +71,7 @@ export const RunRequestForm: React.FC<Props> = ({ result }) => {
         secrets,
         vars,
         env: values.value.env,
+        provider_values: {},
       });
 
       exportRequest.mutate({
@@ -79,6 +80,7 @@ export const RunRequestForm: React.FC<Props> = ({ result }) => {
         secrets,
         vars,
         env: values.value.env,
+        provider_values: {},
       });
     },
   });

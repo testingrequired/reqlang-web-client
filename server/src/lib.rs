@@ -10,6 +10,7 @@ use axum::{
     response::{IntoResponse, Response},
     routing::{any, get, post},
 };
+use axum_extra::extract::Host;
 use clap::Parser;
 use futures_util::{SinkExt, StreamExt};
 use hyper::{body::Incoming, service::service_fn};
@@ -279,7 +280,9 @@ pub async fn init_server(
     Ok(AppServer(listener, app))
 }
 
+#[axum::debug_handler]
 async fn export_request(
+    Host(hostname): Host,
     Json(from_client_params): Json<RequestParamsFromClient>,
 ) -> (StatusCode, Result<String, String>) {
     let mut provider_values: HashMap<String, String> = HashMap::new();
@@ -289,6 +292,8 @@ async fn export_request(
     if let Some(env) = env {
         provider_values.insert("env".to_string(), env.to_string());
     }
+
+    provider_values.insert("clientUrl".to_string(), format!("http://{hostname}"));
 
     let result = reqlang::templater::template(
         &from_client_params.reqfile,
@@ -331,7 +336,8 @@ async fn parse_request_file(
 }
 
 async fn run_request(
-    Json(from_client_params): Json<RequestParamsFromClient>,
+    Host(hostname): Host,
+    Json(mut from_client_params): Json<RequestParamsFromClient>,
 ) -> (StatusCode, Json<(HttpResponse, String)>) {
     let mut provider_values: HashMap<String, String> = HashMap::new();
 
@@ -340,6 +346,12 @@ async fn run_request(
     if let Some(env) = env {
         provider_values.insert("env".to_string(), env.to_string());
     }
+
+    provider_values.insert("clientUrl".to_string(), format!("http://{hostname}"));
+
+    from_client_params.provider_values = provider_values;
+
+    dbg!(&from_client_params);
 
     let response = Into::<HttpRequestFetcher>::into(from_client_params)
         .fetch()

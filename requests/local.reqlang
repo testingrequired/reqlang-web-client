@@ -1,0 +1,7 @@
+The reqlang-web client exposes it's url as `{{@clientUrl}}`.
+
+This allows sending request's to the reqlang-web's API. 
+
+```%request
+GET {{@clientUrl}}/api/debug HTTP/1.1
+```
