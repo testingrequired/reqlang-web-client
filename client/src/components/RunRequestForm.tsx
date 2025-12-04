@@ -12,7 +12,8 @@ import {
   TextInput,
 } from "@mantine/core";
 import { useFileStore } from "@/stores/loadedRequestFile";
-import { useRunRequest } from "@/queries/parseReqlang";
+import { useDiffResponse, useRunRequest } from "@/queries/parseReqlang";
+import { useEffect } from "react";
 
 type Props = {
   result: ParseResult;
@@ -21,6 +22,16 @@ type Props = {
 export const RunRequestForm: React.FC<Props> = ({ result }) => {
   const fileStore = useFileStore();
   const runRequest = useRunRequest();
+  const diffResponse = useDiffResponse();
+
+  useEffect(() => {
+    if (typeof runRequest.data !== "undefined") {
+      diffResponse.mutate({
+        expected: result.full.response?.[0]!,
+        actual: runRequest.data[0],
+      });
+    }
+  }, [runRequest.data, fileStore.parsedFile]);
 
   const form = useForm({
     ...formOptions({
@@ -76,6 +87,10 @@ export const RunRequestForm: React.FC<Props> = ({ result }) => {
 
   if (runRequest.isError) {
     return <div>An error occurred: {runRequest.error.message}</div>;
+  }
+
+  if (diffResponse.isError) {
+    return <div>An error occurred: {diffResponse.error.message}</div>;
   }
 
   return (
@@ -229,12 +244,24 @@ export const RunRequestForm: React.FC<Props> = ({ result }) => {
             </Card>
 
             {responseSpan && (
-              <Card>
-                <Text mb={0} pb={0}>
-                  Expected Response
-                </Text>
-                <Code block>{responseText}</Code>
-              </Card>
+              <>
+                <Card>
+                  <Text mb={0} pb={0}>
+                    Expected Response
+                  </Text>
+                  <Code block>{responseText}</Code>
+
+                  {(diffResponse.data?.length ?? 0) > 0 && (
+                    <>
+                      <Text mb={0} pb={0}>
+                        Diff
+                      </Text>
+
+                      <Code block>{diffResponse.data}</Code>
+                    </>
+                  )}
+                </Card>
+              </>
             )}
           </>
         )}

@@ -60,6 +60,7 @@
     "react-use-websocket": "^4.0.0",
     "reqlang-types": "file:../../reqlang/reqlang",
     "server-types": "file:../types",
+    "strip-ansi": "^7.1.2",
     "zustand": "^5.0.8"
   }
 }

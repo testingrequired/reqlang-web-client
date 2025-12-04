@@ -30,9 +30,10 @@ use reqlang::{
     export::ResponseFormat,
     fetch::{Fetch, HttpRequestFetcher},
     parser::parse,
+    prelude::assert_response,
     types::{ParseResult, RequestParamsFromClient, http::HttpResponse},
 };
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::from_str;
 use sqlx::{Pool, Sqlite, SqlitePool, migrate::Migrator, sqlite::SqliteConnectOptions};
 use tokio::{
@@ -276,6 +277,7 @@ pub async fn init_server(
     let app = Router::new()
         .route("/api/parse", post(parse_request_file))
         .route("/api/run", post(run_request))
+        .route("/api/diff_responses", post(diff_response))
         .route("/api/export_response", post(export_response))
         .route("/api/calendar", post(view_calendar))
         .route("/api/timeline", get(get_timeline))
@@ -385,6 +387,23 @@ async fn run_request(
         reqlang::export::export_response(&response, ResponseFormat::HttpMessage);
 
     (StatusCode::OK, Json((response, response_exported)))
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct ResponseDiffRequest {
+    pub expected: HttpResponse,
+    pub actual: HttpResponse,
+}
+
+async fn diff_response(
+    Json(ResponseDiffRequest { expected, actual }): Json<ResponseDiffRequest>,
+) -> (StatusCode, String) {
+    let diff = assert_response(&expected, &actual)
+        .map_err(|err| err.to_string())
+        .err()
+        .unwrap_or("".to_string());
+
+    (StatusCode::OK, diff)
 }
 
 async fn connect_to_db(db_path: String) -> Pool<Sqlite> {

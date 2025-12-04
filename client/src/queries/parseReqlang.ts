@@ -4,10 +4,12 @@ import {
   ParseResult,
   RequestParamsFromClient,
 } from "reqlang-types";
+import stripAnsi from "strip-ansi";
 
 export const PARSE_KEYS = {
   parse: ["parse"] as const,
   run: ["run"] as const,
+  diff: ["diff"] as const,
 } as const;
 
 export const useParsedRequestFileQuery = () =>
@@ -55,5 +57,26 @@ export const useRunRequest = () =>
       const data = (await response.json()) as [HttpResponse, string];
 
       return data;
+    },
+  });
+
+export const useDiffResponse = () =>
+  useMutation({
+    mutationKey: PARSE_KEYS.run,
+    mutationFn: async (responses: {
+      expected: HttpResponse;
+      actual: HttpResponse;
+    }) => {
+      const response = await fetch(`/api/diff_responses`, {
+        method: "POST",
+        body: JSON.stringify(responses),
+        headers: {
+          "content-type": "application/json",
+        },
+      });
+
+      const data = await response.text();
+
+      return stripAnsi(data);
     },
   });
