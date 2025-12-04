@@ -17,16 +17,7 @@ pub struct AchievementId(i64);
 
 impl AchievementId {
     pub const TESTING_ACHIEVEMENTS: AchievementId = AchievementId(1);
-    pub const WISH_GRANTED: AchievementId = AchievementId(2);
     pub const WHATS_IN_HERE: AchievementId = AchievementId(3);
-    pub const BILLY: AchievementId = AchievementId(4);
-    pub const BILL_BILL_BILL: AchievementId = AchievementId(5);
-    pub const FIRST_TRANSACTION: AchievementId = AchievementId(6);
-    pub const SECOND_TRANSACTION: AchievementId = AchievementId(7);
-    pub const TEN_TRANSACTIONS: AchievementId = AchievementId(8);
-    pub const FIFTY_TRANSACTIONS: AchievementId = AchievementId(9);
-    pub const ONE_HUNDRED_TRANSACTIONS: AchievementId = AchievementId(10);
-    pub const BACK_THAT_DB_UP: AchievementId = AchievementId(11);
 
     pub fn id(&self) -> i64 {
         self.0

@@ -1,5 +1,0 @@
-CREATE TABLE Bills (
-    id INTEGER PRIMARY KEY,
-    name TEXT NOT NULL,
-    amount INTEGER NOT NULL
-);

@@ -1,22 +1,15 @@
-use std::{
-    collections::HashMap,
-    env::{current_dir, home_dir},
-    path::PathBuf,
-    sync::Arc,
-};
+use std::{collections::HashMap, env::current_dir, path::PathBuf, sync::Arc};
 
 use axum::{
     Json, Router,
     extract::{
-        Path, Request, State,
-        rejection::JsonRejection,
+        Request, State,
         ws::{Message, WebSocket, WebSocketUpgrade},
     },
     http::StatusCode,
     response::{IntoResponse, Response},
-    routing::{any, delete, get, post},
+    routing::{any, get, post},
 };
-use chrono::{Local, Utc};
 use clap::Parser;
 use futures_util::{SinkExt, StreamExt};
 use hyper::{body::Incoming, service::service_fn};
@@ -45,19 +38,13 @@ use tokio::{
 };
 use tower::Service;
 use tower_http::{compression::CompressionLayer, trace::TraceLayer};
-use tracing::{Level, error, event, info, info_span, instrument};
+use tracing::{error, info, info_span, instrument};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use types::{
     DebugInfo,
     achievement::{AchievementDto, AchievementId},
-    bill::{BillDto, CreateBillDto, UpdateBillDto},
-    debt::{CreateDebtDto, DebtDto, UpdateDebtDto},
     socket::ClientMessage,
-    timeline::Timeline,
-    transaction::{CreateTransactionDto, TransactionDto, UpdateTransactionDto},
 };
-
-mod utils;
 
 #[cfg(not(feature = "development_mode"))]
 use include_dir::include_dir;
@@ -68,9 +55,7 @@ use tower_http::services::ServeDir;
 #[cfg(not(feature = "development_mode"))]
 use tower_serve_static::ServeDir as StaticServeDir;
 
-use crate::services::{
-    achievements_service, bills_service, debt_service, timeline_service, transactions_service,
-};
+use crate::services::achievements_service;
 
 pub mod services;
 
@@ -110,7 +95,6 @@ impl IntoResponse for Error {
 pub struct AppState {
     pub home_dir: PathBuf,
     pub db: Option<Pool<Sqlite>>,
-    pub timeline_cache: Option<Timeline>,
     pub tx: Option<Arc<Mutex<UnboundedSender<String>>>>,
 }
 
@@ -223,7 +207,7 @@ pub async fn init_server(
         StaticServeDir::new(&ASSETS_DIR)
     };
 
-    let app_home_path = home_dir().map(|home| home.join(".reqlang"));
+    let current_dir_path = current_dir().expect("should have current directory");
 
     // Default path to database in order of priority
     //
@@ -232,19 +216,15 @@ pub async fn init_server(
     // 3. Current directory    `$CWD/reqlang.sqlite3`
     let default_db_path = {
         let db_path_env_var = std::env::var(DATABASE_URL_ENV_VAR);
-        let current_dir_path = current_dir().expect("should have current directory");
 
         let default_db_path = db_path_env_var.unwrap_or(
-            app_home_path
-                .clone()
-                .map(|home| home.join(DEFAULT_DB_FILENAME).to_string_lossy().to_string())
-                .unwrap_or(
-                    current_dir_path
-                        .join(DEFAULT_DB_FILENAME)
-                        .to_string_lossy()
-                        .to_string(),
-                ),
+            current_dir_path
+                .join(DEFAULT_DB_FILENAME)
+                .to_string_lossy()
+                .to_string(),
         );
+
+        dbg!(&default_db_path);
 
         default_db_path
     };
@@ -252,9 +232,8 @@ pub async fn init_server(
     let db_pool = connect_to_db(db.unwrap_or(default_db_path)).await;
 
     let state = AppState {
-        home_dir: app_home_path.expect("should have home directory"),
+        home_dir: current_dir_path,
         db: Some(db_pool),
-        timeline_cache: None,
         tx: None,
     };
 
@@ -278,34 +257,8 @@ pub async fn init_server(
         .route("/api/run", post(run_request))
         .route("/api/diff_responses", post(diff_response))
         .route("/api/export_request", post(export_request))
-        .route("/api/calendar", post(view_calendar))
-        .route("/api/timeline", get(get_timeline))
-        .route("/api/debug/backup", post(backup_db))
         .route("/api/debug", get(get_debug_info))
         .route("/api/debug/achievement", post(trigger_test_achievement))
-        .route("/api/state", delete(reset_app_state))
-        .route(
-            "/api/transactions",
-            get(get_transactions).post(create_transaction),
-        )
-        .route(
-            "/api/transactions/{id}",
-            get(get_transaction)
-                .put(update_transaction)
-                .delete(delete_transaction),
-        )
-        .route("/api/bills", get(get_bills).post(create_bill))
-        .route("/api/bills/next_dates", get(next_date_for_bills))
-        .route(
-            "/api/bills/{id}",
-            get(get_bill).put(update_bill).delete(delete_bill),
-        )
-        .route("/api/bills/{id}/next_date", get(next_date_for_bill))
-        .route("/api/debts", get(get_debts).post(create_debt))
-        .route(
-            "/api/debts/{id}",
-            get(get_debt).put(update_debt).delete(delete_debt),
-        )
         .route("/api/achievements", get(get_achievements))
         .route("/api/ws", any(ws_handler))
         .fallback_service(static_dir.clone())
@@ -435,38 +388,6 @@ async fn connect_to_db(db_path: String) -> Pool<Sqlite> {
 
 #[instrument(skip(state))]
 #[axum::debug_handler]
-pub async fn backup_db(State(state): State<Arc<Mutex<AppState>>>) -> String {
-    let state = state.clone();
-
-    let backup_name = {
-        let state = state.lock().await;
-        let conn = state.db.as_ref().unwrap();
-
-        let datetime = Utc::now().format("%Y%m%d%H%M%S").to_string();
-
-        let backup_name = state
-            .home_dir
-            .join(format!("backup.{datetime}.sqlite3"))
-            .to_string_lossy()
-            .to_string();
-
-        let _ = sqlx::query(r#"VACUUM INTO $1"#)
-            .bind(&backup_name)
-            .execute(conn)
-            .await;
-
-        backup_name
-    };
-
-    let _ =
-        achievements_service::complete_achievement(state.clone(), AchievementId::BACK_THAT_DB_UP)
-            .await;
-
-    backup_name
-}
-
-#[instrument(skip(state))]
-#[axum::debug_handler]
 pub async fn trigger_test_achievement(State(state): State<Arc<Mutex<AppState>>>) -> StatusCode {
     let _ = achievements_service::complete_achievement(
         state.clone(),
@@ -523,262 +444,6 @@ pub async fn reset_app_state(State(state): State<Arc<Mutex<AppState>>>) -> Statu
     state.reset();
 
     StatusCode::NO_CONTENT
-}
-
-#[instrument(skip(state))]
-#[axum::debug_handler]
-pub async fn get_transactions(
-    State(state): State<Arc<Mutex<AppState>>>,
-) -> (StatusCode, Json<Vec<TransactionDto>>) {
-    let transactions = transactions_service::get_transactions(state).await;
-
-    (StatusCode::OK, Json(transactions))
-}
-
-#[instrument(skip(state))]
-pub async fn get_transaction(
-    State(state): State<Arc<Mutex<AppState>>>,
-    Path(id): Path<i64>,
-) -> Result<(StatusCode, Json<TransactionDto>), StatusCode> {
-    match transactions_service::get_transaction(state, id).await {
-        Some(result) => Ok((StatusCode::OK, Json(result))),
-        None => Err(StatusCode::NOT_FOUND),
-    }
-}
-
-#[instrument(skip(state))]
-pub async fn create_transaction(
-    State(state): State<Arc<Mutex<AppState>>>,
-    payload: Result<Json<CreateTransactionDto>, JsonRejection>,
-) -> (StatusCode, Result<Json<TransactionDto>, String>) {
-    event!(Level::INFO, "Creating a transaction");
-    match payload {
-        Ok(Json(body)) => {
-            let transaction = transactions_service::create_transaction(state, body)
-                .await
-                .expect("should be valid transaction");
-
-            (StatusCode::CREATED, Ok(Json(transaction)))
-        }
-        Err(JsonRejection::JsonDataError(err)) => (StatusCode::BAD_REQUEST, Err(err.body_text())),
-        Err(JsonRejection::JsonSyntaxError(err)) => (StatusCode::BAD_REQUEST, Err(err.body_text())),
-        Err(JsonRejection::BytesRejection(err)) => (StatusCode::BAD_REQUEST, Err(err.body_text())),
-        Err(_) => todo!(),
-    }
-}
-
-pub async fn delete_transaction(
-    State(state): State<Arc<Mutex<AppState>>>,
-    Path(id): Path<i64>,
-) -> StatusCode {
-    match transactions_service::delete_transaction(state, id).await {
-        Ok(_) => StatusCode::NO_CONTENT,
-        Err(_) => StatusCode::NOT_FOUND,
-    }
-}
-
-pub async fn update_transaction(
-    State(state): State<Arc<Mutex<AppState>>>,
-    Path(_): Path<u64>,
-    payload: Result<Json<UpdateTransactionDto>, JsonRejection>,
-) -> (StatusCode, Result<Json<TransactionDto>, String>) {
-    match payload {
-        Ok(Json(body)) => {
-            let updated_transaction = transactions_service::update_transaction(state, body).await;
-
-            match updated_transaction {
-                Ok(updated_transaction) => (StatusCode::OK, Ok(Json(updated_transaction))),
-                Err(err) => (StatusCode::NOT_FOUND, Err(err)),
-            }
-        }
-        Err(JsonRejection::JsonDataError(err)) => (StatusCode::BAD_REQUEST, Err(err.body_text())),
-        Err(JsonRejection::JsonSyntaxError(err)) => (StatusCode::BAD_REQUEST, Err(err.body_text())),
-        Err(JsonRejection::BytesRejection(err)) => (StatusCode::BAD_REQUEST, Err(err.body_text())),
-        Err(_) => todo!(),
-    }
-}
-
-pub async fn get_bills(
-    State(state): State<Arc<Mutex<AppState>>>,
-) -> (StatusCode, Json<Vec<BillDto>>) {
-    (StatusCode::OK, Json(bills_service::get_bills(state).await))
-}
-
-#[instrument(skip(state))]
-#[axum::debug_handler]
-pub async fn get_bill(
-    State(state): State<Arc<Mutex<AppState>>>,
-    Path(id): Path<i64>,
-) -> Result<(StatusCode, Json<BillDto>), (StatusCode, String)> {
-    info!("Getting bill with ID: {id}");
-    match bills_service::get_bill(state, id).await {
-        Ok(bill) => Ok((StatusCode::OK, Json(bill))),
-        Err(err) => Err((StatusCode::INTERNAL_SERVER_ERROR, err)),
-    }
-}
-
-pub async fn update_bill(
-    State(state): State<Arc<Mutex<AppState>>>,
-    Path(_): Path<u64>,
-    payload: Result<Json<UpdateBillDto>, JsonRejection>,
-) -> (StatusCode, Result<Json<BillDto>, String>) {
-    match payload {
-        Ok(Json(body)) => {
-            let updated_bill = bills_service::update_bill(state, body).await;
-
-            match updated_bill {
-                Ok(updated_bill) => (StatusCode::OK, Ok(Json(updated_bill))),
-                Err(err) => (StatusCode::NOT_FOUND, Err(err)),
-            }
-        }
-        Err(JsonRejection::JsonDataError(err)) => (StatusCode::BAD_REQUEST, Err(err.body_text())),
-        Err(JsonRejection::JsonSyntaxError(err)) => (StatusCode::BAD_REQUEST, Err(err.body_text())),
-        Err(JsonRejection::BytesRejection(err)) => (StatusCode::BAD_REQUEST, Err(err.body_text())),
-        Err(_) => todo!(),
-    }
-}
-
-pub async fn delete_bill(
-    State(state): State<Arc<Mutex<AppState>>>,
-    Path(id): Path<i64>,
-) -> StatusCode {
-    match bills_service::delete_bill(state, id).await {
-        Ok(_) => StatusCode::NO_CONTENT,
-        Err(_) => StatusCode::NOT_FOUND,
-    }
-}
-
-#[instrument(skip(state))]
-pub async fn create_bill(
-    State(state): State<Arc<Mutex<AppState>>>,
-    payload: Result<Json<CreateBillDto>, JsonRejection>,
-) -> (StatusCode, Result<Json<BillDto>, String>) {
-    event!(Level::INFO, "Creating a bill");
-    match payload {
-        Ok(Json(body)) => {
-            let bill = bills_service::create_bill(state, body)
-                .await
-                .expect("should be valid bill");
-
-            (StatusCode::CREATED, Ok(Json(bill)))
-        }
-        Err(JsonRejection::JsonDataError(err)) => (StatusCode::BAD_REQUEST, Err(err.body_text())),
-        Err(JsonRejection::JsonSyntaxError(err)) => (StatusCode::BAD_REQUEST, Err(err.body_text())),
-        Err(JsonRejection::BytesRejection(err)) => (StatusCode::BAD_REQUEST, Err(err.body_text())),
-        Err(_) => todo!(),
-    }
-}
-
-pub async fn next_date_for_bill(
-    State(state): State<Arc<Mutex<AppState>>>,
-    Path(id): Path<i64>,
-) -> (StatusCode, Result<Json<String>, String>) {
-    match bills_service::get_bill_next_date(state, id).await {
-        Ok(date) => (StatusCode::OK, Ok(Json(date))),
-        Err(err) => (StatusCode::INTERNAL_SERVER_ERROR, Err(err)),
-    }
-}
-
-pub async fn next_date_for_bills(
-    State(state): State<Arc<Mutex<AppState>>>,
-) -> (StatusCode, Result<Json<Vec<(i64, String)>>, String>) {
-    match bills_service::get_next_date_for_bills(state).await {
-        Ok(next_dates) => (StatusCode::OK, Ok(Json(next_dates))),
-        Err(err) => (StatusCode::INTERNAL_SERVER_ERROR, Err(err)),
-    }
-}
-
-pub async fn get_timeline(
-    State(state): State<Arc<Mutex<AppState>>>,
-) -> (StatusCode, Result<Json<Timeline>, String>) {
-    let timeline = timeline_service::get_timeline(state, &Local::now()).await;
-
-    (StatusCode::OK, Ok(Json(timeline)))
-}
-
-pub async fn get_timeline_on_date(
-    State(state): State<Arc<Mutex<AppState>>>,
-    Path(timeline_date): Path<String>,
-) -> (StatusCode, Result<Json<Timeline>, String>) {
-    let timeline = timeline_service::get_timeline(state, &Local::now()).await;
-
-    timeline.get_rolling_balance_on_date(&timeline_date);
-
-    (StatusCode::OK, Ok(Json(timeline)))
-}
-
-pub async fn get_debts(
-    State(state): State<Arc<Mutex<AppState>>>,
-) -> (StatusCode, Json<Vec<DebtDto>>) {
-    (StatusCode::OK, Json(debt_service::get_debts(state).await))
-}
-
-#[instrument(skip(state))]
-#[axum::debug_handler]
-pub async fn get_debt(
-    State(state): State<Arc<Mutex<AppState>>>,
-    Path(id): Path<i64>,
-) -> Result<(StatusCode, Json<DebtDto>), (StatusCode, String)> {
-    match debt_service::get_debt(state, id).await {
-        Ok(debt) => Ok((StatusCode::OK, Json(debt))),
-        Err(err) => Err((StatusCode::INTERNAL_SERVER_ERROR, err)),
-    }
-}
-
-pub async fn update_debt(
-    State(state): State<Arc<Mutex<AppState>>>,
-    Path(_): Path<u64>,
-    payload: Result<Json<UpdateDebtDto>, JsonRejection>,
-) -> (StatusCode, Result<Json<DebtDto>, String>) {
-    match payload {
-        Ok(Json(body)) => {
-            let updated_debt = debt_service::update_debt(state, body).await;
-
-            match updated_debt {
-                Ok(updated_debt) => (StatusCode::OK, Ok(Json(updated_debt))),
-                Err(err) => {
-                    error!("{err}");
-
-                    (StatusCode::NOT_FOUND, Err(err))
-                }
-            }
-        }
-        Err(JsonRejection::JsonDataError(err)) => (StatusCode::BAD_REQUEST, Err(err.body_text())),
-        Err(JsonRejection::JsonSyntaxError(err)) => (StatusCode::BAD_REQUEST, Err(err.body_text())),
-        Err(JsonRejection::BytesRejection(err)) => (StatusCode::BAD_REQUEST, Err(err.body_text())),
-        Err(_) => todo!(),
-    }
-}
-
-pub async fn delete_debt(
-    State(state): State<Arc<Mutex<AppState>>>,
-    Path(id): Path<i64>,
-) -> StatusCode {
-    match debt_service::delete_debt(state, id).await {
-        Ok(_) => StatusCode::NO_CONTENT,
-        Err(_) => StatusCode::NOT_FOUND,
-    }
-}
-
-#[instrument(skip(state))]
-pub async fn create_debt(
-    State(state): State<Arc<Mutex<AppState>>>,
-    payload: Result<Json<CreateDebtDto>, JsonRejection>,
-) -> (StatusCode, Result<Json<DebtDto>, String>) {
-    event!(Level::INFO, "Creating a Debt");
-    match payload {
-        Ok(Json(body)) => {
-            let bill = debt_service::create_debt(state, body)
-                .await
-                .expect("should be valid debt");
-
-            (StatusCode::CREATED, Ok(Json(bill)))
-        }
-        Err(JsonRejection::JsonDataError(err)) => (StatusCode::BAD_REQUEST, Err(err.body_text())),
-        Err(JsonRejection::JsonSyntaxError(err)) => (StatusCode::BAD_REQUEST, Err(err.body_text())),
-        Err(JsonRejection::BytesRejection(err)) => (StatusCode::BAD_REQUEST, Err(err.body_text())),
-        Err(_) => todo!(),
-    }
 }
 
 #[axum::debug_handler]
@@ -853,10 +518,4 @@ pub async fn get_achievements(
         StatusCode::OK,
         Json(achievements_service::get_achievements(state).await),
     )
-}
-
-pub async fn view_calendar(State(state): State<Arc<Mutex<AppState>>>) -> StatusCode {
-    let _ = achievements_service::complete_achievement(state, AchievementId::WISH_GRANTED).await;
-
-    StatusCode::OK
 }

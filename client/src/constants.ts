@@ -1,9 +1,5 @@
 import { ReadyState } from "react-use-websocket";
 
-export const DND_TYPE_BILL = "BILL";
-export const DND_TYPE_TRANSACTION = "TRANSACTION";
-export const DND_TYPE_NEW_TRANSACTION = "NEW_TRANSACTION";
-
 export const WEBSOCKET_URL = import.meta.env.DEV
   ? "ws://localhost:3001/api/ws"
   : (`ws://${window.location.host}/api/ws` as const);

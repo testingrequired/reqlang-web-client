@@ -1,4 +1,4 @@
-app-name := "budget-calendar"
+app-name := "reqlang-web"
 
 default:
     @just --list
@@ -71,22 +71,22 @@ watch-types:
 [unix]
 install: build
     cp target/debug/reqlang-web ~/.cargo/bin/reqlang-web
-    cp target/debug/reqlang-web-app ~/.cargo/bin/reqlang-web-app
+    cp target/debug/reqlang-web ~/.cargo/bin/reqlang-web
 
 [windows]
 install: build
     cp target/debug/reqlang-web.exe ~/.cargo/bin/reqlang-web.exe
-    cp target/debug/reqlang-web-app.exe ~/.cargo/bin/reqlang-web-app.exe
+    cp target/debug/reqlang-web.exe ~/.cargo/bin/reqlang-web.exe
 
 [unix]
 install-release: build-release
     cp target/release/reqlang-web ~/.cargo/bin/reqlang-web
-    cp target/release/reqlang-web-app ~/.cargo/bin/reqlang-web-app
+    cp target/release/reqlang-web ~/.cargo/bin/reqlang-web
 
 [windows]
 install-release: build-release
     cp target/release/reqlang-web.exe ~/.cargo/bin/reqlang-web.exe
-    cp target/release/reqlang-web-app.exe ~/.cargo/bin/reqlang-web-app.exe
+    cp target/release/reqlang-web.exe ~/.cargo/bin/reqlang-web.exe
 
 # Start the server and client in development mode
 watch: build
