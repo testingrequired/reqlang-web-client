@@ -253,6 +253,9 @@ export const RunRequestForm: React.FC<Props> = ({ result }) => {
 
         {runRequest.isSuccess && exportRequest.isSuccess && (
           <>
+            <Text mb={0} size="xl" fw="bold">
+              Results
+            </Text>
             <Card>
               <Text mb={0} pb={0} fw="bold">
                 Request
