@@ -237,7 +237,7 @@ export const RunRequestForm: React.FC<Props> = ({ result }) => {
         {runRequest.isSuccess && (
           <>
             <Card>
-              <Text mb={0} pb={0}>
+              <Text mb={0} pb={0} fw="bold">
                 {responseSpan ? "Actual Response" : "Response"}
               </Text>
               <Code block>{runRequest.data[1]}</Code>
@@ -245,21 +245,22 @@ export const RunRequestForm: React.FC<Props> = ({ result }) => {
 
             {responseSpan && (
               <>
+                {(diffResponse.data?.length ?? 0) > 0 ? (
+                  <>
+                    <Alert color="red" title="Test Result: Failed!">
+                      <Code block>{diffResponse.data}</Code>
+                    </Alert>
+                  </>
+                ) : (
+                  <Alert color="green" title="Test Result: Passed!"></Alert>
+                )}
+
                 <Card>
-                  <Text mb={0} pb={0}>
+                  <Text mb={0} pb={0} fw="bold">
                     Expected Response
                   </Text>
+
                   <Code block>{responseText}</Code>
-
-                  {(diffResponse.data?.length ?? 0) > 0 && (
-                    <>
-                      <Text mb={0} pb={0}>
-                        Diff
-                      </Text>
-
-                      <Code block>{diffResponse.data}</Code>
-                    </>
-                  )}
                 </Card>
               </>
             )}
