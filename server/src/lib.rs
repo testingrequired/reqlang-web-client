@@ -26,7 +26,6 @@ use hyper_util::{
 };
 use reqlang::{
     ast::Ast,
-    diagnostics::get_diagnostics,
     export::ResponseFormat,
     fetch::{Fetch, HttpRequestFetcher},
     parser::parse,
@@ -353,17 +352,10 @@ async fn parse_request_file(
                 Err(err) => (StatusCode::INTERNAL_SERVER_ERROR, Err(err.to_string())),
             }
         }
-        Err(err) => {
-            let diagnostics: Vec<String> = get_diagnostics(&err, &body.payload)
-                .iter()
-                .map(|d| d.message.clone())
-                .collect();
-
-            match serde_json::to_string_pretty(&diagnostics) {
-                Ok(json) => (StatusCode::BAD_GATEWAY, Err(json)),
-                Err(err) => (StatusCode::INTERNAL_SERVER_ERROR, Err(err.to_string())),
-            }
-        }
+        Err(err) => match serde_json::to_string_pretty(err) {
+            Ok(result) => (StatusCode::BAD_REQUEST, Err(result)),
+            Err(err) => (StatusCode::INTERNAL_SERVER_ERROR, Err(err.to_string())),
+        },
     }
 }
 

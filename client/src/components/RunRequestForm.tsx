@@ -230,7 +230,7 @@ export const RunRequestForm: React.FC<Props> = ({ result }) => {
           </Card>
         )}
 
-        <Button type="submit" disabled={runRequest.isPending}>
+        <Button type="submit" loading={runRequest.isPending}>
           Run Request
         </Button>
 

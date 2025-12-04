@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import {
   HttpResponse,
   ParseResult,
+  ReqlangError,
   RequestParamsFromClient,
 } from "reqlang-types";
 import stripAnsi from "strip-ansi";
@@ -28,7 +29,10 @@ export const useParsedRequestFileQuery = () =>
 
       if (!response.ok) {
         if (response.status === 400) {
-          const errs = (await response.json()) as [string];
+          const errs = (await response.json()) as [
+            ReqlangError,
+            { start: number; end: number },
+          ][];
 
           throw new Error("Unable to parse request file", {
             cause: errs,

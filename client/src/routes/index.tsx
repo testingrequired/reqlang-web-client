@@ -46,6 +46,10 @@ function RouteComponent() {
           >
             <Text size="sm">{query.error.message}</Text>
 
+            <Code block>{fileStore.file?.text}</Code>
+
+            <Text size="sm">Errors</Text>
+
             {query.error.cause! && (
               <Code block>{JSON.stringify(query.error.cause, null, 2)}</Code>
             )}
