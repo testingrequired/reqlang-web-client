@@ -12,7 +12,11 @@ import {
   TextInput,
 } from "@mantine/core";
 import { useFileStore } from "@/stores/loadedRequestFile";
-import { useDiffResponse, useRunRequest } from "@/queries/parseReqlang";
+import {
+  useDiffResponse,
+  useExportRequest,
+  useRunRequest,
+} from "@/queries/parseReqlang";
 import { useEffect } from "react";
 
 type Props = {
@@ -23,6 +27,7 @@ export const RunRequestForm: React.FC<Props> = ({ result }) => {
   const fileStore = useFileStore();
   const runRequest = useRunRequest();
   const diffResponse = useDiffResponse();
+  const exportRequest = useExportRequest();
 
   useEffect(() => {
     if (typeof runRequest.data !== "undefined") {
@@ -67,6 +72,14 @@ export const RunRequestForm: React.FC<Props> = ({ result }) => {
         vars,
         env: values.value.env,
       });
+
+      exportRequest.mutate({
+        reqfile: fileStore.file?.text ?? "",
+        prompts,
+        secrets,
+        vars,
+        env: values.value.env,
+      });
     },
   });
 
@@ -91,6 +104,10 @@ export const RunRequestForm: React.FC<Props> = ({ result }) => {
 
   if (diffResponse.isError) {
     return <div>An error occurred: {diffResponse.error.message}</div>;
+  }
+
+  if (exportRequest.isError) {
+    return <div>An error occurred: {exportRequest.error.message}</div>;
   }
 
   return (
@@ -234,8 +251,15 @@ export const RunRequestForm: React.FC<Props> = ({ result }) => {
           Run Request
         </Button>
 
-        {runRequest.isSuccess && (
+        {runRequest.isSuccess && exportRequest.isSuccess && (
           <>
+            <Card>
+              <Text mb={0} pb={0} fw="bold">
+                Request
+              </Text>
+              <Code block>{exportRequest.data}</Code>
+            </Card>
+
             <Card>
               <Text mb={0} pb={0} fw="bold">
                 {responseSpan ? "Actual Response" : "Response"}

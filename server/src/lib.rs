@@ -26,7 +26,7 @@ use hyper_util::{
 };
 use reqlang::{
     ast::Ast,
-    export::ResponseFormat,
+    export::{RequestFormat, ResponseFormat},
     fetch::{Fetch, HttpRequestFetcher},
     parser::parse,
     prelude::assert_response,
@@ -277,7 +277,7 @@ pub async fn init_server(
         .route("/api/parse", post(parse_request_file))
         .route("/api/run", post(run_request))
         .route("/api/diff_responses", post(diff_response))
-        .route("/api/export_response", post(export_response))
+        .route("/api/export_request", post(export_request))
         .route("/api/calendar", post(view_calendar))
         .route("/api/timeline", get(get_timeline))
         .route("/api/debug/backup", post(backup_db))
@@ -326,8 +326,26 @@ pub async fn init_server(
     Ok(AppServer(listener, app))
 }
 
-async fn export_response(Json(body): Json<HttpResponse>) -> (StatusCode, Result<String, String>) {
-    let r = reqlang::export::export_response(&body, ResponseFormat::HttpMessage);
+async fn export_request(
+    Json(from_client_params): Json<RequestParamsFromClient>,
+) -> (StatusCode, Result<String, String>) {
+    let mut provider_values: HashMap<String, String> = HashMap::new();
+
+    let env = from_client_params.env.as_deref();
+
+    if let Some(env) = env {
+        provider_values.insert("env".to_string(), env.to_string());
+    }
+
+    let result = reqlang::templater::template(
+        &from_client_params.reqfile,
+        env,
+        &from_client_params.prompts,
+        &from_client_params.secrets,
+        &provider_values,
+    )
+    .unwrap();
+    let r = reqlang::export::export(&result.request, RequestFormat::HttpMessage);
 
     (StatusCode::OK, Ok(r))
 }

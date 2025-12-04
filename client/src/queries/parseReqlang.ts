@@ -10,6 +10,7 @@ import stripAnsi from "strip-ansi";
 export const PARSE_KEYS = {
   parse: ["parse"] as const,
   run: ["run"] as const,
+  export: ["export"] as const,
   diff: ["diff"] as const,
 } as const;
 
@@ -59,6 +60,24 @@ export const useRunRequest = () =>
       });
 
       const data = (await response.json()) as [HttpResponse, string];
+
+      return data;
+    },
+  });
+
+export const useExportRequest = () =>
+  useMutation({
+    mutationKey: PARSE_KEYS.run,
+    mutationFn: async (params: RequestParamsFromClient) => {
+      const response = await fetch(`/api/export_request`, {
+        method: "POST",
+        body: JSON.stringify(params),
+        headers: {
+          "content-type": "application/json",
+        },
+      });
+
+      const data = (await response.text()) as string;
 
       return data;
     },
