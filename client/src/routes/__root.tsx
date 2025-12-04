@@ -69,7 +69,7 @@ export const Route = createRootRoute({
                 hiddenFrom="sm"
                 size="sm"
               />
-              <Title m="sm">Reqlang</Title>
+              <Title m="sm">reqlang-web</Title>
             </Group>
           </Group>
         </AppShell.Header>
