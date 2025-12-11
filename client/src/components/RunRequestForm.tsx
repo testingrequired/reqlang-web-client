@@ -4,13 +4,16 @@ import {
   ActionIcon,
   Alert,
   Button,
+  ButtonGroup,
   Card,
   Code,
+  CopyButton,
   Select,
   Stack,
   Table,
   Text,
   TextInput,
+  Tooltip,
 } from "@mantine/core";
 import {
   useDiffResponse,
@@ -18,7 +21,11 @@ import {
   useRunRequest,
 } from "@/queries/parseReqlang";
 import { useEffect } from "react";
-import { IconRefresh } from "@tabler/icons-react";
+import {
+  IconCopy,
+  IconCopyCheckFilled,
+  IconRefresh,
+} from "@tabler/icons-react";
 
 type Props = {
   result: ParseResult;
@@ -127,6 +134,33 @@ export const RunRequestForm: React.FC<Props> = ({
       <Stack>
         <Card p="xs">
           <Code block>{requestText}</Code>
+
+          <ButtonGroup>
+            <CopyButton value={requestText}>
+              {({ copied, copy }) => (
+                <Tooltip label="Copy">
+                  <ActionIcon onClick={copy} color="dark" aria-label="Copy">
+                    {copied ? (
+                      <IconCopyCheckFilled stroke={1} />
+                    ) : (
+                      <IconCopy stroke={1} />
+                    )}
+                  </ActionIcon>
+                </Tooltip>
+              )}
+            </CopyButton>
+
+            <Tooltip label="Reload Request File">
+              <ActionIcon
+                color="dark"
+                variant="filled"
+                aria-label="Reload Request File"
+                onClick={refreshFile}
+              >
+                <IconRefresh stroke={1} />
+              </ActionIcon>
+            </Tooltip>
+          </ButtonGroup>
         </Card>
 
         {result.envs.length > 0 && (
@@ -256,14 +290,6 @@ export const RunRequestForm: React.FC<Props> = ({
           Run Request
         </Button>
 
-        <ActionIcon
-          variant="filled"
-          aria-label="Settings"
-          onClick={refreshFile}
-        >
-          <IconRefresh stroke={1.5} />
-        </ActionIcon>
-
         {runRequest.isSuccess && exportRequest.isSuccess && (
           <>
             <Text mb={0} size="xl" fw="bold">
@@ -274,6 +300,20 @@ export const RunRequestForm: React.FC<Props> = ({
                 Request
               </Text>
               <Code block>{exportRequest.data}</Code>
+
+              <CopyButton value={exportRequest.data}>
+                {({ copied, copy }) => (
+                  <Tooltip label="Copy">
+                    <ActionIcon onClick={copy} color="dark" aria-label="Copy">
+                      {copied ? (
+                        <IconCopyCheckFilled stroke={1} />
+                      ) : (
+                        <IconCopy stroke={1} />
+                      )}
+                    </ActionIcon>
+                  </Tooltip>
+                )}
+              </CopyButton>
             </Card>
 
             <Card>
@@ -281,6 +321,20 @@ export const RunRequestForm: React.FC<Props> = ({
                 {responseSpan ? "Actual Response" : "Response"}
               </Text>
               <Code block>{runRequest.data[1]}</Code>
+
+              <CopyButton value={runRequest.data[1]}>
+                {({ copied, copy }) => (
+                  <Tooltip label="Copy">
+                    <ActionIcon onClick={copy} color="dark" aria-label="Copy">
+                      {copied ? (
+                        <IconCopyCheckFilled stroke={1} />
+                      ) : (
+                        <IconCopy stroke={1} />
+                      )}
+                    </ActionIcon>
+                  </Tooltip>
+                )}
+              </CopyButton>
             </Card>
 
             {responseSpan && (
@@ -289,6 +343,24 @@ export const RunRequestForm: React.FC<Props> = ({
                   <>
                     <Alert color="red" title="Test Result: Failed!">
                       <Code block>{diffResponse.data}</Code>
+
+                      <CopyButton value={diffResponse.data ?? ""}>
+                        {({ copied, copy }) => (
+                          <Tooltip label="Copy">
+                            <ActionIcon
+                              onClick={copy}
+                              color="dark"
+                              aria-label="Copy"
+                            >
+                              {copied ? (
+                                <IconCopyCheckFilled stroke={1} />
+                              ) : (
+                                <IconCopy stroke={1} />
+                              )}
+                            </ActionIcon>
+                          </Tooltip>
+                        )}
+                      </CopyButton>
                     </Alert>
                   </>
                 ) : (
@@ -301,6 +373,24 @@ export const RunRequestForm: React.FC<Props> = ({
                   </Text>
 
                   <Code block>{responseText}</Code>
+
+                  <CopyButton value={responseText}>
+                    {({ copied, copy }) => (
+                      <Tooltip label="Copy">
+                        <ActionIcon
+                          onClick={copy}
+                          color="dark"
+                          aria-label="Copy"
+                        >
+                          {copied ? (
+                            <IconCopyCheckFilled stroke={1} />
+                          ) : (
+                            <IconCopy stroke={1} />
+                          )}
+                        </ActionIcon>
+                      </Tooltip>
+                    )}
+                  </CopyButton>
                 </Card>
               </>
             )}
