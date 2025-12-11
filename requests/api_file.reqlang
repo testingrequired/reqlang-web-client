@@ -1,0 +1,11 @@
+Get text content of a reqfile.
+
+```%config
+[[prompts]]
+name = "file"
+```
+
+
+```%request
+GET {{@clientUrl}}/api/files/{{?file}} HTTP/1.1
+```

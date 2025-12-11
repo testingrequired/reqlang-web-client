@@ -1,9 +1,9 @@
-use std::{collections::HashMap, env::current_dir, path::PathBuf, sync::Arc};
+use std::{collections::HashMap, env::current_dir, fs, path::PathBuf, sync::Arc};
 
 use axum::{
     Json, Router,
     extract::{
-        Request, State,
+        Path, Request, State,
         ws::{Message, WebSocket, WebSocketUpgrade},
     },
     http::StatusCode,
@@ -13,6 +13,7 @@ use axum::{
 use axum_extra::extract::Host;
 use clap::Parser;
 use futures_util::{SinkExt, StreamExt};
+use glob::glob;
 use hyper::{body::Incoming, service::service_fn};
 use hyper_util::{
     rt::{TokioExecutor, TokioIo},
@@ -210,6 +211,14 @@ pub async fn init_server(
 
     let current_dir_path = current_dir().expect("should have current directory");
 
+    #[cfg(feature = "development_mode")]
+    let current_dir_path = {
+        let current_dir_path = current_dir_path.parent().unwrap().to_path_buf();
+        dbg!(&current_dir_path);
+
+        current_dir_path
+    };
+
     // Default path to database in order of priority
     //
     // 1. Enivornment variable `$DATABASE_URL`
@@ -225,8 +234,6 @@ pub async fn init_server(
                 .to_string(),
         );
 
-        dbg!(&default_db_path);
-
         default_db_path
     };
 
@@ -237,6 +244,8 @@ pub async fn init_server(
         db: Some(db_pool),
         tx: None,
     };
+
+    dbg!(&state);
 
     let state = Arc::new(Mutex::new(state));
 
@@ -256,6 +265,8 @@ pub async fn init_server(
     let app = Router::new()
         .route("/api/parse", post(parse_request_file))
         .route("/api/run", post(run_request))
+        .route("/api/files", get(list_files))
+        .route("/api/files/{*file}", get(get_file))
         .route("/api/diff_responses", post(diff_response))
         .route("/api/export_request", post(export_request))
         .route("/api/debug", get(get_debug_info))
@@ -278,6 +289,81 @@ pub async fn init_server(
         );
 
     Ok(AppServer(listener, app))
+}
+
+#[axum::debug_handler]
+async fn list_files(
+    State(state): State<Arc<Mutex<AppState>>>,
+) -> (StatusCode, Result<String, String>) {
+    let cwd = {
+        let state = state.lock().await;
+
+        let cwd = state.home_dir.clone();
+
+        cwd
+    };
+
+    let mut files = vec![];
+    let mut errs = vec![];
+
+    for entry in glob(&format!(
+        "{}/**/*.reqlang",
+        cwd.to_str().unwrap_or_default().to_string()
+    ))
+    .expect("Failed to read glob pattern")
+    {
+        match entry {
+            Ok(path) => {
+                files.push(
+                    path.strip_prefix(&cwd)
+                        .unwrap()
+                        .to_str()
+                        .unwrap()
+                        .to_string(),
+                );
+            }
+            Err(e) => {
+                errs.push(e.to_string());
+            }
+        }
+    }
+
+    if errs.is_empty() {
+        (
+            StatusCode::OK,
+            Ok(serde_json::to_string_pretty(&files).unwrap()),
+        )
+    } else {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Err(serde_json::to_string_pretty(&errs).unwrap()),
+        )
+    }
+}
+
+#[axum::debug_handler]
+async fn get_file(
+    State(state): State<Arc<Mutex<AppState>>>,
+    Path(file): Path<String>,
+) -> (StatusCode, Result<String, String>) {
+    let cwd = {
+        let state = state.lock().await;
+
+        let cwd = state.home_dir.clone();
+
+        cwd
+    };
+
+    let file_path = cwd.join(file);
+
+    if !fs::exists(&file_path).expect("unable to tell if file exists") {
+        return (StatusCode::NOT_FOUND, Ok("file does not exist".to_string()));
+    }
+
+    match fs::read_to_string(file_path) {
+        Ok(file_content) => (StatusCode::OK, Ok(file_content)),
+        Err(err) => (StatusCode::INTERNAL_SERVER_ERROR, Err(err.to_string())),
+    }
 }
 
 #[axum::debug_handler]
@@ -417,12 +503,13 @@ pub async fn get_debug_info(
 ) -> (StatusCode, Json<DebugInfo>) {
     let state = state.clone();
 
-    // Get cwd
-    let cwd = std::env::current_dir()
-        .expect("should have current directory")
-        .to_str()
-        .unwrap_or_default()
-        .to_string();
+    let cwd = {
+        let state = state.lock().await;
+
+        let cwd = state.home_dir.clone();
+
+        cwd.to_str().unwrap_or_default().to_string()
+    };
 
     let db = {
         let state = state.lock().await;

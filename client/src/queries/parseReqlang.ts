@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   HttpResponse,
   ParseResult,
@@ -12,7 +12,49 @@ export const PARSE_KEYS = {
   run: ["run"] as const,
   export: ["export"] as const,
   diff: ["diff"] as const,
+  files: ["files"] as const,
+  file: (path: string | null) => ["files", path] as const,
 } as const;
+
+export const useGetFilesQuery = () =>
+  useQuery({
+    queryKey: PARSE_KEYS.files,
+    queryFn: async () => {
+      const response = await fetch(`/api/files`, {
+        method: "GET",
+      });
+
+      if (!response.ok) {
+        throw new Error(`There was an issue fetching files list`);
+      }
+
+      const data = (await response.json()) as unknown as string[];
+
+      return data;
+    },
+  });
+
+export const useGetFileQuery = (path: string | null) =>
+  useQuery({
+    queryKey: PARSE_KEYS.file(path),
+    queryFn: async () => {
+      if (path === null) {
+        return null;
+      }
+
+      const response = await fetch(`/api/files/${path}`, {
+        method: "GET",
+      });
+
+      if (!response.ok) {
+        throw new Error(`There was an issue fetching file: ${path}`);
+      }
+
+      const data = await response.text();
+
+      return data;
+    },
+  });
 
 export const useParsedRequestFileQuery = () =>
   useMutation({

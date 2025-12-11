@@ -33,7 +33,7 @@ hyper = { version = "1", features = ["full"] }
 http-body-util = "0.1"
 hyper-util = { version = "0.1", features = ["full"] }
 reqlang = { git = "https://github.com/testingrequired/reqlang.git", rev = "6dafa75f24c0ff520339c522235d952efc2b5206" }
-
+glob = "0.3.2"
 
 [dev-dependencies]
 pretty_assertions = "1.4"

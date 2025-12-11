@@ -1,52 +1,44 @@
 import { createFileRoute } from "@tanstack/react-router";
-import Uploader from "@/components/Uploader";
+import { Alert, Code, Stack, Tabs, Text } from "@mantine/core";
 import {
-  Alert,
-  ButtonGroup,
-  Code,
-  Group,
-  Stack,
-  Tabs,
-  Text,
-} from "@mantine/core";
-import { CloseRequestFileButton } from "@/components/CloseRequestFileButton";
-import { useFileStore } from "@/stores/loadedRequestFile";
-import { useParsedRequestFileQuery } from "@/queries/parseReqlang";
-import { useEffect } from "react";
+  useGetFileQuery,
+  useGetFilesQuery,
+  useParsedRequestFileQuery,
+} from "@/queries/parseReqlang";
+import { useEffect, useState } from "react";
 import { ParseResult } from "reqlang-types";
 import { RequestDetails } from "@/components/RequestDetails";
 import { RunRequestForm } from "@/components/RunRequestForm";
+import { FilesSelect } from "@/components/FileSelect";
 
 export const Route = createFileRoute("/")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const fileStore = useFileStore();
-
   const query = useParsedRequestFileQuery();
+  const filesQuery = useGetFilesQuery();
+  const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const fileQuery = useGetFileQuery(selectedFile);
 
   useEffect(() => {
-    if (typeof fileStore.file === "undefined" || fileStore.file === null) {
+    if (!fileQuery.data) {
       return;
     }
 
-    query.mutate(fileStore.file?.text!);
-  }, [fileStore.file?.text!]);
+    query.mutate(fileQuery.data);
+  }, [fileQuery.data]);
 
   if (!query.isIdle) {
     if (query.isError) {
       return (
         <Stack>
-          <Uploader onUpload={fileStore.setFile} />
+          <FilesSelect onChange={setSelectedFile} value={selectedFile} />
 
-          <Alert
-            color="red"
-            title={`Error loading '${fileStore.file?.fileName}'`}
-          >
+          <Alert color="red" title={`Error loading '${selectedFile}'`}>
             <Text size="sm">{query.error.message}</Text>
 
-            <Code block>{fileStore.file?.text}</Code>
+            <Code block>{fileQuery.data}</Code>
 
             <Text size="sm">Errors</Text>
 
@@ -59,28 +51,19 @@ function RouteComponent() {
     }
   }
 
-  if (query.isPending) {
+  if (query.isPending || filesQuery.isPending || fileQuery.isLoading) {
     return <p>Loading...</p>;
   }
 
   const data: ParseResult = query.data!;
 
-  if (fileStore.file === null) {
-    return <Uploader onUpload={fileStore.setFile} />;
-  }
+  const refreshFileText = () => {
+    fileQuery.refetch();
+  };
 
   return (
     <Stack>
-      <Uploader onUpload={fileStore.setFile} />
-
-      {fileStore.file && (
-        <Group align="top" mt="xl">
-          <Text m={0}>{fileStore.file.fileName}</Text>
-          <ButtonGroup>
-            <CloseRequestFileButton onClick={fileStore.unsetFile} />
-          </ButtonGroup>
-        </Group>
-      )}
+      <FilesSelect onChange={setSelectedFile} value={selectedFile} />
 
       {typeof data !== "undefined" && (
         <>
@@ -92,7 +75,11 @@ function RouteComponent() {
             </Tabs.List>
 
             <Tabs.Panel value="run" p="md">
-              <RunRequestForm result={data} />
+              <RunRequestForm
+                result={data}
+                requestFileText={fileQuery.data!}
+                refreshFile={refreshFileText}
+              />
             </Tabs.Panel>
 
             <Tabs.Panel value="details" p="md">
@@ -100,7 +87,7 @@ function RouteComponent() {
             </Tabs.Panel>
 
             <Tabs.Panel value="raw" p="md">
-              <Code block>{fileStore.file?.text}</Code>
+              <Code block>{fileQuery.data}</Code>
             </Tabs.Panel>
           </Tabs>
         </>

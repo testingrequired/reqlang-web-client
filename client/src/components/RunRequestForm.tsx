@@ -1,6 +1,7 @@
 import { ParseResult } from "reqlang-types";
 import { formOptions, useForm, useStore } from "@tanstack/react-form";
 import {
+  ActionIcon,
   Alert,
   Button,
   Card,
@@ -11,20 +12,25 @@ import {
   Text,
   TextInput,
 } from "@mantine/core";
-import { useFileStore } from "@/stores/loadedRequestFile";
 import {
   useDiffResponse,
   useExportRequest,
   useRunRequest,
 } from "@/queries/parseReqlang";
 import { useEffect } from "react";
+import { IconRefresh } from "@tabler/icons-react";
 
 type Props = {
   result: ParseResult;
+  requestFileText: string;
+  refreshFile: () => void;
 };
 
-export const RunRequestForm: React.FC<Props> = ({ result }) => {
-  const fileStore = useFileStore();
+export const RunRequestForm: React.FC<Props> = ({
+  result,
+  requestFileText,
+  refreshFile,
+}) => {
   const runRequest = useRunRequest();
   const diffResponse = useDiffResponse();
   const exportRequest = useExportRequest();
@@ -36,7 +42,7 @@ export const RunRequestForm: React.FC<Props> = ({ result }) => {
         actual: runRequest.data[0],
       });
     }
-  }, [runRequest.data, fileStore.parsedFile]);
+  }, [runRequest.data]);
 
   const form = useForm({
     ...formOptions({
@@ -66,7 +72,7 @@ export const RunRequestForm: React.FC<Props> = ({ result }) => {
       const vars = result.full.config?.[0].envs?.[selectedEnv] ?? {};
 
       runRequest.mutate({
-        reqfile: fileStore.file?.text ?? "",
+        reqfile: requestFileText,
         prompts,
         secrets,
         vars,
@@ -75,7 +81,7 @@ export const RunRequestForm: React.FC<Props> = ({ result }) => {
       });
 
       exportRequest.mutate({
-        reqfile: fileStore.file?.text ?? "",
+        reqfile: requestFileText,
         prompts,
         secrets,
         vars,
@@ -89,13 +95,10 @@ export const RunRequestForm: React.FC<Props> = ({ result }) => {
   const envVarValues = result.full.config?.[0].envs?.[selectedEnv];
 
   const requestSpan = result.full.request[1];
-  const requestText = fileStore.file?.text.slice(
-    requestSpan.start,
-    requestSpan.end
-  );
+  const requestText = requestFileText.slice(requestSpan.start, requestSpan.end);
 
   const responseSpan = result.full.response?.[1];
-  const responseText = fileStore.file?.text.slice(
+  const responseText = requestFileText.slice(
     responseSpan?.start,
     responseSpan?.end
   );
@@ -252,6 +255,14 @@ export const RunRequestForm: React.FC<Props> = ({ result }) => {
         <Button type="submit" loading={runRequest.isPending}>
           Run Request
         </Button>
+
+        <ActionIcon
+          variant="filled"
+          aria-label="Settings"
+          onClick={refreshFile}
+        >
+          <IconRefresh stroke={1.5} />
+        </ActionIcon>
 
         {runRequest.isSuccess && exportRequest.isSuccess && (
           <>

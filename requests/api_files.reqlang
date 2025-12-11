@@ -1,0 +1,16 @@
+List all the reqlang files reqlang-web has.
+
+```%request
+GET {{@clientUrl}}/api/files HTTP/1.1
+```
+
+```%response
+HTTP/1.1 200 OK
+
+[
+  "requests/api_debug.reqlang",
+  "requests/api_file.reqlang",
+  "requests/api_files.reqlang",
+  "requests/status_code.reqlang"
+]
+```
