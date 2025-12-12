@@ -294,7 +294,7 @@ pub async fn init_server(
 #[axum::debug_handler]
 async fn list_files(
     State(state): State<Arc<Mutex<AppState>>>,
-) -> (StatusCode, Result<String, String>) {
+) -> (StatusCode, Result<Json<Vec<String>>, String>) {
     let cwd = {
         let state = state.lock().await;
 
@@ -329,10 +329,7 @@ async fn list_files(
     }
 
     if errs.is_empty() {
-        (
-            StatusCode::OK,
-            Ok(serde_json::to_string_pretty(&files).unwrap()),
-        )
+        (StatusCode::OK, Ok(Json(files)))
     } else {
         (
             StatusCode::INTERNAL_SERVER_ERROR,
