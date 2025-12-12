@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { RootView } from "../src";
+import { RootView } from "@/test";
 
 let root: RootView;
 
@@ -10,7 +10,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("has title", async ({ page }) => {
-  await expect(page).toHaveTitle("Reqlang");
+  await expect(page).toHaveTitle("reqlang-web");
 });
 
 test("has request link", async ({ page }) => {

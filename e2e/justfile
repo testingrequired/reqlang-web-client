@@ -18,7 +18,7 @@ build-release:
 
 # Run the release server for the e2e test to use
 run-server:
-    cd ../target/release && ./reqlang-web --db 'sqlite::memory:' --port=3000 --open false
+    cd ../target/release && ./reqlang-web-browser --db 'sqlite::memory:' --port=3000 --open false
 
 # Run all tests
 test:

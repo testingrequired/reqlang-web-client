@@ -14,8 +14,6 @@ export class RootView {
   public async goto(): Promise<RootView> {
     await this.page.goto("/");
 
-    await this.page.waitForURL(`/`);
-
     await expect(this.root).toBeVisible();
 
     return this;
