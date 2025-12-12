@@ -11,6 +11,7 @@ use axum::{
     routing::{any, get, post},
 };
 use axum_extra::extract::Host;
+use chrono::Local;
 use clap::Parser;
 use futures_util::{SinkExt, StreamExt};
 use glob::glob;
@@ -43,7 +44,7 @@ use tower_http::{compression::CompressionLayer, trace::TraceLayer};
 use tracing::{error, info, info_span, instrument};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use types::{
-    DebugInfo,
+    DebugInfo, RequestRunResponse,
     achievement::{AchievementDto, AchievementId},
     socket::ClientMessage,
 };
@@ -421,7 +422,7 @@ async fn parse_request_file(
 async fn run_request(
     Host(hostname): Host,
     Json(mut from_client_params): Json<RequestParamsFromClient>,
-) -> (StatusCode, Json<(HttpResponse, String)>) {
+) -> (StatusCode, Json<(RequestRunResponse, String)>) {
     let mut provider_values: HashMap<String, String> = HashMap::new();
 
     let env = from_client_params.env.as_deref();
@@ -436,15 +437,28 @@ async fn run_request(
 
     dbg!(&from_client_params);
 
+    let request_run_start = Local::now().timestamp_millis() as u64;
+
     let response = Into::<HttpRequestFetcher>::into(from_client_params)
         .fetch()
         .await
         .expect("Request should have succeeded");
 
+    let request_run_end = Local::now().timestamp_millis() as u64;
+
     let response_exported =
         reqlang::export::export_response(&response, ResponseFormat::HttpMessage);
 
-    (StatusCode::OK, Json((response, response_exported)))
+    (
+        StatusCode::OK,
+        Json((
+            RequestRunResponse {
+                response,
+                time_taken: request_run_end - request_run_start,
+            },
+            response_exported,
+        )),
+    )
 }
 
 #[derive(Debug, Serialize, Deserialize)]

@@ -46,7 +46,7 @@ export const RunRequestForm: React.FC<Props> = ({
     if (typeof runRequest.data !== "undefined") {
       diffResponse.mutate({
         expected: result.full.response?.[0]!,
-        actual: runRequest.data[0],
+        actual: runRequest.data[0].response,
       });
     }
   }, [runRequest.data]);
@@ -322,19 +322,25 @@ export const RunRequestForm: React.FC<Props> = ({
               </Text>
               <Code block>{runRequest.data[1]}</Code>
 
-              <CopyButton value={runRequest.data[1]}>
-                {({ copied, copy }) => (
-                  <Tooltip label="Copy">
-                    <ActionIcon onClick={copy} color="dark" aria-label="Copy">
-                      {copied ? (
-                        <IconCopyCheckFilled stroke={1} />
-                      ) : (
-                        <IconCopy stroke={1} />
-                      )}
-                    </ActionIcon>
-                  </Tooltip>
-                )}
-              </CopyButton>
+              <Stack>
+                <CopyButton value={runRequest.data[1]}>
+                  {({ copied, copy }) => (
+                    <Tooltip label="Copy">
+                      <ActionIcon onClick={copy} color="dark" aria-label="Copy">
+                        {copied ? (
+                          <IconCopyCheckFilled stroke={1} />
+                        ) : (
+                          <IconCopy stroke={1} />
+                        )}
+                      </ActionIcon>
+                    </Tooltip>
+                  )}
+                </CopyButton>
+
+                <Text size="sm">
+                  Time Taken: {runRequest.data[0].time_taken} ms
+                </Text>
+              </Stack>
             </Card>
 
             {responseSpan && (

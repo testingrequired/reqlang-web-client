@@ -5,6 +5,7 @@ import {
   ReqlangError,
   RequestParamsFromClient,
 } from "reqlang-types";
+import { RequestRunResponse } from "server-types";
 import stripAnsi from "strip-ansi";
 
 export const PARSE_KEYS = {
@@ -101,7 +102,7 @@ export const useRunRequest = () =>
         },
       });
 
-      const data = (await response.json()) as [HttpResponse, string];
+      const data = (await response.json()) as [RequestRunResponse, string];
 
       return data;
     },
