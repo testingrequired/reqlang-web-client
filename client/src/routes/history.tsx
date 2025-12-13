@@ -1,15 +1,6 @@
 import { FilesSelect } from "@/components/FileSelect";
 import { useGetRunHistoryQuery } from "@/queries/parseReqlang";
-import {
-  ActionIcon,
-  Card,
-  Code,
-  Group,
-  Stack,
-  Text,
-  Title,
-} from "@mantine/core";
-import { IconX } from "@tabler/icons-react";
+import { Card, Code, Stack, Text, Title } from "@mantine/core";
 import { createFileRoute } from "@tanstack/react-router";
 import moment from "moment";
 import { useState } from "react";
@@ -44,19 +35,7 @@ function RouteComponent() {
     <Stack gap="xl">
       <Title order={2}>History</Title>
 
-      <Group>
-        <ActionIcon
-          disabled={selectedFile === null}
-          onClick={(e) => {
-            e.preventDefault();
-
-            setSelectedFile(null);
-          }}
-        >
-          <IconX />
-        </ActionIcon>
-        <FilesSelect onChange={setSelectedFile} value={selectedFile} />
-      </Group>
+      <FilesSelect onChange={setSelectedFile} value={selectedFile} clearable />
 
       {history.map((run) => (
         <Stack gap="xs">
