@@ -20,6 +20,7 @@ import { RequestDetails } from "@/components/RequestDetails";
 import { RunRequestForm } from "@/components/RunRequestForm";
 import { FilesSelect } from "@/components/FileSelect";
 import { IconCopy, IconCopyCheckFilled } from "@tabler/icons-react";
+import { RequestRunHistory } from "@/components/RequestRunHistory";
 
 export const Route = createFileRoute("/")({
   component: RouteComponent,
@@ -80,6 +81,7 @@ function RouteComponent() {
           <Tabs defaultValue="run">
             <Tabs.List>
               <Tabs.Tab value="run">Run</Tabs.Tab>
+              <Tabs.Tab value="history">History</Tabs.Tab>
               <Tabs.Tab value="details">Details</Tabs.Tab>
               <Tabs.Tab value="raw">Raw</Tabs.Tab>
             </Tabs.List>
@@ -91,6 +93,10 @@ function RouteComponent() {
                 requestFileText={fileQuery.data!}
                 refreshFile={refreshFileText}
               />
+            </Tabs.Panel>
+
+            <Tabs.Panel value="history" p="md">
+              <RequestRunHistory result={data} requestFilePath={selectedFile} />
             </Tabs.Panel>
 
             <Tabs.Panel value="details" p="md">

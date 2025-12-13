@@ -91,8 +91,9 @@ export const useParsedRequestFileQuery = () =>
     },
   });
 
-export const useRunRequest = () =>
-  useMutation({
+export const useRunRequest = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
     mutationKey: PARSE_KEYS.run,
     mutationFn: async (params: RunRequest) => {
       const response = await fetch(`/api/run`, {
@@ -107,7 +108,13 @@ export const useRunRequest = () =>
 
       return data;
     },
+    onSuccess: async () => {
+      queryClient.invalidateQueries({
+        queryKey: PARSE_KEYS.history,
+      });
+    },
   });
+};
 
 export const useExportRequest = () =>
   useMutation({
