@@ -4,6 +4,8 @@ use ts_rs::TS;
 
 pub mod achievement;
 pub mod errors;
+pub mod request_run;
+pub mod run_request;
 pub mod socket;
 pub mod utils;
 

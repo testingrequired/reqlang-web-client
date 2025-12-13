@@ -87,6 +87,7 @@ function RouteComponent() {
             <Tabs.Panel value="run" p="md">
               <RunRequestForm
                 result={data}
+                requestFilePath={selectedFile ?? ""}
                 requestFileText={fileQuery.data!}
                 refreshFile={refreshFileText}
               />

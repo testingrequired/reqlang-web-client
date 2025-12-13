@@ -5,7 +5,7 @@ import {
   ReqlangError,
   RequestParamsFromClient,
 } from "reqlang-types";
-import { RequestRunResponse } from "server-types";
+import { RequestRunResponse, RunRequest } from "server-types";
 import stripAnsi from "strip-ansi";
 
 export const PARSE_KEYS = {
@@ -93,7 +93,7 @@ export const useParsedRequestFileQuery = () =>
 export const useRunRequest = () =>
   useMutation({
     mutationKey: PARSE_KEYS.run,
-    mutationFn: async (params: RequestParamsFromClient) => {
+    mutationFn: async (params: RunRequest) => {
       const response = await fetch(`/api/run`, {
         method: "POST",
         body: JSON.stringify(params),
