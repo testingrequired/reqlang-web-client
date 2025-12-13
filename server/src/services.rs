@@ -187,6 +187,17 @@ pub mod request_service {
             .collect()
     }
 
+    pub async fn delete_run_history(state: Arc<Mutex<AppState>>) {
+        let state = state.clone();
+        let state = state.lock().await;
+        let conn = state.db.as_ref().unwrap();
+
+        sqlx::query("DELETE FROM RequestRunHistory")
+            .execute(conn)
+            .await
+            .expect("should work");
+    }
+
     async fn add_to_run_history(run: &NewRequestRun, state: Arc<Mutex<AppState>>) -> RequestRun {
         let state = state.clone();
         let state = state.lock().await;

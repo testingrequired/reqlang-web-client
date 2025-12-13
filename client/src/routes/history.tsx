@@ -1,6 +1,9 @@
 import { FilesSelect } from "@/components/FileSelect";
-import { useGetRunHistoryQuery } from "@/queries/parseReqlang";
-import { Card, Code, Stack, Text, Title } from "@mantine/core";
+import {
+  useClearRunHistoryMutation,
+  useGetRunHistoryQuery,
+} from "@/queries/parseReqlang";
+import { Button, Card, Code, Stack, Text, Title } from "@mantine/core";
 import { createFileRoute } from "@tanstack/react-router";
 import moment from "moment";
 import { useState } from "react";
@@ -11,9 +14,10 @@ export const Route = createFileRoute("/history")({
 
 function RouteComponent() {
   const query = useGetRunHistoryQuery();
+  const deleteHistoryMutation = useClearRunHistoryMutation();
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
 
-  if (query.isError) {
+  if (query.isError || deleteHistoryMutation.isError) {
     return <p>Error</p>;
   }
 
@@ -36,6 +40,10 @@ function RouteComponent() {
       <Title order={2}>History</Title>
 
       <FilesSelect onChange={setSelectedFile} value={selectedFile} clearable />
+
+      <Button onClick={() => deleteHistoryMutation.mutate()}>
+        Clear History
+      </Button>
 
       {history.map((run) => (
         <Stack gap="xs">

@@ -271,7 +271,10 @@ pub async fn init_server(
         .route("/api/run", post(run_request))
         .route("/api/files", get(list_files))
         .route("/api/files/{*file}", get(get_file))
-        .route("/api/history", get(get_run_history))
+        .route(
+            "/api/history",
+            get(get_run_history).delete(delete_run_history),
+        )
         .route("/api/diff_responses", post(diff_response))
         .route("/api/export_request", post(export_request))
         .route("/api/debug", get(get_debug_info))
@@ -302,6 +305,14 @@ async fn get_run_history(
 ) -> (StatusCode, Result<Json<Vec<RequestRun>>, String>) {
     let results = request_service::get_run_history(state).await;
     (StatusCode::OK, Ok(Json(results)))
+}
+
+#[axum::debug_handler]
+async fn delete_run_history(
+    State(state): State<Arc<Mutex<AppState>>>,
+) -> (StatusCode, Result<(), String>) {
+    request_service::delete_run_history(state).await;
+    (StatusCode::OK, Ok(()))
 }
 
 #[axum::debug_handler]

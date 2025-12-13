@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   HttpResponse,
   ParseResult,
@@ -158,3 +158,20 @@ export const useGetRunHistoryQuery = () =>
       return data;
     },
   });
+
+export const useClearRunHistoryMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: PARSE_KEYS.history,
+    mutationFn: async () => {
+      await fetch(`/api/history`, {
+        method: "DELETE",
+      });
+    },
+    onSuccess: async () => {
+      queryClient.invalidateQueries({
+        queryKey: PARSE_KEYS.history,
+      });
+    },
+  });
+};
