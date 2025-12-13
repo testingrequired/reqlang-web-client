@@ -1,7 +1,7 @@
 import { useGetRunHistoryQuery } from "@/queries/parseReqlang";
 import { Code, Select, Stack, Table, Text, Title } from "@mantine/core";
 import moment from "moment";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ParseResult } from "reqlang-types";
 import { RequestParamsFromClient, RequestRun } from "server-types";
 
@@ -16,6 +16,12 @@ export const RequestRunHistory: React.FC<Props> = ({
 }) => {
   const query = useGetRunHistoryQuery();
   const [runIndex, setRunIndex] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (query.data && query.data.length > 0 && runIndex === null) {
+      setRunIndex("0");
+    }
+  }, [query.data]);
 
   const providerReferences = result.full.refs
     .filter((ref) => Object.keys(ref[0]).at(0) === "Provider")
@@ -83,9 +89,13 @@ export const RequestRunHistory: React.FC<Props> = ({
             {selectedRun.response}
           </Code>
 
-          <Title order={3}>Environment</Title>
+          {selectedRunParams?.env && (
+            <>
+              <Title order={3}>Environment</Title>
 
-          <Text>{selectedRunParams?.env ?? "null"}</Text>
+              <Text>{selectedRunParams.env}</Text>
+            </>
+          )}
 
           <Title order={3}>Parameters</Title>
 
