@@ -5,7 +5,7 @@ import {
   ReqlangError,
   RequestParamsFromClient,
 } from "reqlang-types";
-import { RequestRunResponse, RunRequest } from "server-types";
+import { RequestRun, RequestRunResponse, RunRequest } from "server-types";
 import stripAnsi from "strip-ansi";
 
 export const PARSE_KEYS = {
@@ -14,6 +14,7 @@ export const PARSE_KEYS = {
   export: ["export"] as const,
   diff: ["diff"] as const,
   files: ["files"] as const,
+  history: ["history"] as const,
   file: (path: string | null) => ["files", path] as const,
 } as const;
 
@@ -144,5 +145,16 @@ export const useDiffResponse = () =>
       const data = await response.text();
 
       return stripAnsi(data);
+    },
+  });
+
+export const useGetRunHistoryQuery = () =>
+  useQuery({
+    queryKey: PARSE_KEYS.history,
+    queryFn: async () => {
+      const response = await fetch(`/api/history`);
+      const data = (await response.json()) as RequestRun[];
+
+      return data;
     },
   });

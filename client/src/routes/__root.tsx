@@ -85,6 +85,15 @@ export const Route = createRootRoute({
           />
 
           <NavLink
+            label="History"
+            component={Link}
+            to="/history"
+            activeProps={{
+              style: { fontWeight: "bold" },
+            }}
+          />
+
+          <NavLink
             label="Debug"
             component={Link}
             to="/debug"
