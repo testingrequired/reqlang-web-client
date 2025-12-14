@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import {
   ActionIcon,
   Alert,
+  ButtonGroup,
+  Card,
   Code,
   CopyButton,
   Stack,
@@ -16,7 +18,6 @@ import {
 } from "@/queries/parseReqlang";
 import { useEffect } from "react";
 import { ParseResult } from "reqlang-types";
-import { RequestDetails } from "@/components/RequestDetails";
 import { RunRequestForm } from "@/components/RunRequestForm";
 import { FilesSelect } from "@/components/FileSelect";
 import { IconCopy, IconCopyCheckFilled } from "@tabler/icons-react";
@@ -92,8 +93,7 @@ function RouteComponent() {
             <Tabs.List>
               <Tabs.Tab value="run">Run</Tabs.Tab>
               <Tabs.Tab value="history">History</Tabs.Tab>
-              <Tabs.Tab value="details">Details</Tabs.Tab>
-              <Tabs.Tab value="raw">Raw</Tabs.Tab>
+              <Tabs.Tab value="file">File</Tabs.Tab>
             </Tabs.List>
 
             <Tabs.Panel value="run" p="md">
@@ -112,26 +112,29 @@ function RouteComponent() {
               />
             </Tabs.Panel>
 
-            <Tabs.Panel value="details" p="md">
-              <RequestDetails result={data} />
-            </Tabs.Panel>
-
-            <Tabs.Panel value="raw" p="md">
-              <Code block>{fileQuery.data}</Code>
-
-              <CopyButton value={fileQuery.data ?? ""}>
-                {({ copied, copy }) => (
-                  <Tooltip label="Copy">
-                    <ActionIcon onClick={copy} color="dark" aria-label="Copy">
-                      {copied ? (
-                        <IconCopyCheckFilled stroke={1} />
-                      ) : (
-                        <IconCopy stroke={1} />
-                      )}
-                    </ActionIcon>
-                  </Tooltip>
-                )}
-              </CopyButton>
+            <Tabs.Panel value="file" p="md">
+              <Card>
+                <Code block>{fileQuery.data}</Code>
+                <ButtonGroup>
+                  <CopyButton value={fileQuery.data ?? ""}>
+                    {({ copied, copy }) => (
+                      <Tooltip label="Copy">
+                        <ActionIcon
+                          onClick={copy}
+                          color="dark"
+                          aria-label="Copy"
+                        >
+                          {copied ? (
+                            <IconCopyCheckFilled stroke={1} />
+                          ) : (
+                            <IconCopy stroke={1} />
+                          )}
+                        </ActionIcon>
+                      </Tooltip>
+                    )}
+                  </CopyButton>
+                </ButtonGroup>
+              </Card>
             </Tabs.Panel>
           </Tabs>
         </>
