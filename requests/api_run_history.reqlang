@@ -1,0 +1,6 @@
+Get the run history for hte client.
+
+
+```%request
+GET {{@clientUrl}}/api/history HTTP/1.1
+```

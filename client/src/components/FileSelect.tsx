@@ -5,9 +5,10 @@ import { IconRefresh } from "@tabler/icons-react";
 type Prop = {
   onChange: (value: string | null) => void;
   value: string | null;
+  clearable?: boolean;
 };
 
-export const FilesSelect = ({ onChange, value }: Prop) => {
+export const FilesSelect = ({ onChange, value, clearable = false }: Prop) => {
   const filesQuery = useGetFilesQuery();
 
   function refresh() {
@@ -41,6 +42,7 @@ export const FilesSelect = ({ onChange, value }: Prop) => {
       onChange={onChange}
       value={value}
       leftSection={icon}
+      clearable={clearable}
     />
   );
 };

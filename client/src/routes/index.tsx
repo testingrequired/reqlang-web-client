@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import {
   ActionIcon,
   Alert,
+  ButtonGroup,
+  Card,
   Code,
   CopyButton,
   Stack,
@@ -14,12 +16,13 @@ import {
   useGetFilesQuery,
   useParsedRequestFileQuery,
 } from "@/queries/parseReqlang";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { ParseResult } from "reqlang-types";
-import { RequestDetails } from "@/components/RequestDetails";
 import { RunRequestForm } from "@/components/RunRequestForm";
 import { FilesSelect } from "@/components/FileSelect";
 import { IconCopy, IconCopyCheckFilled } from "@tabler/icons-react";
+import { RequestRunHistory } from "@/components/RequestRunHistory";
+import { useSelectedRequestFileStore } from "@/stores/selectedRequestFile";
 
 export const Route = createFileRoute("/")({
   component: RouteComponent,
@@ -28,8 +31,8 @@ export const Route = createFileRoute("/")({
 function RouteComponent() {
   const query = useParsedRequestFileQuery();
   const filesQuery = useGetFilesQuery();
-  const [selectedFile, setSelectedFile] = useState<string | null>(null);
-  const fileQuery = useGetFileQuery(selectedFile);
+  const selectedRequestFileStore = useSelectedRequestFileStore();
+  const fileQuery = useGetFileQuery(selectedRequestFileStore.value);
 
   useEffect(() => {
     if (!fileQuery.data) {
@@ -43,9 +46,15 @@ function RouteComponent() {
     if (query.isError) {
       return (
         <Stack>
-          <FilesSelect onChange={setSelectedFile} value={selectedFile} />
+          <FilesSelect
+            onChange={selectedRequestFileStore.set}
+            value={selectedRequestFileStore.value}
+          />
 
-          <Alert color="red" title={`Error loading '${selectedFile}'`}>
+          <Alert
+            color="red"
+            title={`Error loading '${selectedRequestFileStore.value}'`}
+          >
             <Text size="sm">{query.error.message}</Text>
 
             <Code block>{fileQuery.data}</Code>
@@ -73,45 +82,59 @@ function RouteComponent() {
 
   return (
     <Stack>
-      <FilesSelect onChange={setSelectedFile} value={selectedFile} />
+      <FilesSelect
+        onChange={selectedRequestFileStore.set}
+        value={selectedRequestFileStore.value}
+      />
 
       {typeof data !== "undefined" && (
         <>
           <Tabs defaultValue="run">
             <Tabs.List>
               <Tabs.Tab value="run">Run</Tabs.Tab>
-              <Tabs.Tab value="details">Details</Tabs.Tab>
-              <Tabs.Tab value="raw">Raw</Tabs.Tab>
+              <Tabs.Tab value="history">History</Tabs.Tab>
+              <Tabs.Tab value="file">File</Tabs.Tab>
             </Tabs.List>
 
             <Tabs.Panel value="run" p="md">
               <RunRequestForm
                 result={data}
+                requestFilePath={selectedRequestFileStore.value ?? ""}
                 requestFileText={fileQuery.data!}
                 refreshFile={refreshFileText}
               />
             </Tabs.Panel>
 
-            <Tabs.Panel value="details" p="md">
-              <RequestDetails result={data} />
+            <Tabs.Panel value="history" p="md">
+              <RequestRunHistory
+                result={data}
+                requestFilePath={selectedRequestFileStore.value}
+              />
             </Tabs.Panel>
 
-            <Tabs.Panel value="raw" p="md">
-              <Code block>{fileQuery.data}</Code>
-
-              <CopyButton value={fileQuery.data ?? ""}>
-                {({ copied, copy }) => (
-                  <Tooltip label="Copy">
-                    <ActionIcon onClick={copy} color="dark" aria-label="Copy">
-                      {copied ? (
-                        <IconCopyCheckFilled stroke={1} />
-                      ) : (
-                        <IconCopy stroke={1} />
-                      )}
-                    </ActionIcon>
-                  </Tooltip>
-                )}
-              </CopyButton>
+            <Tabs.Panel value="file" p="md">
+              <Card>
+                <Code block>{fileQuery.data}</Code>
+                <ButtonGroup>
+                  <CopyButton value={fileQuery.data ?? ""}>
+                    {({ copied, copy }) => (
+                      <Tooltip label="Copy">
+                        <ActionIcon
+                          onClick={copy}
+                          color="dark"
+                          aria-label="Copy"
+                        >
+                          {copied ? (
+                            <IconCopyCheckFilled stroke={1} />
+                          ) : (
+                            <IconCopy stroke={1} />
+                          )}
+                        </ActionIcon>
+                      </Tooltip>
+                    )}
+                  </CopyButton>
+                </ButtonGroup>
+              </Card>
             </Tabs.Panel>
           </Tabs>
         </>

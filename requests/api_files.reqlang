@@ -6,8 +6,7 @@ GET {{@clientUrl}}/api/files HTTP/1.1
 
 ```%response
 HTTP/1.1 200 OK
-content-length: 118
 content-type: application/json
 
-["requests/api_debug.reqlang","requests/api_file.reqlang","requests/api_files.reqlang","requests/status_code.reqlang"]
+["requests/api_debug.reqlang","requests/api_file.reqlang","requests/api_files.reqlang","requests/api_run_history.reqlang","requests/status_code.reqlang"]
 ```

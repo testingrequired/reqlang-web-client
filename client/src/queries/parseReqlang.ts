@@ -1,11 +1,11 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   HttpResponse,
   ParseResult,
   ReqlangError,
   RequestParamsFromClient,
 } from "reqlang-types";
-import { RequestRunResponse } from "server-types";
+import { RequestRun, RequestRunResponse, RunRequest } from "server-types";
 import stripAnsi from "strip-ansi";
 
 export const PARSE_KEYS = {
@@ -14,6 +14,7 @@ export const PARSE_KEYS = {
   export: ["export"] as const,
   diff: ["diff"] as const,
   files: ["files"] as const,
+  history: ["history"] as const,
   file: (path: string | null) => ["files", path] as const,
 } as const;
 
@@ -90,10 +91,11 @@ export const useParsedRequestFileQuery = () =>
     },
   });
 
-export const useRunRequest = () =>
-  useMutation({
+export const useRunRequest = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
     mutationKey: PARSE_KEYS.run,
-    mutationFn: async (params: RequestParamsFromClient) => {
+    mutationFn: async (params: RunRequest) => {
       const response = await fetch(`/api/run`, {
         method: "POST",
         body: JSON.stringify(params),
@@ -106,7 +108,13 @@ export const useRunRequest = () =>
 
       return data;
     },
+    onSuccess: async () => {
+      queryClient.invalidateQueries({
+        queryKey: PARSE_KEYS.history,
+      });
+    },
   });
+};
 
 export const useExportRequest = () =>
   useMutation({
@@ -146,3 +154,31 @@ export const useDiffResponse = () =>
       return stripAnsi(data);
     },
   });
+
+export const useGetRunHistoryQuery = () =>
+  useQuery({
+    queryKey: PARSE_KEYS.history,
+    queryFn: async () => {
+      const response = await fetch(`/api/history`);
+      const data = (await response.json()) as RequestRun[];
+
+      return data;
+    },
+  });
+
+export const useClearRunHistoryMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: PARSE_KEYS.history,
+    mutationFn: async () => {
+      await fetch(`/api/history`, {
+        method: "DELETE",
+      });
+    },
+    onSuccess: async () => {
+      queryClient.invalidateQueries({
+        queryKey: PARSE_KEYS.history,
+      });
+    },
+  });
+};

@@ -29,12 +29,14 @@ import {
 
 type Props = {
   result: ParseResult;
+  requestFilePath: string;
   requestFileText: string;
   refreshFile: () => void;
 };
 
 export const RunRequestForm: React.FC<Props> = ({
   result,
+  requestFilePath,
   requestFileText,
   refreshFile,
 }) => {
@@ -79,12 +81,15 @@ export const RunRequestForm: React.FC<Props> = ({
       const vars = result.full.config?.[0].envs?.[selectedEnv] ?? {};
 
       runRequest.mutate({
-        reqfile: requestFileText,
-        prompts,
-        secrets,
-        vars,
-        env: values.value.env,
-        provider_values: {},
+        request_file_path: requestFilePath,
+        params: {
+          reqfile: requestFileText,
+          prompts,
+          secrets,
+          vars,
+          env: values.value.env,
+          provider_values: {},
+        },
       });
 
       exportRequest.mutate({

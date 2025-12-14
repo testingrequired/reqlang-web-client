@@ -11,11 +11,18 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as HistoryImport } from './routes/history'
 import { Route as DebugImport } from './routes/debug'
 import { Route as AchievementsImport } from './routes/achievements'
 import { Route as IndexImport } from './routes/index'
 
 // Create/Update Routes
+
+const HistoryRoute = HistoryImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const DebugRoute = DebugImport.update({
   id: '/debug',
@@ -60,6 +67,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DebugImport
       parentRoute: typeof rootRoute
     }
+    '/history': {
+      id: '/history'
+      path: '/history'
+      fullPath: '/history'
+      preLoaderRoute: typeof HistoryImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -69,12 +83,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/achievements': typeof AchievementsRoute
   '/debug': typeof DebugRoute
+  '/history': typeof HistoryRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/achievements': typeof AchievementsRoute
   '/debug': typeof DebugRoute
+  '/history': typeof HistoryRoute
 }
 
 export interface FileRoutesById {
@@ -82,14 +98,15 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/achievements': typeof AchievementsRoute
   '/debug': typeof DebugRoute
+  '/history': typeof HistoryRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/achievements' | '/debug'
+  fullPaths: '/' | '/achievements' | '/debug' | '/history'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/achievements' | '/debug'
-  id: '__root__' | '/' | '/achievements' | '/debug'
+  to: '/' | '/achievements' | '/debug' | '/history'
+  id: '__root__' | '/' | '/achievements' | '/debug' | '/history'
   fileRoutesById: FileRoutesById
 }
 
@@ -97,12 +114,14 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AchievementsRoute: typeof AchievementsRoute
   DebugRoute: typeof DebugRoute
+  HistoryRoute: typeof HistoryRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AchievementsRoute: AchievementsRoute,
   DebugRoute: DebugRoute,
+  HistoryRoute: HistoryRoute,
 }
 
 export const routeTree = rootRoute
@@ -117,7 +136,8 @@ export const routeTree = rootRoute
       "children": [
         "/",
         "/achievements",
-        "/debug"
+        "/debug",
+        "/history"
       ]
     },
     "/": {
@@ -128,6 +148,9 @@ export const routeTree = rootRoute
     },
     "/debug": {
       "filePath": "debug.tsx"
+    },
+    "/history": {
+      "filePath": "history.tsx"
     }
   }
 }

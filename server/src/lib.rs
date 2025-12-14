@@ -11,7 +11,6 @@ use axum::{
     routing::{any, get, post},
 };
 use axum_extra::extract::Host;
-use chrono::Local;
 use clap::Parser;
 use futures_util::{SinkExt, StreamExt};
 use glob::glob;
@@ -22,8 +21,7 @@ use hyper_util::{
 };
 use reqlang::{
     ast::Ast,
-    export::{RequestFormat, ResponseFormat},
-    fetch::{Fetch, HttpRequestFetcher},
+    export::RequestFormat,
     parser::parse,
     prelude::assert_response,
     types::{ParseResult, RequestParamsFromClient, http::HttpResponse},
@@ -46,6 +44,8 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use types::{
     DebugInfo, RequestRunResponse,
     achievement::{AchievementDto, AchievementId},
+    request_run::RequestRun,
+    run_request::RunRequest,
     socket::ClientMessage,
 };
 
@@ -58,7 +58,10 @@ use tower_http::services::ServeDir;
 #[cfg(not(feature = "development_mode"))]
 use tower_serve_static::ServeDir as StaticServeDir;
 
-use crate::services::achievements_service;
+use crate::services::{
+    achievements_service,
+    request_service::{self, run_request_from_params},
+};
 
 pub mod services;
 
@@ -268,6 +271,10 @@ pub async fn init_server(
         .route("/api/run", post(run_request))
         .route("/api/files", get(list_files))
         .route("/api/files/{*file}", get(get_file))
+        .route(
+            "/api/history",
+            get(get_run_history).delete(delete_run_history),
+        )
         .route("/api/diff_responses", post(diff_response))
         .route("/api/export_request", post(export_request))
         .route("/api/debug", get(get_debug_info))
@@ -290,6 +297,22 @@ pub async fn init_server(
         );
 
     Ok(AppServer(listener, app))
+}
+
+#[axum::debug_handler]
+async fn get_run_history(
+    State(state): State<Arc<Mutex<AppState>>>,
+) -> (StatusCode, Result<Json<Vec<RequestRun>>, String>) {
+    let results = request_service::get_run_history(state).await;
+    (StatusCode::OK, Ok(Json(results)))
+}
+
+#[axum::debug_handler]
+async fn delete_run_history(
+    State(state): State<Arc<Mutex<AppState>>>,
+) -> (StatusCode, Result<(), String>) {
+    request_service::delete_run_history(state).await;
+    (StatusCode::OK, Ok(()))
 }
 
 #[axum::debug_handler]
@@ -420,45 +443,13 @@ async fn parse_request_file(
 }
 
 async fn run_request(
+    State(state): State<Arc<Mutex<AppState>>>,
     Host(hostname): Host,
-    Json(mut from_client_params): Json<RequestParamsFromClient>,
+    Json(run_request_from_client): Json<RunRequest>,
 ) -> (StatusCode, Json<(RequestRunResponse, String)>) {
-    let mut provider_values: HashMap<String, String> = HashMap::new();
+    let result = run_request_from_params(&hostname, &run_request_from_client, state).await;
 
-    let env = from_client_params.env.as_deref();
-
-    if let Some(env) = env {
-        provider_values.insert("env".to_string(), env.to_string());
-    }
-
-    provider_values.insert("clientUrl".to_string(), format!("http://{hostname}"));
-
-    from_client_params.provider_values = provider_values;
-
-    dbg!(&from_client_params);
-
-    let request_run_start = Local::now().timestamp_millis() as u64;
-
-    let response = Into::<HttpRequestFetcher>::into(from_client_params)
-        .fetch()
-        .await
-        .expect("Request should have succeeded");
-
-    let request_run_end = Local::now().timestamp_millis() as u64;
-
-    let response_exported =
-        reqlang::export::export_response(&response, ResponseFormat::HttpMessage);
-
-    (
-        StatusCode::OK,
-        Json((
-            RequestRunResponse {
-                response,
-                time_taken: request_run_end - request_run_start,
-            },
-            response_exported,
-        )),
-    )
+    (StatusCode::OK, Json(result))
 }
 
 #[derive(Debug, Serialize, Deserialize)]
