@@ -42,6 +42,7 @@ export const FilesSelect = ({ onChange, value, clearable = false }: Prop) => {
       onChange={onChange}
       value={value}
       leftSection={icon}
+      searchable
       clearable={clearable}
     />
   );

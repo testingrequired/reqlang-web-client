@@ -162,6 +162,12 @@ export const useGetRunHistoryQuery = () =>
       const response = await fetch(`/api/history`);
       const data = (await response.json()) as RequestRun[];
 
+      data.sort(
+        (a, b) =>
+          (b.request_at as unknown as number) -
+          (a.request_at as unknown as number)
+      );
+
       return data;
     },
   });
