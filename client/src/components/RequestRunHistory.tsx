@@ -9,7 +9,7 @@ type Props = {
 };
 
 export const RequestRunHistory: React.FC<Props> = ({ requestFilePath }) => {
-  const [runIndex, setRunIndex] = useState<number | null>(null);
+  const [runId, setRunId] = useState<string | null>(null);
   const runHistoryQuery = useGetRunHistoryForRequestQuery(requestFilePath);
 
   if (runHistoryQuery.isError) {
@@ -25,13 +25,14 @@ export const RequestRunHistory: React.FC<Props> = ({ requestFilePath }) => {
       (run) => run.request_file_path === requestFilePath
     ) ?? [];
 
-  const requestRun = runIndex === null ? null : history[runIndex];
+  const requestRun =
+    runId === null ? null : (history.find((x) => x.uuid === runId) ?? null);
 
   return (
     <Stack gap="xl">
       <RequestRunSelect
-        value={runIndex}
-        onChange={setRunIndex}
+        value={runId}
+        onChange={setRunId}
         requestRunHistory={history}
       />
 

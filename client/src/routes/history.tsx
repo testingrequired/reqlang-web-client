@@ -34,7 +34,7 @@ function RouteComponent() {
     string | null
   >(null);
   const [selectedRequestRunInHistory, setSelectedREquestRunInHistory] =
-    useState<number | null>(null);
+    useState<string | null>(null);
 
   if (getRunHistoryQuery.isError || deleteHistoryMutation.isError) {
     return <p>Error</p>;
@@ -60,7 +60,8 @@ function RouteComponent() {
   let selectedRun: RequestRun | null = null;
 
   if (selectedRequestRunInHistory !== null) {
-    selectedRun = history[selectedRequestRunInHistory];
+    selectedRun =
+      history.find((x) => x.uuid === selectedRequestRunInHistory) ?? null;
   }
 
   const historyOrItem =
