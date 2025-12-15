@@ -18,6 +18,7 @@ import { useSelectedRequestFileStore } from "@/stores/selectedRequestFile";
 import { useGetFileQuery, useGetFilesQuery } from "@/queries/files";
 import { useParsedRequestFileMutation } from "@/queries/parse";
 import { CopyTextButton } from "@/components/CopyTextButton";
+import { RequestFromRequestFile } from "@/components/RequestFromRequestFile";
 
 export const Route = createFileRoute("/")({
   component: RouteComponent,
@@ -78,6 +79,14 @@ function RouteComponent() {
         value={selectedRequestFileStore.value}
       />
 
+      {data && (
+        <RequestFromRequestFile
+          result={data}
+          requestFileText={fileQuery.data ?? ""}
+          onRefreshFile={fileQuery.refetch}
+        />
+      )}
+
       {typeof data !== "undefined" && (
         <>
           <Tabs defaultValue="run">
@@ -92,7 +101,6 @@ function RouteComponent() {
                 result={data}
                 requestFilePath={selectedRequestFileStore.value ?? ""}
                 requestFileText={fileQuery.data!}
-                refreshFile={fileQuery.refetch}
               />
             </Tabs.Panel>
 

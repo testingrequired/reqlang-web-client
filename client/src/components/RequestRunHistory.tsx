@@ -1,4 +1,4 @@
-import { Card, Stack, Text, Title } from "@mantine/core";
+import { Card, Stack, Text } from "@mantine/core";
 import { useState } from "react";
 import { RequestRunHistoryItem } from "./RequestRunHistoryItem";
 import { RequestRunSelect } from "./RequestRunSelect";
@@ -28,9 +28,7 @@ export const RequestRunHistory: React.FC<Props> = ({ requestFilePath }) => {
   const requestRun = runIndex === null ? null : history[runIndex];
 
   return (
-    <Stack>
-      <Title order={2}>Run History</Title>
-
+    <Stack gap="xl">
       <RequestRunSelect
         value={runIndex}
         onChange={setRunIndex}

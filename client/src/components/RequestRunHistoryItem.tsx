@@ -4,6 +4,7 @@ import { Code, Loader, Stack, Table, Text } from "@mantine/core";
 import { useEffect } from "react";
 import { RequestParamsFromClient } from "reqlang-types";
 import { RequestRun } from "server-types";
+import { RequestFromRequestFile } from "./RequestFromRequestFile";
 
 type Props = {
   requestRun: RequestRun;
@@ -49,12 +50,10 @@ export const RequestRunHistoryItem = ({ requestRun }: Props) => {
           Request
         </Text>
 
-        <Code block m={0}>
-          {params.reqfile.slice(
-            result.full.request[1].start,
-            result.full.request[1].end
-          )}
-        </Code>
+        <RequestFromRequestFile
+          result={result}
+          requestFileText={params.reqfile}
+        />
       </Stack>
 
       <Stack>

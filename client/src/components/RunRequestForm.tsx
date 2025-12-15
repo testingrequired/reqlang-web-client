@@ -1,10 +1,8 @@
 import { ParseResult } from "reqlang-types";
 import { formOptions, useForm, useStore } from "@tanstack/react-form";
 import {
-  ActionIcon,
   Alert,
   Button,
-  ButtonGroup,
   Card,
   Code,
   Select,
@@ -12,10 +10,8 @@ import {
   Table,
   Text,
   TextInput,
-  Tooltip,
 } from "@mantine/core";
 import { useEffect } from "react";
-import { IconRefresh } from "@tabler/icons-react";
 import { useDiffResponseMutation } from "@/queries/diffResponse";
 import { useRunRequestMutation } from "@/queries/runRequest";
 import { useExportRequestMutation } from "@/queries/export";
@@ -25,14 +21,12 @@ type Props = {
   result: ParseResult;
   requestFilePath: string;
   requestFileText: string;
-  refreshFile: () => void;
 };
 
 export const RunRequestForm: React.FC<Props> = ({
   result,
   requestFilePath,
   requestFileText,
-  refreshFile,
 }) => {
   const runRequestMutation = useRunRequestMutation();
   const diffResponseMutation = useDiffResponseMutation();
@@ -100,9 +94,6 @@ export const RunRequestForm: React.FC<Props> = ({
   const selectedEnv = useStore(form.store, (state) => state.values.env);
   const envVarValues = result.full.config?.[0].envs?.[selectedEnv];
 
-  const requestSpan = result.full.request[1];
-  const requestText = requestFileText.slice(requestSpan.start, requestSpan.end);
-
   const responseSpan = result.full.response?.[1];
   const responseText = requestFileText.slice(
     responseSpan?.start,
@@ -131,25 +122,6 @@ export const RunRequestForm: React.FC<Props> = ({
       }}
     >
       <Stack>
-        <Card p="xs">
-          <Code block>{requestText}</Code>
-
-          <ButtonGroup>
-            <CopyTextButton value={requestText} />
-
-            <Tooltip label="Reload Request File">
-              <ActionIcon
-                color="dark"
-                variant="filled"
-                aria-label="Reload Request File"
-                onClick={refreshFile}
-              >
-                <IconRefresh stroke={1} />
-              </ActionIcon>
-            </Tooltip>
-          </ButtonGroup>
-        </Card>
-
         {result.envs.length > 0 && (
           <Card>
             <Stack>
