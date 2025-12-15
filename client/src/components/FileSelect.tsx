@@ -1,5 +1,5 @@
 import { useGetFilesQuery } from "@/queries/parseReqlang";
-import { ActionIcon, Alert, Select, Tooltip } from "@mantine/core";
+import { ActionIcon, Alert, Loader, Select, Tooltip } from "@mantine/core";
 import { IconRefresh } from "@tabler/icons-react";
 
 type Prop = {
@@ -26,7 +26,7 @@ export const FilesSelect = ({
   }
 
   if (filesQuery.isPending) {
-    return <p>Loading...</p>;
+    return <Loader />;
   }
 
   const icon = (
@@ -35,6 +35,7 @@ export const FilesSelect = ({
         variant="filled"
         aria-label="Refresh File List"
         onClick={refresh}
+        disabled={disabled}
       >
         <IconRefresh stroke={1.5} />
       </ActionIcon>

@@ -10,6 +10,8 @@ import {
   ButtonGroup,
   Card,
   Code,
+  Group,
+  Loader,
   Stack,
   Text,
   Title,
@@ -38,7 +40,7 @@ function RouteComponent() {
   }
 
   if (getRunHistoryQuery.isPending) {
-    return <p>Loading...</p>;
+    return <Loader />;
   }
 
   let allHistory = getRunHistoryQuery.data;
@@ -83,7 +85,9 @@ function RouteComponent() {
 
   return (
     <Stack gap="xl">
-      <Title order={2}>History</Title>
+      <Title order={2} mb={0}>
+        History
+      </Title>
 
       {allHistory.length > 0 ? (
         <>
@@ -104,7 +108,7 @@ function RouteComponent() {
             showPathsInSelect={selectedRequestFilePath === null}
           />
 
-          <ButtonGroup>
+          <Group>
             <Button
               disabled={
                 selectedRequestFilePath === null &&
@@ -114,17 +118,23 @@ function RouteComponent() {
                 setSelectedRequestFilePath(null);
                 setSelectedREquestRunInHistory(null);
               }}
+              size="compact-sm"
             >
               Clear Filters
             </Button>
-            <Button
-              onClick={openModal}
-              color="red"
-              disabled={history.length === 0}
-            >
-              Clear All Runs
-            </Button>
-          </ButtonGroup>
+
+            <ButtonGroup mt={0}>
+              <Button
+                onClick={openModal}
+                color="red"
+                size="compact-sm"
+                variant="outline"
+                disabled={history.length === 0}
+              >
+                Delete History
+              </Button>
+            </ButtonGroup>
+          </Group>
 
           {historyOrItem}
         </>

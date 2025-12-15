@@ -6,6 +6,7 @@ import {
   Card,
   Code,
   CopyButton,
+  Loader,
   Stack,
   Tabs,
   Text,
@@ -71,7 +72,7 @@ function RouteComponent() {
   }
 
   if (query.isPending || filesQuery.isPending || fileQuery.isLoading) {
-    return <p>Loading...</p>;
+    return <Loader />;
   }
 
   const data: ParseResult = query.data!;
