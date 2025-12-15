@@ -1,20 +1,20 @@
 import { Code, Stack, Table, Text, Title } from "@mantine/core";
-import { ParseResult, RequestParamsFromClient } from "reqlang-types";
+import { ParseResult } from "reqlang-types";
 import { RequestRun } from "server-types";
 
 type Props = {
   requestRun: RequestRun;
-  params: RequestParamsFromClient;
   result: ParseResult;
   clientContextReferences: string[];
 };
 
 export const RequestRunHistoryItem = ({
   requestRun,
-  params,
   result,
   clientContextReferences,
 }: Props) => {
+  const params = JSON.parse(requestRun.params_from_client_json);
+
   return (
     <Stack gap="xs">
       <Title order={3} mb={0}>

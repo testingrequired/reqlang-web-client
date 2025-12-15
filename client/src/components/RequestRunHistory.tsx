@@ -1,7 +1,6 @@
 import { Stack, Text, Title } from "@mantine/core";
 import { useState } from "react";
 import { ParseResult } from "reqlang-types";
-import { RequestParamsFromClient } from "server-types";
 import { RequestRunHistoryItem } from "./RequestRunHistoryItem";
 import { RequestRunSelect } from "./RequestRunSelect";
 import { useGetRunHistoryForRequestQuery } from "@/queries/history";
@@ -37,13 +36,6 @@ export const RequestRunHistory: React.FC<Props> = ({
 
   const requestRun = runIndex === null ? null : history[runIndex];
 
-  const selectedRunParams: RequestParamsFromClient | null =
-    requestRun === null
-      ? null
-      : (JSON.parse(
-          requestRun.params_from_client_json
-        ) as unknown as RequestParamsFromClient);
-
   return (
     <Stack>
       <Title order={2}>Run History</Title>
@@ -54,12 +46,11 @@ export const RequestRunHistory: React.FC<Props> = ({
         requestRunHistory={history}
       />
 
-      {requestRun && selectedRunParams && (
+      {requestRun && (
         <RequestRunHistoryItem
           requestRun={requestRun}
           result={result}
           clientContextReferences={providerReferences as any}
-          params={selectedRunParams}
         />
       )}
     </Stack>
