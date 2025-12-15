@@ -154,14 +154,14 @@ const Item = ({ selectedRun }: ItemProps) => {
   return (
     <Card>
       <Group mb="md">
-        <Badge radius="sm" variant="transparent" color="white">
+        <Badge variant="transparent" color="white">
+          {moment(selectedRun.request_at as unknown as number).fromNow()}
+        </Badge>
+        <Badge variant="transparent" color="white">
           {selectedRun.request_file_path}
         </Badge>
-        <Badge radius="sm" variant="transparent" color="white">
+        <Badge radius="lg" variant="transparent" color="dark">
           {selectedRun.uuid.slice(0, 8)}
-        </Badge>
-        <Badge radius="sm" variant="transparent" color="dark">
-          {moment(selectedRun.request_at as unknown as number).fromNow()}
         </Badge>
         <Text size="md" m={0}></Text>
       </Group>

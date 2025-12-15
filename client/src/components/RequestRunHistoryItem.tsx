@@ -73,7 +73,7 @@ export const RequestRunHistoryItem = ({ requestRun }: Props) => {
             Environment
           </Text>
 
-          <Text>{params.env}</Text>
+          <Code p="md">{params.env}</Code>
         </Stack>
       )}
 
