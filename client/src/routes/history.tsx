@@ -1,10 +1,6 @@
 import { FilesSelect } from "@/components/FileSelect";
 import { RequestRunSelect } from "@/components/RequestRunSelect";
 import {
-  useClearRunHistoryMutation,
-  useGetRunHistoryQuery,
-} from "@/queries/parseReqlang";
-import {
   Alert,
   Button,
   ButtonGroup,
@@ -21,6 +17,10 @@ import moment from "moment";
 import { useState } from "react";
 import { RequestRun } from "server-types";
 import { modals } from "@mantine/modals";
+import {
+  useClearRunHistoryMutation,
+  useGetRunHistoryQuery,
+} from "@/queries/history";
 
 export const Route = createFileRoute("/history")({
   component: RouteComponent,

@@ -15,17 +15,15 @@ import {
   TextInput,
   Tooltip,
 } from "@mantine/core";
-import {
-  useDiffResponse,
-  useExportRequest,
-  useRunRequest,
-} from "@/queries/parseReqlang";
 import { useEffect } from "react";
 import {
   IconCopy,
   IconCopyCheckFilled,
   IconRefresh,
 } from "@tabler/icons-react";
+import { useDiffResponseMutation } from "@/queries/diffResponse";
+import { useRunRequestMutation } from "@/queries/runRequest";
+import { useExportRequestMutation } from "@/queries/export";
 
 type Props = {
   result: ParseResult;
@@ -40,18 +38,18 @@ export const RunRequestForm: React.FC<Props> = ({
   requestFileText,
   refreshFile,
 }) => {
-  const runRequest = useRunRequest();
-  const diffResponse = useDiffResponse();
-  const exportRequest = useExportRequest();
+  const runRequestMutation = useRunRequestMutation();
+  const diffResponseMutation = useDiffResponseMutation();
+  const exportRequest = useExportRequestMutation();
 
   useEffect(() => {
-    if (typeof runRequest.data !== "undefined") {
-      diffResponse.mutate({
+    if (typeof runRequestMutation.data !== "undefined") {
+      diffResponseMutation.mutate({
         expected: result.full.response?.[0]!,
-        actual: runRequest.data[0].response,
+        actual: runRequestMutation.data[0].response,
       });
     }
-  }, [runRequest.data]);
+  }, [runRequestMutation.data]);
 
   const form = useForm({
     ...formOptions({
@@ -80,7 +78,7 @@ export const RunRequestForm: React.FC<Props> = ({
 
       const vars = result.full.config?.[0].envs?.[selectedEnv] ?? {};
 
-      runRequest.mutate({
+      runRequestMutation.mutate({
         request_file_path: requestFilePath,
         params: {
           reqfile: requestFileText,
@@ -115,12 +113,12 @@ export const RunRequestForm: React.FC<Props> = ({
     responseSpan?.end
   );
 
-  if (runRequest.isError) {
-    return <div>An error occurred: {runRequest.error.message}</div>;
+  if (runRequestMutation.isError) {
+    return <div>An error occurred: {runRequestMutation.error.message}</div>;
   }
 
-  if (diffResponse.isError) {
-    return <div>An error occurred: {diffResponse.error.message}</div>;
+  if (diffResponseMutation.isError) {
+    return <div>An error occurred: {diffResponseMutation.error.message}</div>;
   }
 
   if (exportRequest.isError) {
@@ -291,11 +289,11 @@ export const RunRequestForm: React.FC<Props> = ({
           </Card>
         )}
 
-        <Button type="submit" loading={runRequest.isPending}>
+        <Button type="submit" loading={runRequestMutation.isPending}>
           Run Request
         </Button>
 
-        {runRequest.isSuccess && exportRequest.isSuccess && (
+        {runRequestMutation.isSuccess && exportRequest.isSuccess && (
           <>
             <Text mb={0} size="xl" fw="bold">
               Results
@@ -325,10 +323,10 @@ export const RunRequestForm: React.FC<Props> = ({
               <Text mb={0} pb={0} fw="bold">
                 {responseSpan ? "Actual Response" : "Response"}
               </Text>
-              <Code block>{runRequest.data[1]}</Code>
+              <Code block>{runRequestMutation.data[1]}</Code>
 
               <Stack>
-                <CopyButton value={runRequest.data[1]}>
+                <CopyButton value={runRequestMutation.data[1]}>
                   {({ copied, copy }) => (
                     <Tooltip label="Copy">
                       <ActionIcon onClick={copy} color="dark" aria-label="Copy">
@@ -343,19 +341,19 @@ export const RunRequestForm: React.FC<Props> = ({
                 </CopyButton>
 
                 <Text size="sm">
-                  Time Taken: {runRequest.data[0].time_taken} ms
+                  Time Taken: {runRequestMutation.data[0].time_taken} ms
                 </Text>
               </Stack>
             </Card>
 
             {responseSpan && (
               <>
-                {(diffResponse.data?.length ?? 0) > 0 ? (
+                {(diffResponseMutation.data?.length ?? 0) > 0 ? (
                   <>
                     <Alert color="red" title="Test Result: Failed!">
-                      <Code block>{diffResponse.data}</Code>
+                      <Code block>{diffResponseMutation.data}</Code>
 
-                      <CopyButton value={diffResponse.data ?? ""}>
+                      <CopyButton value={diffResponseMutation.data ?? ""}>
                         {({ copied, copy }) => (
                           <Tooltip label="Copy">
                             <ActionIcon

@@ -1,4 +1,4 @@
-import { useGetFilesQuery } from "@/queries/parseReqlang";
+import { useGetFilesQuery } from "@/queries/files";
 import { ActionIcon, Alert, Loader, Select, Tooltip } from "@mantine/core";
 import { IconRefresh } from "@tabler/icons-react";
 

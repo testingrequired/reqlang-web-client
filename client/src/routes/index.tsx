@@ -12,11 +12,6 @@ import {
   Text,
   Tooltip,
 } from "@mantine/core";
-import {
-  useGetFileQuery,
-  useGetFilesQuery,
-  useParsedRequestFileQuery,
-} from "@/queries/parseReqlang";
 import { useEffect } from "react";
 import { ParseResult } from "reqlang-types";
 import { RunRequestForm } from "@/components/RunRequestForm";
@@ -24,13 +19,15 @@ import { FilesSelect } from "@/components/FileSelect";
 import { IconCopy, IconCopyCheckFilled } from "@tabler/icons-react";
 import { RequestRunHistory } from "@/components/RequestRunHistory";
 import { useSelectedRequestFileStore } from "@/stores/selectedRequestFile";
+import { useGetFileQuery, useGetFilesQuery } from "@/queries/files";
+import { useParsedRequestFileMutation } from "@/queries/parse";
 
 export const Route = createFileRoute("/")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const query = useParsedRequestFileQuery();
+  const query = useParsedRequestFileMutation();
   const filesQuery = useGetFilesQuery();
   const selectedRequestFileStore = useSelectedRequestFileStore();
   const fileQuery = useGetFileQuery(selectedRequestFileStore.value);

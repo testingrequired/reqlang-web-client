@@ -4,7 +4,7 @@ import { ParseResult } from "reqlang-types";
 import { RequestParamsFromClient } from "server-types";
 import { RequestRunHistoryItem } from "./RequestRunHistoryItem";
 import { RequestRunSelect } from "./RequestRunSelect";
-import { useGetRunHistoryQuery } from "@/queries/parseReqlang";
+import { useGetRunHistoryQuery } from "@/queries/history";
 
 type Props = {
   requestFilePath: string | null;
