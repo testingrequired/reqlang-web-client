@@ -4,7 +4,7 @@ import { ParseResult } from "reqlang-types";
 import { RequestParamsFromClient } from "server-types";
 import { RequestRunHistoryItem } from "./RequestRunHistoryItem";
 import { RequestRunSelect } from "./RequestRunSelect";
-import { useGetRunHistoryQuery } from "@/queries/history";
+import { useGetRunHistoryForRequestQuery } from "@/queries/history";
 
 type Props = {
   requestFilePath: string | null;
@@ -16,7 +16,7 @@ export const RequestRunHistory: React.FC<Props> = ({
   result,
 }) => {
   const [runIndex, setRunIndex] = useState<number | null>(null);
-  const runHistoryQuery = useGetRunHistoryQuery();
+  const runHistoryQuery = useGetRunHistoryForRequestQuery(requestFilePath);
 
   const providerReferences = result.full.refs
     .filter((ref) => Object.keys(ref[0]).at(0) === "Provider")
@@ -30,9 +30,10 @@ export const RequestRunHistory: React.FC<Props> = ({
     return <Text>Loading...</Text>;
   }
 
-  const history = runHistoryQuery.data.filter(
-    (run) => run.request_file_path === requestFilePath
-  );
+  const history =
+    runHistoryQuery?.data?.filter(
+      (run) => run.request_file_path === requestFilePath
+    ) ?? [];
 
   const requestRun = runIndex === null ? null : history[runIndex];
 
