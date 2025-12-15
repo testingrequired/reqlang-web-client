@@ -1,26 +1,23 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
-  ActionIcon,
   Alert,
   ButtonGroup,
   Card,
   Code,
-  CopyButton,
   Loader,
   Stack,
   Tabs,
   Text,
-  Tooltip,
 } from "@mantine/core";
 import { useEffect } from "react";
 import { ParseResult } from "reqlang-types";
 import { RunRequestForm } from "@/components/RunRequestForm";
 import { FilesSelect } from "@/components/FileSelect";
-import { IconCopy, IconCopyCheckFilled } from "@tabler/icons-react";
 import { RequestRunHistory } from "@/components/RequestRunHistory";
 import { useSelectedRequestFileStore } from "@/stores/selectedRequestFile";
 import { useGetFileQuery, useGetFilesQuery } from "@/queries/files";
 import { useParsedRequestFileMutation } from "@/queries/parse";
+import { CopyTextButton } from "@/components/CopyTextButton";
 
 export const Route = createFileRoute("/")({
   component: RouteComponent,
@@ -74,10 +71,6 @@ function RouteComponent() {
 
   const data: ParseResult = query.data!;
 
-  const refreshFileText = () => {
-    fileQuery.refetch();
-  };
-
   return (
     <Stack>
       <FilesSelect
@@ -99,7 +92,7 @@ function RouteComponent() {
                 result={data}
                 requestFilePath={selectedRequestFileStore.value ?? ""}
                 requestFileText={fileQuery.data!}
-                refreshFile={refreshFileText}
+                refreshFile={fileQuery.refetch}
               />
             </Tabs.Panel>
 
@@ -114,23 +107,7 @@ function RouteComponent() {
               <Card>
                 <Code block>{fileQuery.data}</Code>
                 <ButtonGroup>
-                  <CopyButton value={fileQuery.data ?? ""}>
-                    {({ copied, copy }) => (
-                      <Tooltip label="Copy">
-                        <ActionIcon
-                          onClick={copy}
-                          color="dark"
-                          aria-label="Copy"
-                        >
-                          {copied ? (
-                            <IconCopyCheckFilled stroke={1} />
-                          ) : (
-                            <IconCopy stroke={1} />
-                          )}
-                        </ActionIcon>
-                      </Tooltip>
-                    )}
-                  </CopyButton>
+                  <CopyTextButton value={fileQuery.data} />
                 </ButtonGroup>
               </Card>
             </Tabs.Panel>

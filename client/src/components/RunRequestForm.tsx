@@ -7,7 +7,6 @@ import {
   ButtonGroup,
   Card,
   Code,
-  CopyButton,
   Select,
   Stack,
   Table,
@@ -16,14 +15,11 @@ import {
   Tooltip,
 } from "@mantine/core";
 import { useEffect } from "react";
-import {
-  IconCopy,
-  IconCopyCheckFilled,
-  IconRefresh,
-} from "@tabler/icons-react";
+import { IconRefresh } from "@tabler/icons-react";
 import { useDiffResponseMutation } from "@/queries/diffResponse";
 import { useRunRequestMutation } from "@/queries/runRequest";
 import { useExportRequestMutation } from "@/queries/export";
+import { CopyTextButton } from "./CopyTextButton";
 
 type Props = {
   result: ParseResult;
@@ -139,19 +135,7 @@ export const RunRequestForm: React.FC<Props> = ({
           <Code block>{requestText}</Code>
 
           <ButtonGroup>
-            <CopyButton value={requestText}>
-              {({ copied, copy }) => (
-                <Tooltip label="Copy">
-                  <ActionIcon onClick={copy} color="dark" aria-label="Copy">
-                    {copied ? (
-                      <IconCopyCheckFilled stroke={1} />
-                    ) : (
-                      <IconCopy stroke={1} />
-                    )}
-                  </ActionIcon>
-                </Tooltip>
-              )}
-            </CopyButton>
+            <CopyTextButton value={requestText} />
 
             <Tooltip label="Reload Request File">
               <ActionIcon
@@ -304,19 +288,7 @@ export const RunRequestForm: React.FC<Props> = ({
               </Text>
               <Code block>{exportRequest.data}</Code>
 
-              <CopyButton value={exportRequest.data}>
-                {({ copied, copy }) => (
-                  <Tooltip label="Copy">
-                    <ActionIcon onClick={copy} color="dark" aria-label="Copy">
-                      {copied ? (
-                        <IconCopyCheckFilled stroke={1} />
-                      ) : (
-                        <IconCopy stroke={1} />
-                      )}
-                    </ActionIcon>
-                  </Tooltip>
-                )}
-              </CopyButton>
+              <CopyTextButton value={exportRequest.data} />
             </Card>
 
             <Card>
@@ -326,19 +298,7 @@ export const RunRequestForm: React.FC<Props> = ({
               <Code block>{runRequestMutation.data[1]}</Code>
 
               <Stack>
-                <CopyButton value={runRequestMutation.data[1]}>
-                  {({ copied, copy }) => (
-                    <Tooltip label="Copy">
-                      <ActionIcon onClick={copy} color="dark" aria-label="Copy">
-                        {copied ? (
-                          <IconCopyCheckFilled stroke={1} />
-                        ) : (
-                          <IconCopy stroke={1} />
-                        )}
-                      </ActionIcon>
-                    </Tooltip>
-                  )}
-                </CopyButton>
+                <CopyTextButton value={runRequestMutation.data[1]} />
 
                 <Text size="sm">
                   Time Taken: {runRequestMutation.data[0].time_taken} ms
@@ -353,23 +313,7 @@ export const RunRequestForm: React.FC<Props> = ({
                     <Alert color="red" title="Test Result: Failed!">
                       <Code block>{diffResponseMutation.data}</Code>
 
-                      <CopyButton value={diffResponseMutation.data ?? ""}>
-                        {({ copied, copy }) => (
-                          <Tooltip label="Copy">
-                            <ActionIcon
-                              onClick={copy}
-                              color="dark"
-                              aria-label="Copy"
-                            >
-                              {copied ? (
-                                <IconCopyCheckFilled stroke={1} />
-                              ) : (
-                                <IconCopy stroke={1} />
-                              )}
-                            </ActionIcon>
-                          </Tooltip>
-                        )}
-                      </CopyButton>
+                      <CopyTextButton value={diffResponseMutation.data} />
                     </Alert>
                   </>
                 ) : (
@@ -383,23 +327,7 @@ export const RunRequestForm: React.FC<Props> = ({
 
                   <Code block>{responseText}</Code>
 
-                  <CopyButton value={responseText}>
-                    {({ copied, copy }) => (
-                      <Tooltip label="Copy">
-                        <ActionIcon
-                          onClick={copy}
-                          color="dark"
-                          aria-label="Copy"
-                        >
-                          {copied ? (
-                            <IconCopyCheckFilled stroke={1} />
-                          ) : (
-                            <IconCopy stroke={1} />
-                          )}
-                        </ActionIcon>
-                      </Tooltip>
-                    )}
-                  </CopyButton>
+                  <CopyTextButton value={responseText} />
                 </Card>
               </>
             )}
