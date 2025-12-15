@@ -1,5 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Alert, Card, Code, Loader, Stack, Tabs, Text } from "@mantine/core";
+import {
+  ActionIcon,
+  Alert,
+  Card,
+  Code,
+  Loader,
+  Space,
+  Stack,
+  Tabs,
+  Text,
+  Tooltip,
+} from "@mantine/core";
 import { useEffect } from "react";
 import { ParseResult } from "reqlang-types";
 import { RunRequestForm } from "@/components/RunRequestForm";
@@ -10,6 +21,7 @@ import { useGetFileQuery, useGetFilesQuery } from "@/queries/files";
 import { useParsedRequestFileMutation } from "@/queries/parse";
 import { RequestFromRequestFile } from "@/components/RequestFromRequestFile";
 import { CopyCode } from "@/components/CopyCode";
+import { IconRefresh } from "@tabler/icons-react";
 
 export const Route = createFileRoute("/")({
   component: RouteComponent,
@@ -71,11 +83,12 @@ function RouteComponent() {
       />
 
       {data && (
-        <RequestFromRequestFile
-          result={data}
-          requestFileText={fileQuery.data ?? ""}
-          onRefreshFile={fileQuery.refetch}
-        />
+        <Card>
+          <RequestFromRequestFile
+            result={data}
+            requestFileText={fileQuery.data ?? ""}
+          />
+        </Card>
       )}
 
       {typeof data !== "undefined" && (
@@ -104,6 +117,19 @@ function RouteComponent() {
             <Tabs.Panel value="file" p="md">
               <Card>
                 <CopyCode>{fileQuery.data!}</CopyCode>
+
+                <Tooltip label="Reload Request File">
+                  <ActionIcon
+                    color="dark"
+                    variant="filled"
+                    aria-label="Reload Request File"
+                    onClick={() => {
+                      fileQuery.refetch();
+                    }}
+                  >
+                    <IconRefresh stroke={1} />
+                  </ActionIcon>
+                </Tooltip>
               </Card>
             </Tabs.Panel>
           </Tabs>
