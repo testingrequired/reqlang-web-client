@@ -6,28 +6,37 @@ type Props = {
   requestRunHistory: RequestRun[];
   value: number | null;
   onChange: (value: number | null) => void;
+  showPathsInSelect?: boolean;
 };
 
 export const RequestRunSelect = ({
   requestRunHistory,
   value,
   onChange,
+  showPathsInSelect = false,
 }: Props) => {
   return (
     <Select
-      placeholder="Select a request run in history"
+      placeholder="Select a run from request history"
       data={requestRunHistory.map((run, i) => {
         const date = moment(run.request_at as unknown as number);
+        const dateLabel = `${date.calendar()} (${date.fromNow()})`;
+        const label = showPathsInSelect
+          ? `${dateLabel} [${run.request_file_path}]`
+          : dateLabel;
+
         return {
           value: `${i}`,
-          label: `${date.calendar()} (${date.fromNow()})`,
+          label,
         };
       })}
-      value={value?.toString(10)}
+      value={value === null ? null : value.toString(10)}
       onChange={(newValue) => {
         if (newValue === null) {
+          debugger;
           onChange(null);
         } else {
+          debugger;
           onChange(parseInt(newValue, 10));
         }
       }}

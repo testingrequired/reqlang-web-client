@@ -6,9 +6,15 @@ type Prop = {
   onChange: (value: string | null) => void;
   value: string | null;
   clearable?: boolean;
+  disabled?: boolean;
 };
 
-export const FilesSelect = ({ onChange, value, clearable = false }: Prop) => {
+export const FilesSelect = ({
+  onChange,
+  value,
+  clearable = false,
+  disabled = false,
+}: Prop) => {
   const filesQuery = useGetFilesQuery();
 
   function refresh() {
@@ -44,6 +50,7 @@ export const FilesSelect = ({ onChange, value, clearable = false }: Prop) => {
       leftSection={icon}
       searchable
       clearable={clearable}
+      disabled={disabled}
     />
   );
 };

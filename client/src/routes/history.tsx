@@ -1,4 +1,5 @@
 import { FilesSelect } from "@/components/FileSelect";
+import { RequestRunSelect } from "@/components/RequestRunSelect";
 import {
   useClearRunHistoryMutation,
   useGetRunHistoryQuery,
@@ -7,70 +8,114 @@ import { Button, Card, Code, Stack, Text, Title } from "@mantine/core";
 import { createFileRoute } from "@tanstack/react-router";
 import moment from "moment";
 import { useState } from "react";
+import { RequestRun } from "server-types";
 
 export const Route = createFileRoute("/history")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const query = useGetRunHistoryQuery();
+  const getRunHistoryQuery = useGetRunHistoryQuery();
   const deleteHistoryMutation = useClearRunHistoryMutation();
-  const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const [selectedRequestFilePath, setSelectedRequestFilePath] = useState<
+    string | null
+  >(null);
+  const [selectedRequestRunInHistory, setSelectedREquestRunInHistory] =
+    useState<number | null>(null);
 
-  if (query.isError || deleteHistoryMutation.isError) {
+  if (getRunHistoryQuery.isError || deleteHistoryMutation.isError) {
     return <p>Error</p>;
   }
 
-  if (query.isPending) {
+  if (getRunHistoryQuery.isPending) {
     return <p>Loading...</p>;
   }
 
+  let allHistory = getRunHistoryQuery.data;
+  let selectedRequestHistory = allHistory.filter(
+    (run) => run.request_file_path === selectedRequestFilePath
+  );
+
   const history =
-    selectedFile === null
-      ? query.data
-      : query.data.filter((run) => run.request_file_path === selectedFile);
+    selectedRequestFilePath === null ? allHistory : selectedRequestHistory;
 
   history.sort(
     (a, b) =>
       (b.request_at as unknown as number) - (a.request_at as unknown as number)
   );
 
+  let selectedRun: RequestRun | null = null;
+
+  if (selectedRequestRunInHistory !== null) {
+    selectedRun = history[selectedRequestRunInHistory];
+  }
+
+  const historyOrItem =
+    selectedRun !== null ? (
+      <Item selectedRun={selectedRun} />
+    ) : (
+      history.map((run) => <Item selectedRun={run} />)
+    );
+
   return (
     <Stack gap="xl">
       <Title order={2}>History</Title>
 
-      <FilesSelect onChange={setSelectedFile} value={selectedFile} clearable />
+      <FilesSelect
+        onChange={setSelectedRequestFilePath}
+        value={selectedRequestFilePath}
+        clearable
+        disabled={
+          selectedRequestFilePath === null &&
+          selectedRequestRunInHistory !== null
+        }
+      />
+
+      <RequestRunSelect
+        value={selectedRequestRunInHistory}
+        onChange={setSelectedREquestRunInHistory}
+        requestRunHistory={history}
+        showPathsInSelect={selectedRequestFilePath === null}
+      />
 
       <Button onClick={() => deleteHistoryMutation.mutate()}>
         Clear History
       </Button>
 
-      {history.map((run) => (
-        <Stack gap="xs">
-          <Text size="md" m={0}>
-            {run.request_file_path} (
-            {moment(run.request_at as unknown as number).fromNow()})
-          </Text>
-
-          <Card>
-            <Text size="md" m={0}>
-              Params
-            </Text>
-            <Code block style={{ maxWidth: "100%" }}>
-              {run.params_from_client_json}
-            </Code>
-          </Card>
-
-          <Card>
-            <Text size="md" m={0}>
-              Response
-            </Text>
-            <Code block style={{ maxWidth: "100%" }}>
-              {run.response}
-            </Code>
-          </Card>
-        </Stack>
-      ))}
+      {historyOrItem}
     </Stack>
   );
 }
+
+type ItemProps = {
+  selectedRun: RequestRun;
+};
+
+const Item = ({ selectedRun }: ItemProps) => {
+  return (
+    <Stack gap="xs">
+      <Text size="md" m={0}>
+        {selectedRun.request_file_path} (
+        {moment(selectedRun.request_at as unknown as number).fromNow()})
+      </Text>
+
+      <Card>
+        <Text size="md" m={0}>
+          Params
+        </Text>
+        <Code block style={{ maxWidth: "100%" }}>
+          {selectedRun.params_from_client_json}
+        </Code>
+      </Card>
+
+      <Card>
+        <Text size="md" m={0}>
+          Response
+        </Text>
+        <Code block style={{ maxWidth: "100%" }}>
+          {selectedRun.response}
+        </Code>
+      </Card>
+    </Stack>
+  );
+};
