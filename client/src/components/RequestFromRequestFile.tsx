@@ -1,7 +1,7 @@
-import { ActionIcon, ButtonGroup, Code, Stack, Tooltip } from "@mantine/core";
+import { ActionIcon, ButtonGroup, Stack, Tooltip } from "@mantine/core";
 import { ParseResult } from "reqlang-types";
-import { CopyTextButton } from "./CopyTextButton";
 import { IconRefresh } from "@tabler/icons-react";
+import { CopyCode } from "./CopyCode";
 
 type Props = {
   result: ParseResult;
@@ -19,11 +19,9 @@ export const RequestFromRequestFile = ({
 
   return (
     <Stack>
-      <Code block>{requestText}</Code>
+      <CopyCode>{requestText}</CopyCode>
 
       <ButtonGroup>
-        <CopyTextButton value={requestText} />
-
         {onRefreshFile && (
           <Tooltip label="Reload Request File">
             <ActionIcon

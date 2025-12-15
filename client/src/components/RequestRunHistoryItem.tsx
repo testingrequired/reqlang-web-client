@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { RequestParamsFromClient } from "reqlang-types";
 import { RequestRun } from "server-types";
 import { RequestFromRequestFile } from "./RequestFromRequestFile";
+import { CopyCode } from "./CopyCode";
 
 type Props = {
   requestRun: RequestRun;
@@ -61,9 +62,7 @@ export const RequestRunHistoryItem = ({ requestRun }: Props) => {
           Response
         </Text>
 
-        <Code block mt={0}>
-          {requestRun.response}
-        </Code>
+        <CopyCode>{requestRun.response}</CopyCode>
       </Stack>
 
       {params?.env && (

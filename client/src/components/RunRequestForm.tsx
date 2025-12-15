@@ -4,7 +4,6 @@ import {
   Alert,
   Button,
   Card,
-  Code,
   Select,
   Stack,
   Table,
@@ -15,7 +14,7 @@ import { useEffect } from "react";
 import { useDiffResponseMutation } from "@/queries/diffResponse";
 import { useRunRequestMutation } from "@/queries/runRequest";
 import { useExportRequestMutation } from "@/queries/export";
-import { CopyTextButton } from "./CopyTextButton";
+import { CopyCode } from "./CopyCode";
 
 type Props = {
   result: ParseResult;
@@ -255,23 +254,19 @@ export const RunRequestForm: React.FC<Props> = ({
               Results
             </Text>
             <Card>
-              <Text mb={0} pb={0} fw="bold">
+              <Text pb={0} fw="bold">
                 Request
               </Text>
-              <Code block>{exportRequest.data}</Code>
-
-              <CopyTextButton value={exportRequest.data} />
+              <CopyCode>{exportRequest.data}</CopyCode>
             </Card>
 
             <Card>
-              <Text mb={0} pb={0} fw="bold">
+              <Text pb={0} fw="bold">
                 {responseSpan ? "Actual Response" : "Response"}
               </Text>
-              <Code block>{runRequestMutation.data[1]}</Code>
+              <CopyCode>{runRequestMutation.data[1]}</CopyCode>
 
               <Stack>
-                <CopyTextButton value={runRequestMutation.data[1]} />
-
                 <Text size="sm">
                   Time Taken: {runRequestMutation.data[0].time_taken} ms
                 </Text>
@@ -282,10 +277,8 @@ export const RunRequestForm: React.FC<Props> = ({
               <>
                 {(diffResponseMutation.data?.length ?? 0) > 0 ? (
                   <>
-                    <Alert color="red" title="Test Result: Failed!">
-                      <Code block>{diffResponseMutation.data}</Code>
-
-                      <CopyTextButton value={diffResponseMutation.data} />
+                    <Alert color="red" title="Test Result: Failed!" w="100%">
+                      <CopyCode>{diffResponseMutation.data!}</CopyCode>
                     </Alert>
                   </>
                 ) : (
@@ -293,13 +286,11 @@ export const RunRequestForm: React.FC<Props> = ({
                 )}
 
                 <Card>
-                  <Text mb={0} pb={0} fw="bold">
+                  <Text pb={0} fw="bold">
                     Expected Response
                   </Text>
 
-                  <Code block>{responseText}</Code>
-
-                  <CopyTextButton value={responseText} />
+                  <CopyCode>{responseText}</CopyCode>
                 </Card>
               </>
             )}

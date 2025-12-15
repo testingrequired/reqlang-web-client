@@ -1,14 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import {
-  Alert,
-  ButtonGroup,
-  Card,
-  Code,
-  Loader,
-  Stack,
-  Tabs,
-  Text,
-} from "@mantine/core";
+import { Alert, Card, Code, Loader, Stack, Tabs, Text } from "@mantine/core";
 import { useEffect } from "react";
 import { ParseResult } from "reqlang-types";
 import { RunRequestForm } from "@/components/RunRequestForm";
@@ -17,8 +8,8 @@ import { RequestRunHistory } from "@/components/RequestRunHistory";
 import { useSelectedRequestFileStore } from "@/stores/selectedRequestFile";
 import { useGetFileQuery, useGetFilesQuery } from "@/queries/files";
 import { useParsedRequestFileMutation } from "@/queries/parse";
-import { CopyTextButton } from "@/components/CopyTextButton";
 import { RequestFromRequestFile } from "@/components/RequestFromRequestFile";
+import { CopyCode } from "@/components/CopyCode";
 
 export const Route = createFileRoute("/")({
   component: RouteComponent,
@@ -112,10 +103,7 @@ function RouteComponent() {
 
             <Tabs.Panel value="file" p="md">
               <Card>
-                <Code block>{fileQuery.data}</Code>
-                <ButtonGroup>
-                  <CopyTextButton value={fileQuery.data} />
-                </ButtonGroup>
+                <CopyCode>{fileQuery.data!}</CopyCode>
               </Card>
             </Tabs.Panel>
           </Tabs>

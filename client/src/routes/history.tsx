@@ -66,9 +66,32 @@ function RouteComponent() {
 
   const historyOrItem =
     selectedRun !== null ? (
-      <Item selectedRun={selectedRun} />
+      <Item
+        onClickRequestFilePath={() => {
+          setSelectedRequestFilePath(selectedRun.request_file_path);
+          setSelectedREquestRunInHistory(null);
+        }}
+        onClickRequestRunUuid={() => {
+          setSelectedRequestFilePath(null);
+          setSelectedREquestRunInHistory(selectedRun.uuid);
+        }}
+        selectedRun={selectedRun}
+      />
     ) : (
-      history.map((run) => <Item key={run.uuid} selectedRun={run} />)
+      history.map((run) => (
+        <Item
+          onClickRequestFilePath={() => {
+            setSelectedRequestFilePath(run.request_file_path);
+            setSelectedREquestRunInHistory(null);
+          }}
+          onClickRequestRunUuid={() => {
+            setSelectedRequestFilePath(null);
+            setSelectedREquestRunInHistory(run.uuid);
+          }}
+          key={run.uuid}
+          selectedRun={run}
+        />
+      ))
     );
 
   const openModal = () =>
@@ -149,19 +172,40 @@ function RouteComponent() {
 
 type ItemProps = {
   selectedRun: RequestRun;
+  onClickRequestFilePath: () => void;
+  onClickRequestRunUuid: () => void;
 };
 
-const Item = ({ selectedRun }: ItemProps) => {
+const Item = ({
+  selectedRun,
+  onClickRequestFilePath,
+  onClickRequestRunUuid,
+}: ItemProps) => {
   return (
     <Card>
       <Group mb="md">
         <Badge variant="transparent" color="white">
           {moment(selectedRun.request_at as unknown as number).fromNow()}
         </Badge>
-        <Badge variant="transparent" color="white">
+        <Badge
+          variant="transparent"
+          color="white"
+          onClick={onClickRequestFilePath}
+          style={{
+            cursor: "pointer",
+          }}
+        >
           {selectedRun.request_file_path}
         </Badge>
-        <Badge radius="lg" variant="transparent" color="dark">
+        <Badge
+          radius="lg"
+          variant="transparent"
+          color="dark"
+          onClick={onClickRequestRunUuid}
+          style={{
+            cursor: "pointer",
+          }}
+        >
           {selectedRun.uuid.slice(0, 8)}
         </Badge>
         <Text size="md" m={0}></Text>
