@@ -6,7 +6,6 @@ import {
   Button,
   ButtonGroup,
   Card,
-  Code,
   Group,
   Loader,
   Stack,
@@ -14,7 +13,6 @@ import {
   Title,
 } from "@mantine/core";
 import { createFileRoute } from "@tanstack/react-router";
-import moment from "moment";
 import { useState } from "react";
 import { RequestRun } from "server-types";
 import { modals } from "@mantine/modals";
@@ -22,6 +20,8 @@ import {
   useClearRunHistoryMutation,
   useGetRunHistoryQuery,
 } from "@/queries/history";
+import { RequestRunHistoryItem } from "@/components/RequestRunHistoryItem";
+import moment from "moment";
 
 export const Route = createFileRoute("/history")({
   component: RouteComponent,
@@ -152,8 +152,8 @@ type ItemProps = {
 
 const Item = ({ selectedRun }: ItemProps) => {
   return (
-    <Stack gap="xs">
-      <Group>
+    <Card>
+      <Group mb="md">
         <Badge radius="sm" variant="transparent" color="white">
           {selectedRun.request_file_path}
         </Badge>
@@ -167,22 +167,8 @@ const Item = ({ selectedRun }: ItemProps) => {
       </Group>
 
       <Card>
-        <Text size="md" m={0}>
-          Params
-        </Text>
-        <Code block style={{ maxWidth: "100%" }}>
-          {selectedRun.params_from_client_json}
-        </Code>
+        <RequestRunHistoryItem requestRun={selectedRun} />
       </Card>
-
-      <Card>
-        <Text size="md" m={0}>
-          Response
-        </Text>
-        <Code block style={{ maxWidth: "100%" }}>
-          {selectedRun.response}
-        </Code>
-      </Card>
-    </Stack>
+    </Card>
   );
 };

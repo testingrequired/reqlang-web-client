@@ -1,25 +1,16 @@
-import { Stack, Text, Title } from "@mantine/core";
+import { Card, Stack, Text, Title } from "@mantine/core";
 import { useState } from "react";
-import { ParseResult } from "reqlang-types";
 import { RequestRunHistoryItem } from "./RequestRunHistoryItem";
 import { RequestRunSelect } from "./RequestRunSelect";
 import { useGetRunHistoryForRequestQuery } from "@/queries/history";
 
 type Props = {
   requestFilePath: string | null;
-  result: ParseResult;
 };
 
-export const RequestRunHistory: React.FC<Props> = ({
-  requestFilePath,
-  result,
-}) => {
+export const RequestRunHistory: React.FC<Props> = ({ requestFilePath }) => {
   const [runIndex, setRunIndex] = useState<number | null>(null);
   const runHistoryQuery = useGetRunHistoryForRequestQuery(requestFilePath);
-
-  const providerReferences = result.full.refs
-    .filter((ref) => Object.keys(ref[0]).at(0) === "Provider")
-    .map(([ref]) => Object.values(ref).at(0));
 
   if (runHistoryQuery.isError) {
     return <Text>Error!</Text>;
@@ -47,11 +38,9 @@ export const RequestRunHistory: React.FC<Props> = ({
       />
 
       {requestRun && (
-        <RequestRunHistoryItem
-          requestRun={requestRun}
-          result={result}
-          clientContextReferences={providerReferences as any}
-        />
+        <Card>
+          <RequestRunHistoryItem requestRun={requestRun} />
+        </Card>
       )}
     </Stack>
   );

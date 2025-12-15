@@ -98,7 +98,6 @@ function RouteComponent() {
 
             <Tabs.Panel value="history" p="md">
               <RequestRunHistory
-                result={data}
                 requestFilePath={selectedRequestFileStore.value}
               />
             </Tabs.Panel>
