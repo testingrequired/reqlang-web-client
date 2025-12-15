@@ -1,4 +1,4 @@
-import { Card, Stack, Text } from "@mantine/core";
+import { Alert, Card, Stack, Text } from "@mantine/core";
 import { useState } from "react";
 import { RequestRunHistoryItem } from "./RequestRunHistoryItem";
 import { RequestRunSelect } from "./RequestRunSelect";
@@ -24,6 +24,10 @@ export const RequestRunHistory: React.FC<Props> = ({ requestFilePath }) => {
     runHistoryQuery?.data?.filter(
       (run) => run.request_file_path === requestFilePath
     ) ?? [];
+
+  if (history.length === 0) {
+    return <Alert>No runs in history yet.</Alert>;
+  }
 
   const requestRun =
     runId === null ? null : (history.find((x) => x.uuid === runId) ?? null);
