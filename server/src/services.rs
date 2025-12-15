@@ -164,13 +164,14 @@ pub mod request_service {
         let state = state.lock().await;
         let conn = state.db.as_ref().unwrap();
 
-        let mut rows = sqlx::query("SELECT id, request_file_path, request_file_hash, params_from_client_json, response, request_at, response_at FROM RequestRunHistory").fetch(conn);
+        let mut rows = sqlx::query("SELECT id, uuid, request_file_path, request_file_hash, params_from_client_json, response, request_at, response_at FROM RequestRunHistory").fetch(conn);
 
         let mut request_runs: Vec<RequestRun> = vec![];
 
         while let Some(row) = rows.try_next().await.unwrap() {
             request_runs.push(RequestRun {
                 id: row.try_get("id").unwrap(),
+                uuid: row.try_get("uuid").unwrap(),
                 request_file_path: row.try_get("request_file_path").unwrap(),
                 request_file_hash: row.try_get("request_file_hash").unwrap(),
                 params_from_client_json: row.try_get("params_from_client_json").unwrap(),
@@ -203,9 +204,12 @@ pub mod request_service {
         let state = state.lock().await;
         let conn = state.db.as_ref().unwrap();
 
+        let new_uuid = uuid::Uuid::new_v4().to_string();
+
         let id = sqlx::query(
             r#"
         INSERT INTO RequestRunHistory (
+            uuid,
             request_file_path,
             request_file_hash,
             params_from_client_json,
@@ -218,10 +222,12 @@ pub mod request_service {
             $3,
             $4,
             $5,
-            $6
+            $6,
+            $7
         );
         "#,
         )
+        .bind(&new_uuid)
         .bind(&run.request_file_path)
         .bind(&run.request_file_hash)
         .bind(&run.params_from_client_json)
@@ -234,17 +240,16 @@ pub mod request_service {
 
         let id = id.last_insert_rowid();
 
-        let run = RequestRun {
+        RequestRun {
             id,
+            uuid: new_uuid,
             request_file_path: run.request_file_path.clone(),
             request_file_hash: run.request_file_hash.clone(),
             params_from_client_json: run.params_from_client_json.clone(),
             response: run.response.clone(),
             request_at: run.request_at.clone(),
             response_at: run.response_at.clone(),
-        };
-
-        run
+        }
     }
 
     pub async fn run_request_from_params(

@@ -2,6 +2,7 @@ import { FilesSelect } from "@/components/FileSelect";
 import { RequestRunSelect } from "@/components/RequestRunSelect";
 import {
   Alert,
+  Badge,
   Button,
   ButtonGroup,
   Card,
@@ -66,7 +67,7 @@ function RouteComponent() {
     selectedRun !== null ? (
       <Item selectedRun={selectedRun} />
     ) : (
-      history.map((run) => <Item selectedRun={run} />)
+      history.map((run) => <Item key={run.uuid} selectedRun={run} />)
     );
 
   const openModal = () =>
@@ -152,10 +153,18 @@ type ItemProps = {
 const Item = ({ selectedRun }: ItemProps) => {
   return (
     <Stack gap="xs">
-      <Text size="md" m={0}>
-        {selectedRun.request_file_path} (
-        {moment(selectedRun.request_at as unknown as number).fromNow()})
-      </Text>
+      <Group>
+        <Badge radius="sm" variant="transparent" color="white">
+          {selectedRun.request_file_path}
+        </Badge>
+        <Badge radius="sm" variant="transparent" color="white">
+          {selectedRun.uuid.slice(0, 8)}
+        </Badge>
+        <Badge radius="sm" variant="transparent" color="dark">
+          {moment(selectedRun.request_at as unknown as number).fromNow()}
+        </Badge>
+        <Text size="md" m={0}></Text>
+      </Group>
 
       <Card>
         <Text size="md" m={0}>

@@ -19,6 +19,7 @@ export const RequestRunSelect = ({
     <Select
       placeholder="Select a run from request history"
       data={requestRunHistory.map((run, i) => {
+        const uuid = run.uuid.slice(0, 8);
         const date = moment(run.request_at as unknown as number);
         const dateLabel = `${date.calendar()} (${date.fromNow()})`;
         const label = showPathsInSelect
@@ -27,16 +28,14 @@ export const RequestRunSelect = ({
 
         return {
           value: `${i}`,
-          label,
+          label: `${label} [${uuid}]`,
         };
       })}
       value={value === null ? null : value.toString(10)}
       onChange={(newValue) => {
         if (newValue === null) {
-          debugger;
           onChange(null);
         } else {
-          debugger;
           onChange(parseInt(newValue, 10));
         }
       }}

@@ -1,5 +1,6 @@
 CREATE TABLE RequestRunHistory (
     id INTEGER PRIMARY KEY,
+    uuid TEXT NOT NULL,
 
     -- REQUEST FILE
     request_file_path TEXT NOT NULL,

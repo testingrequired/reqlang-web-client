@@ -6,6 +6,8 @@ use ts_rs::TS;
 pub struct RequestRun {
     pub id: i64,
 
+    pub uuid: String,
+
     pub request_file_path: String,
     pub request_file_hash: String,
 
