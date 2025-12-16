@@ -1,7 +1,7 @@
 import { useGetFileQuery } from "@/queries/files";
 import { useParsedRequestFileMutation } from "@/queries/parse";
-import { Code, Loader, Stack, Table, Text } from "@mantine/core";
-import { useEffect } from "react";
+import { Code, Highlight, Loader, Stack, Table, Text } from "@mantine/core";
+import { useEffect, useState } from "react";
 import { RequestParamsFromClient } from "reqlang-types";
 import { RequestRun } from "server-types";
 import { RequestFromRequestFile } from "./RequestFromRequestFile";
@@ -14,6 +14,7 @@ type Props = {
 export const RequestRunHistoryItem = ({ requestRun }: Props) => {
   const parseRequestFileMutation = useParsedRequestFileMutation();
   const fileQuery = useGetFileQuery(requestRun.request_file_path);
+  const [highlightedReference, setHighlightedReference] = useState<string>("");
   const params: RequestParamsFromClient = JSON.parse(
     requestRun.params_from_client_json
   );
@@ -54,24 +55,34 @@ export const RequestRunHistoryItem = ({ requestRun }: Props) => {
         <RequestFromRequestFile
           result={result}
           requestFileText={params.reqfile}
+          renderText={(text: string) => (
+            <Highlight highlight={highlightedReference} size="sm">
+              {text}
+            </Highlight>
+          )}
         />
       </Stack>
 
-      <Stack>
-        <Text mb={0} fw="bold">
-          Response
-        </Text>
-
-        <CopyCode>{requestRun.response}</CopyCode>
-      </Stack>
-
       {params?.env && (
-        <Stack>
+        <Stack gap="xs">
           <Text mb={0} fw="bold">
             Environment
           </Text>
 
-          <Code p="md">{params.env}</Code>
+          <Code
+            p="sm"
+            onMouseEnter={() => {
+              setHighlightedReference(`{{@env}}`);
+            }}
+            onMouseLeave={() => {
+              setHighlightedReference("");
+            }}
+            style={{
+              cursor: "help",
+            }}
+          >
+            {params.env}
+          </Code>
         </Stack>
       )}
 
@@ -92,8 +103,22 @@ export const RequestRunHistoryItem = ({ requestRun }: Props) => {
               {result.vars.map((key, i) => {
                 return (
                   <Table.Tr key={i}>
-                    <Table.Td>{key}</Table.Td>
-                    <Table.Td>{params?.vars[key]}</Table.Td>
+                    <Table.Td
+                      onMouseEnter={() => {
+                        setHighlightedReference(`{{:${key}}}`);
+                      }}
+                      onMouseLeave={() => {
+                        setHighlightedReference("");
+                      }}
+                      style={{
+                        cursor: "help",
+                      }}
+                    >
+                      <Code>{key}</Code>
+                    </Table.Td>
+                    <Table.Td>
+                      <Code>{params?.vars[key]}</Code>
+                    </Table.Td>
                   </Table.Tr>
                 );
               })}
@@ -113,8 +138,22 @@ export const RequestRunHistoryItem = ({ requestRun }: Props) => {
               {result.prompts.map((prompt, i) => {
                 return (
                   <Table.Tr key={i}>
-                    <Table.Td>{prompt}</Table.Td>
-                    <Table.Td>{params?.prompts[prompt]}</Table.Td>
+                    <Table.Td
+                      onMouseEnter={() => {
+                        setHighlightedReference(`{{?${prompt}}}`);
+                      }}
+                      onMouseLeave={() => {
+                        setHighlightedReference("");
+                      }}
+                      style={{
+                        cursor: "help",
+                      }}
+                    >
+                      <Code>{prompt}</Code>
+                    </Table.Td>
+                    <Table.Td>
+                      <Code>{params?.prompts[prompt]}</Code>
+                    </Table.Td>
                   </Table.Tr>
                 );
               })}
@@ -134,8 +173,22 @@ export const RequestRunHistoryItem = ({ requestRun }: Props) => {
               {result.secrets.map((secret, i) => {
                 return (
                   <Table.Tr key={i}>
-                    <Table.Td>{secret}</Table.Td>
-                    <Table.Td>{params?.secrets[secret]}</Table.Td>
+                    <Table.Td
+                      onMouseEnter={() => {
+                        setHighlightedReference(`{{!${secret}}}`);
+                      }}
+                      onMouseLeave={() => {
+                        setHighlightedReference("");
+                      }}
+                      style={{
+                        cursor: "help",
+                      }}
+                    >
+                      <Code>{secret}</Code>
+                    </Table.Td>
+                    <Table.Td>
+                      <Code>{params?.secrets[secret]}</Code>
+                    </Table.Td>
                   </Table.Tr>
                 );
               })}
@@ -155,14 +208,40 @@ export const RequestRunHistoryItem = ({ requestRun }: Props) => {
               {clientContextReferences.map((key, i) => {
                 return (
                   <Table.Tr key={i}>
-                    <Table.Td>{key}</Table.Td>
-                    <Table.Td>{params?.provider_values[key!]}</Table.Td>
+                    <Table.Td
+                      onMouseEnter={() => {
+                        setHighlightedReference(`{{@${key}}}`);
+                      }}
+                      onMouseLeave={() => {
+                        setHighlightedReference("");
+                      }}
+                      style={{
+                        cursor: "help",
+                      }}
+                    >
+                      <Code>{key}</Code>
+                    </Table.Td>
+                    <Table.Td>
+                      <Code>{params?.provider_values[key!]}</Code>
+                    </Table.Td>
                   </Table.Tr>
                 );
               })}
             </Table.Tbody>
           </Table>
         ) : null}
+
+        <Stack gap="md">
+          <Text mb={0} fw="bold">
+            Response
+          </Text>
+
+          <CopyCode text={requestRun.response}>{requestRun.response}</CopyCode>
+
+          <Text mb={0} size="sm">
+            Response Time: {requestRun.response_at - requestRun.request_at}ms
+          </Text>
+        </Stack>
       </Stack>
     </Stack>
   );
