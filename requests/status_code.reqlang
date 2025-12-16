@@ -5,7 +5,7 @@ description = "Status code the response will return"
 default = "200"
 ```
 ```%request
-GET https://httpbin.org/status/{{?status_code}} HTTP/1.1
+GET http://localhost:3002/status/{{?status_code}} HTTP/1.1
 ```
 
 ```%response

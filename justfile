@@ -94,6 +94,7 @@ watch: build
   just watch-types
   just watch-client
   just watch-server
+  just run-httpbin
 
 [private]
 run-server-dev port:
@@ -167,3 +168,6 @@ db-run-migrations:
 
 db-prepare:
     cd server && cargo sqlx prepare --database-url sqlite://db.sqlite3
+
+run-httpbin:
+    docker run -p 3002:80 kennethreitz/httpbin
