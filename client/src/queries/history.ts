@@ -43,7 +43,7 @@ export const useGetRunHistoryForRequestQuery = (path: string | null) =>
           (a.request_at as unknown as number)
       );
 
-      data.filter((run) => (run.request_file_path = path));
+      data.filter((run) => run.request_file_path === path);
 
       return data;
     },
