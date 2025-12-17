@@ -257,14 +257,18 @@ export const RunRequestForm: React.FC<Props> = ({
               <Text pb={0} fw="bold">
                 Request
               </Text>
-              <CopyCode>{exportRequest.data}</CopyCode>
+              <CopyCode text={exportRequest.data}>
+                {exportRequest.data}
+              </CopyCode>
             </Card>
 
             <Card>
               <Text pb={0} fw="bold">
                 {responseSpan ? "Actual Response" : "Response"}
               </Text>
-              <CopyCode>{runRequestMutation.data[1]}</CopyCode>
+              <CopyCode text={runRequestMutation.data[1]}>
+                {runRequestMutation.data[1]}
+              </CopyCode>
 
               <Stack>
                 <Text size="sm">
@@ -278,7 +282,9 @@ export const RunRequestForm: React.FC<Props> = ({
                 {(diffResponseMutation.data?.length ?? 0) > 0 ? (
                   <>
                     <Alert color="red" title="Test Result: Failed!" w="100%">
-                      <CopyCode>{diffResponseMutation.data!}</CopyCode>
+                      <CopyCode text={diffResponseMutation.data!}>
+                        {diffResponseMutation.data!}
+                      </CopyCode>
                     </Alert>
                   </>
                 ) : (
@@ -290,7 +296,7 @@ export const RunRequestForm: React.FC<Props> = ({
                     Expected Response
                   </Text>
 
-                  <CopyCode>{responseText}</CopyCode>
+                  <CopyCode text={responseText}>{responseText}</CopyCode>
                 </Card>
               </>
             )}

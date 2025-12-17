@@ -56,7 +56,7 @@ export const RequestRunHistoryItem = ({ requestRun }: Props) => {
           result={result}
           requestFileText={params.reqfile}
           renderText={(text: string) => (
-            <Highlight highlight={highlightedReference} size="sm">
+            <Highlight highlight={highlightedReference} size="xs">
               {text}
             </Highlight>
           )}
