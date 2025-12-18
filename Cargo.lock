@@ -3057,7 +3057,7 @@ checksum = "2b15c43186be67a4fd63bee50d0303afffcef381492ebe2c5d87f324e1b8815c"
 [[package]]
 name = "reqlang"
 version = "0.1.0"
-source = "git+https://github.com/testingrequired/reqlang.git?rev=6dafa75f24c0ff520339c522235d952efc2b5206#6dafa75f24c0ff520339c522235d952efc2b5206"
+source = "git+https://github.com/testingrequired/reqlang.git?rev=02cb1c50d4ff59d4959b9cf8e1abd36a28125563#02cb1c50d4ff59d4959b9cf8e1abd36a28125563"
 dependencies = [
  "codespan-reporting 0.11.1",
  "console",
@@ -3080,10 +3080,11 @@ dependencies = [
 
 [[package]]
 name = "reqlang-expr"
-version = "0.8.0"
+version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "326fe744596c473363965061e3678b4829e643b055c7de1ecb7ea14f0b8bcfa9"
+checksum = "571304b8321af999634828b258667c80653f35524e8ae8602078cb9c3263925c"
 dependencies = [
+ "base64",
  "codespan-reporting 0.12.0",
  "iota",
  "lalrpop",
