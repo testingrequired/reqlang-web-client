@@ -115,7 +115,7 @@ function RouteComponent() {
 
             <Tabs.Panel value="file" p="md">
               <Card>
-                <CopyCode>{fileQuery.data!}</CopyCode>
+                <CopyCode text={fileQuery.data!}>{fileQuery.data!}</CopyCode>
 
                 <Tooltip label="Reload Request File">
                   <ActionIcon

@@ -5,7 +5,7 @@ import { ReactNode } from "react";
 type Props = {
   result: ParseResult;
   requestFileText: string;
-  renderText: (text: string) => ReactNode;
+  renderText?: (text: string) => ReactNode;
 };
 
 export const RequestFromRequestFile = ({
@@ -16,5 +16,7 @@ export const RequestFromRequestFile = ({
   const requestSpan = result.full.request[1];
   const requestText = requestFileText.slice(requestSpan.start, requestSpan.end);
 
-  return <CopyCode text={requestText}>{renderText(requestText)}</CopyCode>;
+  const codeText = renderText ? renderText(requestText) : requestText;
+
+  return <CopyCode text={requestText}>{codeText}</CopyCode>;
 };

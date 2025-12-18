@@ -1,11 +1,11 @@
 import { useGetFileQuery } from "@/queries/files";
 import { useParsedRequestFileMutation } from "@/queries/parse";
-import { Code, Highlight, Loader, Stack, Table, Text } from "@mantine/core";
-import { useEffect, useState } from "react";
+import { Code, Loader, Stack, Table, Text } from "@mantine/core";
+import { useEffect } from "react";
 import { RequestParamsFromClient } from "reqlang-types";
 import { RequestRun } from "server-types";
-import { RequestFromRequestFile } from "./RequestFromRequestFile";
 import { CopyCode } from "./CopyCode";
+import { useExportRequestMutation } from "@/queries/export";
 
 type Props = {
   requestRun: RequestRun;
@@ -14,10 +14,10 @@ type Props = {
 export const RequestRunHistoryItem = ({ requestRun }: Props) => {
   const parseRequestFileMutation = useParsedRequestFileMutation();
   const fileQuery = useGetFileQuery(requestRun.request_file_path);
-  const [highlightedReference, setHighlightedReference] = useState<string>("");
   const params: RequestParamsFromClient = JSON.parse(
     requestRun.params_from_client_json
   );
+  const exportRequestMutation = useExportRequestMutation();
 
   useEffect(() => {
     if (!fileQuery.data) {
@@ -25,17 +25,19 @@ export const RequestRunHistoryItem = ({ requestRun }: Props) => {
     }
 
     parseRequestFileMutation.mutate(fileQuery.data);
+    exportRequestMutation.mutate(params);
   }, [fileQuery.data]);
 
   if (
     parseRequestFileMutation.isPending ||
     fileQuery.isLoading ||
-    typeof parseRequestFileMutation.data === "undefined"
+    typeof parseRequestFileMutation.data === "undefined" ||
+    exportRequestMutation.isPending
   ) {
     return <Loader />;
   }
 
-  if (parseRequestFileMutation.error) {
+  if (parseRequestFileMutation.error || exportRequestMutation.isError) {
     return <p>ERRROR!</p>;
   }
 
@@ -52,15 +54,9 @@ export const RequestRunHistoryItem = ({ requestRun }: Props) => {
           Request
         </Text>
 
-        <RequestFromRequestFile
-          result={result}
-          requestFileText={params.reqfile}
-          renderText={(text: string) => (
-            <Highlight highlight={highlightedReference} size="xs">
-              {text}
-            </Highlight>
-          )}
-        />
+        <CopyCode text={exportRequestMutation.data!}>
+          {exportRequestMutation.data}
+        </CopyCode>
       </Stack>
 
       {params?.env && (
@@ -69,20 +65,7 @@ export const RequestRunHistoryItem = ({ requestRun }: Props) => {
             Environment
           </Text>
 
-          <Code
-            p="sm"
-            onMouseEnter={() => {
-              setHighlightedReference(`{{@env}}`);
-            }}
-            onMouseLeave={() => {
-              setHighlightedReference("");
-            }}
-            style={{
-              cursor: "help",
-            }}
-          >
-            {params.env}
-          </Code>
+          <Code p="sm">{params.env}</Code>
         </Stack>
       )}
 
@@ -103,17 +86,7 @@ export const RequestRunHistoryItem = ({ requestRun }: Props) => {
               {result.vars.map((key, i) => {
                 return (
                   <Table.Tr key={i}>
-                    <Table.Td
-                      onMouseEnter={() => {
-                        setHighlightedReference(`{{:${key}}}`);
-                      }}
-                      onMouseLeave={() => {
-                        setHighlightedReference("");
-                      }}
-                      style={{
-                        cursor: "help",
-                      }}
-                    >
+                    <Table.Td>
                       <Code>{key}</Code>
                     </Table.Td>
                     <Table.Td>
@@ -138,17 +111,7 @@ export const RequestRunHistoryItem = ({ requestRun }: Props) => {
               {result.prompts.map((prompt, i) => {
                 return (
                   <Table.Tr key={i}>
-                    <Table.Td
-                      onMouseEnter={() => {
-                        setHighlightedReference(`{{?${prompt}}}`);
-                      }}
-                      onMouseLeave={() => {
-                        setHighlightedReference("");
-                      }}
-                      style={{
-                        cursor: "help",
-                      }}
-                    >
+                    <Table.Td>
                       <Code>{prompt}</Code>
                     </Table.Td>
                     <Table.Td>
@@ -173,17 +136,7 @@ export const RequestRunHistoryItem = ({ requestRun }: Props) => {
               {result.secrets.map((secret, i) => {
                 return (
                   <Table.Tr key={i}>
-                    <Table.Td
-                      onMouseEnter={() => {
-                        setHighlightedReference(`{{!${secret}}}`);
-                      }}
-                      onMouseLeave={() => {
-                        setHighlightedReference("");
-                      }}
-                      style={{
-                        cursor: "help",
-                      }}
-                    >
+                    <Table.Td>
                       <Code>{secret}</Code>
                     </Table.Td>
                     <Table.Td>
@@ -208,17 +161,7 @@ export const RequestRunHistoryItem = ({ requestRun }: Props) => {
               {clientContextReferences.map((key, i) => {
                 return (
                   <Table.Tr key={i}>
-                    <Table.Td
-                      onMouseEnter={() => {
-                        setHighlightedReference(`{{@${key}}}`);
-                      }}
-                      onMouseLeave={() => {
-                        setHighlightedReference("");
-                      }}
-                      style={{
-                        cursor: "help",
-                      }}
-                    >
+                    <Table.Td>
                       <Code>{key}</Code>
                     </Table.Td>
                     <Table.Td>
