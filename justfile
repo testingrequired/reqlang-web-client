@@ -95,6 +95,7 @@ watch: build
   just watch-client
   just watch-server
   just run-httpbin
+  just run-mock-oauth2
 
 [private]
 run-server-dev port:
@@ -171,3 +172,6 @@ db-prepare:
 
 run-httpbin:
     docker run -p 3002:80 kennethreitz/httpbin
+
+run-mock-oauth2:
+    docker run --rm -p 3003:8080 -h localhost ghcr.io/navikt/mock-oauth2-server:3.0.1
