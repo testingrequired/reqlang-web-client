@@ -1,3 +1,9 @@
+```%config
+[envs.dev]
+[envs.qa]
+[envs.prod]
+```
+
 ```%request
-GET http://localhost:3003/default/.well-known/openid-configuration HTTP/1.1
+GET http://localhost:3003/{{@env}}/.well-known/openid-configuration HTTP/1.1
 ```

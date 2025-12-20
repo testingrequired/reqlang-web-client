@@ -1,10 +1,14 @@
 ```%config
 [[prompts]]
 name = "token"
+
+[envs.dev]
+[envs.qa]
+[envs.prod]
 ```
 
 ```%request
-GET http://localhost:3003/default/userinfo HTTP/1.1
+GET http://localhost:3003/{{@env}}/userinfo HTTP/1.1
 Authorization: Bearer {{?token}}
 
 ```
