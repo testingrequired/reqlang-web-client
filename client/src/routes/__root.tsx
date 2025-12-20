@@ -1,14 +1,6 @@
 import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
-import {
-  AppShell,
-  Badge,
-  Burger,
-  Group,
-  NavLink,
-  Title,
-  Tooltip,
-} from "@mantine/core";
+import { AppShell, Burger, Group, NavLink, Title } from "@mantine/core";
 
 import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
@@ -19,7 +11,6 @@ import { useServerWebSocket } from "@/hooks/useServerWebSocket";
 import { notifications } from "@mantine/notifications";
 import { useReward } from "react-rewards";
 import { ServerMessage } from "server-types";
-import { useGetDebugInfoQuery } from "@/queries/debug";
 
 export const Route = createRootRoute({
   component: () => {
@@ -59,16 +50,6 @@ export const Route = createRootRoute({
       },
     });
 
-    const debugInfoQuery = useGetDebugInfoQuery();
-
-    if (debugInfoQuery.isPending) {
-      return <p>Loading...</p>;
-    }
-
-    if (debugInfoQuery.isError) {
-      return <p>Error: {debugInfoQuery.error.message}</p>;
-    }
-
     return (
       <AppShell
         header={{ height: 70 }}
@@ -94,12 +75,6 @@ export const Route = createRootRoute({
         </AppShell.Header>
 
         <AppShell.Navbar>
-          <Tooltip label={debugInfoQuery.data.cwd} position="bottom">
-            <Badge size="sm" m="xs" radius="xs" variant="gradient">
-              {debugInfoQuery.data.cwd}
-            </Badge>
-          </Tooltip>
-
           <NavLink
             label="Home"
             component={Link}
