@@ -16,7 +16,7 @@ import {
   Tabs,
   Tooltip,
 } from "@mantine/core";
-import { IconFolderOpen, IconRefresh } from "@tabler/icons-react";
+import { IconCancel, IconFolderOpen, IconRefresh } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ParseResult } from "reqlang-types";
@@ -117,6 +117,20 @@ const RequestFileSelectForm = ({ value, onChange }: Props) => {
       >
         <IconFolderOpen stroke={1.0} />
       </ActionIcon>
+      {selectedFiles.length > 0 && (
+        <ActionIcon
+          size="input-xl"
+          variant="light"
+          color="red"
+          onClick={() => {
+            setSelectFiles([]);
+            onChange([]);
+          }}
+          aria-label="Close All Request Files"
+        >
+          <IconCancel stroke={1.0} />
+        </ActionIcon>
+      )}
     </ButtonGroup>
   );
 };
