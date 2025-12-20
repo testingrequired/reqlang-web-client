@@ -1,15 +1,19 @@
 import { create } from "zustand";
 
 type Store = {
-  value: string | null;
+  openRequestFiles: string[];
+  selectedRequestFile: string | null;
 };
 
 type Action = {
-  set(value: string | null): void;
+  setOpenRequestFiles(value: string[]): void;
+  setSelectedRequestFile(value: string | null): void;
 };
 
-export const useSelectedRequestFileStore = create<Store & Action>()((set) => ({
-  value: null,
-  set: (value: string | null) => set({ value }),
-  unset: () => set({ value: null }),
+export const useOpenRequestFilesStore = create<Store & Action>()((set) => ({
+  openRequestFiles: [],
+  selectedRequestFile: null,
+  setOpenRequestFiles: (value: string[]) => set({ openRequestFiles: value }),
+  setSelectedRequestFile: (value: string | null) =>
+    set({ selectedRequestFile: value }),
 }));

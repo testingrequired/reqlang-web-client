@@ -5,6 +5,7 @@ import { RequestRunHistory } from "@/components/RequestRunHistory";
 import { RunRequestForm } from "@/components/RunRequestForm";
 import { useGetFileQuery } from "@/queries/files";
 import { useParsedRequestFileMutation } from "@/queries/parse";
+import { useOpenRequestFilesStore } from "@/stores/selectedRequestFile";
 import {
   ActionIcon,
   Alert,
@@ -26,34 +27,47 @@ export const Route = createFileRoute("/requests/")({
 });
 
 function RouteComponent() {
-  const [selectedFiles, setSelectFiles] = useState<string[]>([]);
-  const [activeTab, setActiveTab] = useState<string | null>(null);
+  const openRequestFilesStore = useOpenRequestFilesStore();
 
   useEffect(() => {
-    if (activeTab === null && selectedFiles.length > 0) {
-      setActiveTab(selectedFiles.at(0) as unknown as string);
+    if (
+      openRequestFilesStore.selectedRequestFile === null &&
+      openRequestFilesStore.openRequestFiles.length > 0
+    ) {
+      openRequestFilesStore.setSelectedRequestFile(
+        openRequestFilesStore.openRequestFiles.at(0) as unknown as string
+      );
     }
 
-    if (activeTab !== null) {
-      if (selectedFiles.length === 0) {
-        setActiveTab(null);
+    if (openRequestFilesStore.selectedRequestFile !== null) {
+      if (openRequestFilesStore.openRequestFiles.length === 0) {
+        openRequestFilesStore.setSelectedRequestFile(null);
       }
     }
-  }, [selectedFiles, activeTab]);
+  }, [
+    openRequestFilesStore.openRequestFiles,
+    openRequestFilesStore.selectedRequestFile,
+  ]);
 
   return (
     <Stack>
-      <RequestFileSelectForm value={selectedFiles} onChange={setSelectFiles} />
+      <RequestFileSelectForm
+        value={openRequestFilesStore.openRequestFiles}
+        onChange={openRequestFilesStore.setOpenRequestFiles}
+      />
 
-      {selectedFiles.length > 0 && (
-        <Tabs value={activeTab} onChange={setActiveTab}>
+      {openRequestFilesStore.openRequestFiles.length > 0 && (
+        <Tabs
+          value={openRequestFilesStore.selectedRequestFile}
+          onChange={openRequestFilesStore.setSelectedRequestFile}
+        >
           <Tabs.List>
-            {selectedFiles.map((selectedFile) => (
+            {openRequestFilesStore.openRequestFiles.map((selectedFile) => (
               <Tabs.Tab value={selectedFile}>{selectedFile}</Tabs.Tab>
             ))}
           </Tabs.List>
 
-          {selectedFiles.map((selectedFile) => (
+          {openRequestFilesStore.openRequestFiles.map((selectedFile) => (
             <Tabs.Panel value={selectedFile}>
               <Stack>
                 <DisplayRequestFileForRun requestFilePath={selectedFile} />
