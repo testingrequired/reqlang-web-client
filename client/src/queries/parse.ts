@@ -1,18 +1,24 @@
-import { useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { ParseResult, ReqlangError } from "reqlang-types";
+import { useGetFileQuery } from "./files";
 
 export const PARSE_KEYS = {
-  parse: ["parse"] as const,
+  parse: (input: string | null) => ["parse", input] as const,
 } as const;
 
-export const useParsedRequestFileMutation = () =>
-  useMutation({
-    mutationKey: PARSE_KEYS.parse,
-    mutationFn: async (input: string) => {
+export const useParsedRequestFileMutation = (requestFilePath: string) => {
+  const requestFileContentQuery = useGetFileQuery(requestFilePath);
+
+  const requestFileContent = requestFileContentQuery.data ?? null;
+
+  return useQuery({
+    enabled: !!requestFileContent,
+    queryKey: PARSE_KEYS.parse(requestFileContent),
+    queryFn: async () => {
       const response = await fetch(`/api/parse`, {
         method: "POST",
         body: JSON.stringify({
-          payload: input,
+          payload: requestFileContent,
         }),
         headers: {
           "content-type": "application/json",
@@ -37,3 +43,4 @@ export const useParsedRequestFileMutation = () =>
       return data;
     },
   });
+};

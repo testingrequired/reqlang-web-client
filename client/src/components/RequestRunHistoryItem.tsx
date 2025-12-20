@@ -1,32 +1,27 @@
 import { useGetFileQuery } from "@/queries/files";
 import { useParsedRequestFileMutation } from "@/queries/parse";
 import { Code, Loader, Stack, Table, Text } from "@mantine/core";
-import { useEffect } from "react";
 import { RequestParamsFromClient } from "reqlang-types";
 import { RequestRun } from "server-types";
 import { CopyCode } from "./CopyCode";
-import { useExportRequestMutation } from "@/queries/export";
+import { useExportRequestQuery } from "@/queries/export";
 
 type Props = {
   requestRun: RequestRun;
 };
 
 export const RequestRunHistoryItem = ({ requestRun }: Props) => {
-  const parseRequestFileMutation = useParsedRequestFileMutation();
+  const parseRequestFileMutation = useParsedRequestFileMutation(
+    requestRun.request_file_path
+  );
   const fileQuery = useGetFileQuery(requestRun.request_file_path);
   const params: RequestParamsFromClient = JSON.parse(
     requestRun.params_from_client_json
   );
-  const exportRequestMutation = useExportRequestMutation();
-
-  useEffect(() => {
-    if (!fileQuery.data) {
-      return;
-    }
-
-    parseRequestFileMutation.mutate(fileQuery.data);
-    exportRequestMutation.mutate(params);
-  }, [fileQuery.data]);
+  const exportRequestMutation = useExportRequestQuery(
+    requestRun.request_file_path,
+    params
+  );
 
   if (
     parseRequestFileMutation.isPending ||

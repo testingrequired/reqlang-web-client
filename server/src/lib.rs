@@ -449,6 +449,8 @@ async fn run_request(
 ) -> (StatusCode, Json<(RequestRunResponse, String)>) {
     let result = run_request_from_params(&hostname, &run_request_from_client, state).await;
 
+    dbg!(&result);
+
     (StatusCode::OK, Json(result))
 }
 

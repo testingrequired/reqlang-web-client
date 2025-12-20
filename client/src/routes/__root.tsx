@@ -99,8 +99,9 @@ export const Route = createRootRoute({
               {debugInfoQuery.data.cwd}
             </Badge>
           </Tooltip>
+
           <NavLink
-            label="Request"
+            label="Home"
             component={Link}
             to="/"
             activeProps={{
@@ -109,7 +110,16 @@ export const Route = createRootRoute({
           />
 
           <NavLink
-            label="History"
+            label="Requests"
+            component={Link}
+            to="/requests"
+            activeProps={{
+              style: { fontWeight: "bold" },
+            }}
+          />
+
+          <NavLink
+            label="Run History"
             component={Link}
             to="/history"
             activeProps={{

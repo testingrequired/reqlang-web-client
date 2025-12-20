@@ -1,19 +1,20 @@
-import { ParseResult } from "reqlang-types";
+import { ParseResult, RequestParamsFromClient } from "reqlang-types";
 import { formOptions, useForm, useStore } from "@tanstack/react-form";
 import {
   Alert,
   Button,
   Card,
+  Loader,
   Select,
   Stack,
   Table,
   Text,
   TextInput,
 } from "@mantine/core";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDiffResponseMutation } from "@/queries/diffResponse";
 import { useRunRequestMutation } from "@/queries/runRequest";
-import { useExportRequestMutation } from "@/queries/export";
+import { useExportRequestQuery } from "@/queries/export";
 import { CopyCode } from "./CopyCode";
 
 type Props = {
@@ -29,7 +30,19 @@ export const RunRequestForm: React.FC<Props> = ({
 }) => {
   const runRequestMutation = useRunRequestMutation();
   const diffResponseMutation = useDiffResponseMutation();
-  const exportRequest = useExportRequestMutation();
+  const [params, setParams] = useState<RequestParamsFromClient | null>(null);
+  const exportRequest = useExportRequestQuery(requestFilePath, params);
+
+  useEffect(() => {
+    if (params === null) {
+      return;
+    }
+
+    runRequestMutation.mutate({
+      request_file_path: requestFilePath,
+      params,
+    });
+  }, [params]);
 
   useEffect(() => {
     if (typeof runRequestMutation.data !== "undefined") {
@@ -67,26 +80,16 @@ export const RunRequestForm: React.FC<Props> = ({
 
       const vars = result.full.config?.[0].envs?.[selectedEnv] ?? {};
 
-      runRequestMutation.mutate({
-        request_file_path: requestFilePath,
-        params: {
-          reqfile: requestFileText,
-          prompts,
-          secrets,
-          vars,
-          env: values.value.env,
-          provider_values: {},
-        },
-      });
-
-      exportRequest.mutate({
+      const params = {
         reqfile: requestFileText,
         prompts,
         secrets,
         vars,
         env: values.value.env,
         provider_values: {},
-      });
+      };
+
+      setParams(params);
     },
   });
 
@@ -109,6 +112,10 @@ export const RunRequestForm: React.FC<Props> = ({
 
   if (exportRequest.isError) {
     return <div>An error occurred: {exportRequest.error.message}</div>;
+  }
+
+  if (exportRequest.isPending || diffResponseMutation.isPending) {
+    return <Loader />;
   }
 
   return (
@@ -257,7 +264,7 @@ export const RunRequestForm: React.FC<Props> = ({
               <Text pb={0} fw="bold">
                 Request
               </Text>
-              <CopyCode text={exportRequest.data}>
+              <CopyCode text={exportRequest.data!}>
                 {exportRequest.data}
               </CopyCode>
             </Card>
