@@ -12,6 +12,10 @@ CREATE TABLE RequestRunHistory (
     -- RESPONSE
     response TEXT NOT NULL,
 
+    -- TEST RESULT
+    pass INTEGER NOT NULL,
+    diff TEXT NULL,
+
     -- TIMINGS
     request_at TIMESTAMP NOT NULL,
     response_at TIMESTAMP NOT NULL

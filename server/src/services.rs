@@ -146,13 +146,15 @@ pub mod request_service {
     use chrono::Local;
     use futures_util::TryStreamExt;
     use reqlang::{
+        assert_response,
         export::ResponseFormat,
         fetch::{Fetch, HttpRequestFetcher},
+        prelude::template,
     };
     use sqlx::Row;
     use tokio::sync::Mutex;
     use types::{
-        RequestRunResponse,
+        RequestRunResponse, RequestRunResponseTestResult,
         request_run::{NewRequestRun, RequestRun},
         run_request::RunRequest,
     };
@@ -164,7 +166,7 @@ pub mod request_service {
         let state = state.lock().await;
         let conn = state.db.as_ref().unwrap();
 
-        let mut rows = sqlx::query("SELECT id, uuid, request_file_path, request_file_hash, params_from_client_json, response, request_at, response_at FROM RequestRunHistory").fetch(conn);
+        let mut rows = sqlx::query("SELECT id, uuid, request_file_path, request_file_hash, params_from_client_json, response, pass, diff, request_at, response_at FROM RequestRunHistory").fetch(conn);
 
         let mut request_runs: Vec<RequestRun> = vec![];
 
@@ -176,6 +178,8 @@ pub mod request_service {
                 request_file_hash: row.try_get("request_file_hash").unwrap(),
                 params_from_client_json: row.try_get("params_from_client_json").unwrap(),
                 response: row.try_get("response").unwrap(),
+                pass: row.try_get("pass").unwrap(),
+                diff: row.try_get("diff").unwrap(),
                 request_at: row.try_get("request_at").unwrap(),
                 response_at: row.try_get("response_at").unwrap(),
             });
@@ -214,6 +218,8 @@ pub mod request_service {
             request_file_hash,
             params_from_client_json,
             response,
+            pass,
+            diff,
             request_at,
             response_at
         ) VALUES (
@@ -223,7 +229,9 @@ pub mod request_service {
             $4,
             $5,
             $6,
-            $7
+            $7,
+            $8,
+            $9
         );
         "#,
         )
@@ -232,6 +240,8 @@ pub mod request_service {
         .bind(&run.request_file_hash)
         .bind(&run.params_from_client_json)
         .bind(&run.response)
+        .bind(&run.pass)
+        .bind(&run.diff)
         .bind(&run.request_at)
         .bind(&run.response_at)
         .execute(conn)
@@ -247,6 +257,8 @@ pub mod request_service {
             request_file_hash: run.request_file_hash.clone(),
             params_from_client_json: run.params_from_client_json.clone(),
             response: run.response.clone(),
+            pass: run.pass,
+            diff: run.diff.clone(),
             request_at: run.request_at.clone(),
             response_at: run.response_at.clone(),
         }
@@ -282,6 +294,19 @@ pub mod request_service {
 
         let request_run_end = Local::now().timestamp_millis() as u64;
 
+        let templated = template(
+            &from_client_params.reqfile,
+            env,
+            &from_client_params.prompts,
+            &from_client_params.secrets,
+            &from_client_params.provider_values,
+        )
+        .unwrap();
+
+        let test_result = assert_response::assert_response(&templated.response.unwrap(), &response)
+            .map_err(|err| err.to_string())
+            .err();
+
         let response_exported =
             reqlang::export::export_response(&response, ResponseFormat::HttpMessage);
 
@@ -291,6 +316,8 @@ pub mod request_service {
             params_from_client_json: serde_json::to_string_pretty(&from_client_params)
                 .expect("unable to serialize from_client_params to json"),
             response: response_exported.clone(),
+            pass: test_result.is_none(),
+            diff: test_result.clone(),
             request_at: request_run_start as i64,
             response_at: request_run_end as i64,
         };
@@ -301,6 +328,10 @@ pub mod request_service {
             RequestRunResponse {
                 response,
                 time_taken: request_run_end - request_run_start,
+                test_result: RequestRunResponseTestResult {
+                    pass: test_result.is_none(),
+                    diff: test_result,
+                },
             },
             response_exported,
         )

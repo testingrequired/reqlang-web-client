@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { RequestRunResponse, RunRequest } from "server-types";
 import { HISTORY_KEYS } from "./history";
+import stripAnsi from "strip-ansi";
 
 export const RUN_REQUEST_KEYS = {
   run: ["run"] as const,
@@ -20,6 +21,8 @@ export const useRunRequestMutation = () => {
       });
 
       const data = (await response.json()) as [RequestRunResponse, string];
+
+      data[0].test_result.diff = stripAnsi(data[0].test_result.diff ?? "");
 
       return data;
     },

@@ -12,7 +12,6 @@ import {
   TextInput,
 } from "@mantine/core";
 import { useEffect, useState } from "react";
-import { useDiffResponseMutation } from "@/queries/diffResponse";
 import { useRunRequestMutation } from "@/queries/runRequest";
 import { useExportRequestQuery } from "@/queries/export";
 import { CopyCode } from "./CopyCode";
@@ -29,7 +28,6 @@ export const RunRequestForm: React.FC<Props> = ({
   requestFileText,
 }) => {
   const runRequestMutation = useRunRequestMutation();
-  const diffResponseMutation = useDiffResponseMutation();
   const [params, setParams] = useState<RequestParamsFromClient | null>(null);
   const exportRequest = useExportRequestQuery(requestFilePath, params);
 
@@ -43,15 +41,6 @@ export const RunRequestForm: React.FC<Props> = ({
       params,
     });
   }, [params]);
-
-  useEffect(() => {
-    if (typeof runRequestMutation.data !== "undefined") {
-      diffResponseMutation.mutate({
-        expected: result.full.response?.[0]!,
-        actual: runRequestMutation.data[0].response,
-      });
-    }
-  }, [runRequestMutation.data]);
 
   const form = useForm({
     ...formOptions({
@@ -106,15 +95,11 @@ export const RunRequestForm: React.FC<Props> = ({
     return <div>An error occurred: {runRequestMutation.error.message}</div>;
   }
 
-  if (diffResponseMutation.isError) {
-    return <div>An error occurred: {diffResponseMutation.error.message}</div>;
-  }
-
   if (exportRequest.isError) {
     return <div>An error occurred: {exportRequest.error.message}</div>;
   }
 
-  if (exportRequest.isPending || diffResponseMutation.isPending) {
+  if (exportRequest.isPending) {
     return <Loader />;
   }
 
@@ -286,11 +271,13 @@ export const RunRequestForm: React.FC<Props> = ({
 
             {responseSpan && (
               <>
-                {(diffResponseMutation.data?.length ?? 0) > 0 ? (
+                {!runRequestMutation.data[0].test_result.pass ? (
                   <>
                     <Alert color="red" title="Test Result: Failed!" w="100%">
-                      <CopyCode text={diffResponseMutation.data!}>
-                        {diffResponseMutation.data!}
+                      <CopyCode
+                        text={runRequestMutation.data[0].test_result.diff!}
+                      >
+                        {runRequestMutation.data[0].test_result.diff}
                       </CopyCode>
                     </Alert>
                   </>

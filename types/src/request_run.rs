@@ -15,6 +15,9 @@ pub struct RequestRun {
 
     pub response: String,
 
+    pub pass: bool,
+    pub diff: Option<String>,
+
     pub request_at: i64,
     pub response_at: i64,
 }
@@ -28,6 +31,9 @@ pub struct NewRequestRun {
     pub params_from_client_json: String,
 
     pub response: String,
+
+    pub pass: bool,
+    pub diff: Option<String>,
 
     pub request_at: i64,
     pub response_at: i64,

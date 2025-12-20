@@ -1,10 +1,11 @@
 import { useGetFileQuery } from "@/queries/files";
 import { useParsedRequestFileMutation } from "@/queries/parse";
-import { Code, Loader, Stack, Table, Text } from "@mantine/core";
+import { Alert, Code, Loader, Stack, Table, Text } from "@mantine/core";
 import { RequestParamsFromClient } from "reqlang-types";
 import { RequestRun } from "server-types";
 import { CopyCode } from "./CopyCode";
 import { useExportRequestQuery } from "@/queries/export";
+import stripAnsi from "strip-ansi";
 
 type Props = {
   requestRun: RequestRun;
@@ -174,12 +175,22 @@ export const RequestRunHistoryItem = ({ requestRun }: Props) => {
             Response
           </Text>
 
-          <CopyCode text={requestRun.response}>{requestRun.response}</CopyCode>
-
           <Text mb={0} size="sm">
             Response Time: {requestRun.response_at - requestRun.request_at}ms
           </Text>
+
+          <CopyCode text={requestRun.response}>{requestRun.response}</CopyCode>
         </Stack>
+
+        {result.full.response && (
+          <>
+            <Alert color="red" title="Test Result: Failed!" w="100%">
+              <CopyCode text={stripAnsi(requestRun.diff!.trim())}>
+                {stripAnsi(requestRun.diff!.trim())}
+              </CopyCode>
+            </Alert>
+          </>
+        )}
       </Stack>
     </Stack>
   );

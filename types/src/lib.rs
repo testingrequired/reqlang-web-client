@@ -22,4 +22,12 @@ pub struct DebugInfo {
 pub struct RequestRunResponse {
     pub response: HttpResponse,
     pub time_taken: u64,
+    pub test_result: RequestRunResponseTestResult,
+}
+
+#[derive(TS, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[ts(export)]
+pub struct RequestRunResponseTestResult {
+    pub pass: bool,
+    pub diff: Option<String>,
 }
