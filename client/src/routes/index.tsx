@@ -1,11 +1,30 @@
+import { RequestRunHistoryItem } from "@/components/RequestRunHistoryItem";
 import { useGetDebugInfoQuery } from "@/queries/debug";
-import { Anchor, Card, Group, List, Loader, Text, Title } from "@mantine/core";
+import { useGetRunHistoryQuery } from "@/queries/history";
+import {
+  ActionIcon,
+  Alert,
+  Anchor,
+  Badge,
+  Card,
+  Group,
+  List,
+  Loader,
+  Stack,
+  Text,
+  Title,
+} from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
 import {
   IconBrandGithubFilled,
+  IconCaretDownFilled,
+  IconCaretUpFilled,
   IconFile,
   IconFolderRoot,
 } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
+import moment from "moment";
+import { RequestRun } from "server-types";
 
 export const Route = createFileRoute("/")({
   component: RouteComponent,
@@ -13,14 +32,21 @@ export const Route = createFileRoute("/")({
 
 function RouteComponent() {
   const debugInfoQuery = useGetDebugInfoQuery();
+  const runHistory = useGetRunHistoryQuery();
 
-  if (debugInfoQuery.isPending) {
+  if (debugInfoQuery.isPending || runHistory.isPending) {
     return <Loader />;
   }
 
   if (debugInfoQuery.isError) {
-    return <p>Error: {debugInfoQuery.error.message}</p>;
+    return <Alert color="red">Error: {debugInfoQuery.error.message}</Alert>;
   }
+
+  if (runHistory.isError) {
+    return <Alert color="red">Error: {runHistory.error.message}</Alert>;
+  }
+
+  const lastRuns = runHistory.data.slice(0, 5);
 
   return (
     <>
@@ -31,6 +57,18 @@ function RouteComponent() {
           <Text m={0}>{debugInfoQuery.data.cwd} </Text>
         </Group>
       </Card>
+
+      <Title order={2}>Latest Runs</Title>
+
+      {lastRuns.length > 0 ? (
+        <Stack>
+          {lastRuns.map((lastRun) => (
+            <LatestRunsRun requestRun={lastRun} />
+          ))}
+        </Stack>
+      ) : (
+        <Alert>No requests have been ran yet.</Alert>
+      )}
 
       <Title order={2}>Documentation</Title>
       <Card>
@@ -74,3 +112,36 @@ function RouteComponent() {
     </>
   );
 }
+
+type LatestRunsRunProps = {
+  requestRun: RequestRun;
+};
+
+const LatestRunsRun = ({ requestRun }: LatestRunsRunProps) => {
+  const [isFullView, fullViewHandlers] = useDisclosure(false);
+  return (
+    <Card>
+      <Group mb={isFullView ? "md" : "0"}>
+        <ActionIcon onClick={fullViewHandlers.toggle}>
+          {isFullView ? <IconCaretDownFilled /> : <IconCaretUpFilled />}
+        </ActionIcon>
+        <Badge variant="transparent" color="white">
+          {moment(requestRun.request_at as unknown as number).fromNow()}
+        </Badge>
+        <Badge variant="transparent" color="white">
+          {requestRun.request_file_path}
+        </Badge>
+        <Badge radius="lg" variant="transparent" color="dark">
+          {requestRun.uuid.slice(0, 8)}
+        </Badge>
+        <Text size="md" m={0}></Text>
+      </Group>
+
+      {isFullView && (
+        <Card>
+          <RequestRunHistoryItem requestRun={requestRun} />
+        </Card>
+      )}
+    </Card>
+  );
+};
