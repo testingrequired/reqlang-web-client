@@ -28,7 +28,7 @@ export const RequestRunSelect = ({
 
         return {
           value: `${run.uuid}`,
-          label: `${label} [${uuid}]`,
+          label: `${run.pass ? "✅" : "❌"} ${label} [${uuid}]`,
         };
       })}
       value={value}

@@ -184,11 +184,15 @@ export const RequestRunHistoryItem = ({ requestRun }: Props) => {
 
         {result.full.response && (
           <>
-            <Alert color="red" title="Test Result: Failed!" w="100%">
-              <CopyCode text={stripAnsi(requestRun.diff!.trim())}>
-                {stripAnsi(requestRun.diff!.trim())}
-              </CopyCode>
-            </Alert>
+            {requestRun.pass ? (
+              <Alert color="green" title="Test Result: Passed!"></Alert>
+            ) : (
+              <Alert color="red" title="Test Result: Failed!" w="100%">
+                <CopyCode text={stripAnsi(requestRun.diff?.trim() ?? "")}>
+                  {stripAnsi(requestRun.diff?.trim() ?? "")}
+                </CopyCode>
+              </Alert>
+            )}
           </>
         )}
       </Stack>

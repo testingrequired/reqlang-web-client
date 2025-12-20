@@ -303,9 +303,11 @@ pub mod request_service {
         )
         .unwrap();
 
-        let test_result = assert_response::assert_response(&templated.response.unwrap(), &response)
-            .map_err(|err| err.to_string())
-            .err();
+        let test_result = templated.response.and_then(|expected_response| {
+            assert_response::assert_response(&expected_response, &response)
+                .map_err(|err| err.to_string())
+                .err()
+        });
 
         let response_exported =
             reqlang::export::export_response(&response, ResponseFormat::HttpMessage);
