@@ -16,7 +16,7 @@ import {
   Tabs,
   Tooltip,
 } from "@mantine/core";
-import { IconRefresh } from "@tabler/icons-react";
+import { IconFolderOpen, IconRefresh } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ParseResult } from "reqlang-types";
@@ -81,8 +81,12 @@ const RequestFileSelectForm = ({ value, onChange }: Props) => {
   };
 
   const cancel = () => {
+    setSelectFiles(value);
     setShowOpenFiles(false);
   };
+
+  const changeHaveBeenMade =
+    JSON.stringify(value) !== JSON.stringify(selectedFiles);
 
   return showOpenFiles ? (
     <>
@@ -93,7 +97,9 @@ const RequestFileSelectForm = ({ value, onChange }: Props) => {
       />
 
       <ButtonGroup>
-        <Button onClick={save}>Save</Button>
+        <Button onClick={save} disabled={!changeHaveBeenMade}>
+          Save
+        </Button>
         <Button onClick={cancel} color="red">
           Cancel
         </Button>
@@ -101,13 +107,16 @@ const RequestFileSelectForm = ({ value, onChange }: Props) => {
     </>
   ) : (
     <ButtonGroup>
-      <Button
+      <ActionIcon
+        size="input-xl"
+        variant="light"
         onClick={() => {
           setShowOpenFiles(true);
         }}
+        aria-label="Open/Close Request Files"
       >
-        Open/Close Requests
-      </Button>
+        <IconFolderOpen stroke={1.0} />
+      </ActionIcon>
     </ButtonGroup>
   );
 };
