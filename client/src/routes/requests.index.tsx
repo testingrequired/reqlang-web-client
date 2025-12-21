@@ -21,13 +21,14 @@ import { IconCancel, IconFolderOpen, IconRefresh } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ParseResult } from "reqlang-types";
+import { useStore } from "zustand";
 
 export const Route = createFileRoute("/requests/")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const openRequestFilesStore = useOpenRequestFilesStore();
+  const openRequestFilesStore = useStore(useOpenRequestFilesStore);
 
   useEffect(() => {
     if (
@@ -49,6 +50,8 @@ function RouteComponent() {
     openRequestFilesStore.selectedRequestFile,
   ]);
 
+  const tabs: string[] = [];
+
   return (
     <Stack>
       <RequestFileSelectForm
@@ -62,9 +65,30 @@ function RouteComponent() {
           onChange={openRequestFilesStore.setSelectedRequestFile}
         >
           <Tabs.List>
-            {openRequestFilesStore.openRequestFiles.map((selectedFile) => (
-              <Tabs.Tab value={selectedFile}>{selectedFile}</Tabs.Tab>
-            ))}
+            {openRequestFilesStore.openRequestFiles.map((selectedFile) => {
+              const selectedFileParts = selectedFile.split("/");
+
+              let j = 0;
+
+              let label: string;
+
+              while (true) {
+                label = selectedFileParts.slice(-1 + j * -1).join("/");
+
+                if (!tabs.includes(label)) {
+                  tabs.push(label);
+                  break;
+                }
+
+                j++;
+
+                if (j === selectedFileParts.length) {
+                  break;
+                }
+              }
+
+              return <Tabs.Tab value={selectedFile}>{label}</Tabs.Tab>;
+            })}
           </Tabs.List>
 
           {openRequestFilesStore.openRequestFiles.map((selectedFile) => (
