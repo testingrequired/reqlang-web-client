@@ -1,11 +1,9 @@
-import { RequestRunHistoryItem } from "@/components/RequestRunHistoryItem";
+import { RequestRunHistoryItemCollapsable } from "@/components/RequestRunHistoryItemCollapsable";
 import { useGetDebugInfoQuery } from "@/queries/debug";
 import { useGetRunHistoryQuery } from "@/queries/history";
 import {
-  ActionIcon,
   Alert,
   Anchor,
-  Badge,
   Card,
   Group,
   List,
@@ -14,17 +12,12 @@ import {
   Text,
   Title,
 } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
 import {
   IconBrandGithubFilled,
-  IconCaretDownFilled,
-  IconCaretUpFilled,
   IconFile,
   IconFolderRoot,
 } from "@tabler/icons-react";
-import { createFileRoute, Link } from "@tanstack/react-router";
-import moment from "moment";
-import { RequestRun } from "server-types";
+import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
   component: RouteComponent,
@@ -63,7 +56,7 @@ function RouteComponent() {
       {lastRuns.length > 0 ? (
         <Stack>
           {lastRuns.map((lastRun) => (
-            <LatestRunsRun requestRun={lastRun} />
+            <RequestRunHistoryItemCollapsable requestRun={lastRun} />
           ))}
         </Stack>
       ) : (
@@ -112,67 +105,3 @@ function RouteComponent() {
     </>
   );
 }
-
-type LatestRunsRunProps = {
-  requestRun: RequestRun;
-};
-
-const LatestRunsRun = ({ requestRun }: LatestRunsRunProps) => {
-  const [isFullView, fullViewHandlers] = useDisclosure(false);
-  return (
-    <Card>
-      <Group mb={isFullView ? "md" : "0"}>
-        <ActionIcon onClick={fullViewHandlers.toggle}>
-          {isFullView ? <IconCaretDownFilled /> : <IconCaretUpFilled />}
-        </ActionIcon>
-
-        <Badge variant="transparent" color="white">
-          {moment(requestRun.request_at as unknown as number).fromNow()}
-        </Badge>
-
-        <Link
-          to="/history"
-          search={{
-            requestFilePath: requestRun.request_file_path,
-          }}
-        >
-          <Badge
-            variant="transparent"
-            color="white"
-            style={{
-              cursor: "pointer",
-            }}
-          >
-            {requestRun.request_file_path}
-          </Badge>
-        </Link>
-
-        <Link
-          to="/history"
-          search={{
-            runId: requestRun.uuid,
-          }}
-        >
-          <Badge
-            radius="lg"
-            variant="transparent"
-            color="dark"
-            style={{
-              cursor: "pointer",
-            }}
-          >
-            {requestRun.uuid.slice(0, 8)}
-          </Badge>
-        </Link>
-
-        <Text size="md" m={0}></Text>
-      </Group>
-
-      {isFullView && (
-        <Card>
-          <RequestRunHistoryItem requestRun={requestRun} />
-        </Card>
-      )}
-    </Card>
-  );
-};

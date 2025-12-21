@@ -2,10 +2,8 @@ import { FilesSelect } from "@/components/FileSelect";
 import { RequestRunSelect } from "@/components/RequestRunSelect";
 import {
   Alert,
-  Badge,
   Button,
   ButtonGroup,
-  Card,
   Group,
   Loader,
   Stack,
@@ -13,15 +11,13 @@ import {
   Title,
 } from "@mantine/core";
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
 import { RequestRun } from "server-types";
 import { modals } from "@mantine/modals";
 import {
   useClearRunHistoryMutation,
   useGetRunHistoryQuery,
 } from "@/queries/history";
-import { RequestRunHistoryItem } from "@/components/RequestRunHistoryItem";
-import moment from "moment";
+import { RequestRunHistoryItemCollapsable } from "@/components/RequestRunHistoryItemCollapsable";
 
 type Search = {
   runId?: string;
@@ -30,12 +26,13 @@ type Search = {
 
 export const Route = createFileRoute("/history")({
   component: RouteComponent,
-  validateSearch: (search: Record<string, unknown>): Search => {
-    return {
-      runId: search.runId as string,
-      requestFilePath: search.requestFilePath as string,
-    };
-  },
+  validateSearch: (search): Search => ({
+    runId: typeof search.runId === "string" ? search.runId : undefined,
+    requestFilePath:
+      typeof search.requestFilePath === "string"
+        ? search.requestFilePath
+        : undefined,
+  }),
 });
 
 function RouteComponent() {
@@ -44,68 +41,10 @@ function RouteComponent() {
   const search = Route.useSearch();
   const nav = Route.useNavigate();
 
-  const [selectedRequestFilePath, setSelectedRequestFilePath] = useState<
-    string | null
-  >(search.requestFilePath ?? null);
+  const selectedRequestFilePath = search.requestFilePath ?? null;
+  const selectedRequestRunInHistory = search.runId ?? null;
 
-  const [selectedRequestRunInHistory, setSelectedREquestRunInHistory] =
-    useState<string | null>(search.runId ?? null);
-
-  useEffect(() => {
-    if (search.runId) {
-      if (selectedRequestRunInHistory) {
-        if (selectedRequestRunInHistory !== search.runId) {
-          nav({
-            to: "/history",
-            search: {
-              runId: selectedRequestRunInHistory,
-            },
-          });
-        }
-      } else {
-        nav({
-          to: "/history",
-        });
-      }
-    } else {
-      if (selectedRequestRunInHistory) {
-        nav({
-          to: "/history",
-          search: {
-            runId: selectedRequestRunInHistory,
-          },
-        });
-      }
-    }
-  }, [selectedRequestRunInHistory, search.runId]);
-
-  useEffect(() => {
-    if (search.requestFilePath) {
-      if (selectedRequestFilePath) {
-        if (selectedRequestFilePath !== search.requestFilePath) {
-          nav({
-            to: "/history",
-            search: {
-              requestFilePath: selectedRequestFilePath,
-            },
-          });
-        }
-      } else {
-        nav({
-          to: "/history",
-        });
-      }
-    } else {
-      if (selectedRequestFilePath) {
-        nav({
-          to: "/history",
-          search: {
-            requestFilePath: selectedRequestFilePath,
-          },
-        });
-      }
-    }
-  }, [selectedRequestFilePath, search.requestFilePath]);
+  debugger;
 
   if (getRunHistoryQuery.isError || deleteHistoryMutation.isError) {
     return <p>Error</p>;
@@ -137,32 +76,13 @@ function RouteComponent() {
 
   const historyOrItem =
     selectedRun !== null ? (
-      <Item
-        onClickRequestFilePath={() => {
-          setSelectedRequestFilePath(selectedRun.request_file_path);
-          setSelectedREquestRunInHistory(null);
-        }}
-        onClickRequestRunUuid={() => {
-          setSelectedRequestFilePath(null);
-          setSelectedREquestRunInHistory(selectedRun.uuid);
-        }}
-        selectedRun={selectedRun}
-      />
+      <Item selectedRun={selectedRun} />
     ) : (
-      history.map((run) => (
-        <Item
-          onClickRequestFilePath={() => {
-            setSelectedRequestFilePath(run.request_file_path);
-            setSelectedREquestRunInHistory(null);
-          }}
-          onClickRequestRunUuid={() => {
-            setSelectedRequestFilePath(null);
-            setSelectedREquestRunInHistory(run.uuid);
-          }}
-          key={run.uuid}
-          selectedRun={run}
-        />
-      ))
+      <Stack>
+        {history.map((run) => (
+          <Item key={run.uuid} selectedRun={run} />
+        ))}
+      </Stack>
     );
 
   const openModal = () =>
@@ -188,7 +108,14 @@ function RouteComponent() {
       {allHistory.length > 0 ? (
         <>
           <FilesSelect
-            onChange={setSelectedRequestFilePath}
+            onChange={(value) =>
+              nav({
+                search: (prev) => ({
+                  ...prev,
+                  requestFilePath: value ?? undefined,
+                }),
+              })
+            }
             value={selectedRequestFilePath}
             clearable
             disabled={
@@ -199,7 +126,14 @@ function RouteComponent() {
 
           <RequestRunSelect
             value={selectedRequestRunInHistory}
-            onChange={setSelectedREquestRunInHistory}
+            onChange={(value) =>
+              nav({
+                search: (prev) => ({
+                  ...prev,
+                  runId: value ?? undefined,
+                }),
+              })
+            }
             requestRunHistory={history}
             showPathsInSelect={selectedRequestFilePath === null}
           />
@@ -210,10 +144,11 @@ function RouteComponent() {
                 selectedRequestFilePath === null &&
                 selectedRequestRunInHistory === null
               }
-              onClick={() => {
-                setSelectedRequestFilePath(null);
-                setSelectedREquestRunInHistory(null);
-              }}
+              onClick={() =>
+                nav({
+                  search: {},
+                })
+              }
               size="compact-sm"
             >
               Clear Filters
@@ -243,48 +178,8 @@ function RouteComponent() {
 
 type ItemProps = {
   selectedRun: RequestRun;
-  onClickRequestFilePath: () => void;
-  onClickRequestRunUuid: () => void;
 };
 
-const Item = ({
-  selectedRun,
-  onClickRequestFilePath,
-  onClickRequestRunUuid,
-}: ItemProps) => {
-  return (
-    <Card>
-      <Group mb="md">
-        <Badge variant="transparent" color="white">
-          {moment(selectedRun.request_at as unknown as number).fromNow()}
-        </Badge>
-        <Badge
-          variant="transparent"
-          color="white"
-          onClick={onClickRequestFilePath}
-          style={{
-            cursor: "pointer",
-          }}
-        >
-          {selectedRun.request_file_path}
-        </Badge>
-        <Badge
-          radius="lg"
-          variant="transparent"
-          color="dark"
-          onClick={onClickRequestRunUuid}
-          style={{
-            cursor: "pointer",
-          }}
-        >
-          {selectedRun.uuid.slice(0, 8)}
-        </Badge>
-        <Text size="md" m={0}></Text>
-      </Group>
-
-      <Card>
-        <RequestRunHistoryItem requestRun={selectedRun} />
-      </Card>
-    </Card>
-  );
+const Item = ({ selectedRun }: ItemProps) => {
+  return <RequestRunHistoryItemCollapsable requestRun={selectedRun} />;
 };
