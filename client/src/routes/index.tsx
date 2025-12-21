@@ -22,7 +22,7 @@ import {
   IconFile,
   IconFolderRoot,
 } from "@tabler/icons-react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import moment from "moment";
 import { RequestRun } from "server-types";
 
@@ -125,15 +125,46 @@ const LatestRunsRun = ({ requestRun }: LatestRunsRunProps) => {
         <ActionIcon onClick={fullViewHandlers.toggle}>
           {isFullView ? <IconCaretDownFilled /> : <IconCaretUpFilled />}
         </ActionIcon>
+
         <Badge variant="transparent" color="white">
           {moment(requestRun.request_at as unknown as number).fromNow()}
         </Badge>
-        <Badge variant="transparent" color="white">
-          {requestRun.request_file_path}
-        </Badge>
-        <Badge radius="lg" variant="transparent" color="dark">
-          {requestRun.uuid.slice(0, 8)}
-        </Badge>
+
+        <Link
+          to="/history"
+          search={{
+            requestFilePath: requestRun.request_file_path,
+          }}
+        >
+          <Badge
+            variant="transparent"
+            color="white"
+            style={{
+              cursor: "pointer",
+            }}
+          >
+            {requestRun.request_file_path}
+          </Badge>
+        </Link>
+
+        <Link
+          to="/history"
+          search={{
+            runId: requestRun.uuid,
+          }}
+        >
+          <Badge
+            radius="lg"
+            variant="transparent"
+            color="dark"
+            style={{
+              cursor: "pointer",
+            }}
+          >
+            {requestRun.uuid.slice(0, 8)}
+          </Badge>
+        </Link>
+
         <Text size="md" m={0}></Text>
       </Group>
 

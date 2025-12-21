@@ -13,7 +13,7 @@ import {
   Title,
 } from "@mantine/core";
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { RequestRun } from "server-types";
 import { modals } from "@mantine/modals";
 import {
@@ -23,18 +23,89 @@ import {
 import { RequestRunHistoryItem } from "@/components/RequestRunHistoryItem";
 import moment from "moment";
 
+type Search = {
+  runId?: string;
+  requestFilePath?: string;
+};
+
 export const Route = createFileRoute("/history")({
   component: RouteComponent,
+  validateSearch: (search: Record<string, unknown>): Search => {
+    return {
+      runId: search.runId as string,
+      requestFilePath: search.requestFilePath as string,
+    };
+  },
 });
 
 function RouteComponent() {
   const getRunHistoryQuery = useGetRunHistoryQuery();
   const deleteHistoryMutation = useClearRunHistoryMutation();
+  const search = Route.useSearch();
+  const nav = Route.useNavigate();
+
   const [selectedRequestFilePath, setSelectedRequestFilePath] = useState<
     string | null
-  >(null);
+  >(search.requestFilePath ?? null);
+
   const [selectedRequestRunInHistory, setSelectedREquestRunInHistory] =
-    useState<string | null>(null);
+    useState<string | null>(search.runId ?? null);
+
+  useEffect(() => {
+    if (search.runId) {
+      if (selectedRequestRunInHistory) {
+        if (selectedRequestRunInHistory !== search.runId) {
+          nav({
+            to: "/history",
+            search: {
+              runId: selectedRequestRunInHistory,
+            },
+          });
+        }
+      } else {
+        nav({
+          to: "/history",
+        });
+      }
+    } else {
+      if (selectedRequestRunInHistory) {
+        nav({
+          to: "/history",
+          search: {
+            runId: selectedRequestRunInHistory,
+          },
+        });
+      }
+    }
+  }, [selectedRequestRunInHistory, search.runId]);
+
+  useEffect(() => {
+    if (search.requestFilePath) {
+      if (selectedRequestFilePath) {
+        if (selectedRequestFilePath !== search.requestFilePath) {
+          nav({
+            to: "/history",
+            search: {
+              requestFilePath: selectedRequestFilePath,
+            },
+          });
+        }
+      } else {
+        nav({
+          to: "/history",
+        });
+      }
+    } else {
+      if (selectedRequestFilePath) {
+        nav({
+          to: "/history",
+          search: {
+            requestFilePath: selectedRequestFilePath,
+          },
+        });
+      }
+    }
+  }, [selectedRequestFilePath, search.requestFilePath]);
 
   if (getRunHistoryQuery.isError || deleteHistoryMutation.isError) {
     return <p>Error</p>;
