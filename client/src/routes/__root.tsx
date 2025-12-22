@@ -1,6 +1,13 @@
 import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
-import { AppShell, Burger, Group, NavLink, Title } from "@mantine/core";
+import {
+  AppShell,
+  Burger,
+  Group,
+  NavLink,
+  ThemeIcon,
+  Title,
+} from "@mantine/core";
 
 import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
@@ -11,6 +18,7 @@ import { useServerWebSocket } from "@/hooks/useServerWebSocket";
 import { notifications } from "@mantine/notifications";
 import { useReward } from "react-rewards";
 import { ServerMessage } from "server-types";
+import { IconFileArrowRight } from "@tabler/icons-react";
 
 export const Route = createRootRoute({
   component: () => {
@@ -69,7 +77,12 @@ export const Route = createRootRoute({
               hiddenFrom="sm"
               p="xs"
             />
-            <Title m="xs">reqlang-web</Title>
+            <Title m="xs">
+              <ThemeIcon variant="gradient" size="xl" mr="sm" radius="sm">
+                <IconFileArrowRight />
+              </ThemeIcon>{" "}
+              reqlang
+            </Title>
           </Group>
         </AppShell.Header>
 
