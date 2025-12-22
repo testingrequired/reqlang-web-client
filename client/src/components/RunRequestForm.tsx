@@ -4,9 +4,11 @@ import {
   Alert,
   Button,
   Card,
+  Group,
   Loader,
   Select,
   Stack,
+  Switch,
   Table,
   Text,
   TextInput,
@@ -15,6 +17,7 @@ import { useEffect, useState } from "react";
 import { useRunRequestMutation } from "@/queries/runRequest";
 import { useExportRequestQuery } from "@/queries/export";
 import { CopyCode } from "./CopyCode";
+import { useDisclosure } from "@mantine/hooks";
 
 type Props = {
   result: ParseResult;
@@ -30,16 +33,19 @@ export const RunRequestForm: React.FC<Props> = ({
   const runRequestMutation = useRunRequestMutation();
   const [params, setParams] = useState<RequestParamsFromClient | null>(null);
   const exportRequest = useExportRequestQuery(requestFilePath, params);
+  const [isPreviewing, isPreviewingHandlers] = useDisclosure(false);
 
   useEffect(() => {
     if (params === null) {
       return;
     }
 
-    runRequestMutation.mutate({
-      request_file_path: requestFilePath,
-      params,
-    });
+    if (!isPreviewing) {
+      runRequestMutation.mutate({
+        request_file_path: requestFilePath,
+        params,
+      });
+    }
   }, [params]);
 
   const form = useForm({
@@ -236,66 +242,97 @@ export const RunRequestForm: React.FC<Props> = ({
           </Card>
         )}
 
-        <Button type="submit" loading={runRequestMutation.isPending}>
-          Run Request
-        </Button>
+        <Group grow>
+          <Button type="submit" loading={runRequestMutation.isPending}>
+            {isPreviewing ? "Run (Preview)" : "Run"}
+          </Button>
 
-        {runRequestMutation.isSuccess && exportRequest.isSuccess && (
-          <>
-            <Text mb={0} size="xl" fw="bold">
-              Results
-            </Text>
-            <Card>
-              <Text pb={0} fw="bold">
-                Request
-              </Text>
-              <CopyCode text={exportRequest.data!}>
-                {exportRequest.data}
-              </CopyCode>
-            </Card>
+          <Switch
+            label="Preview Request"
+            checked={isPreviewing}
+            onChange={isPreviewingHandlers.toggle}
+            radius="sm"
+          />
+        </Group>
 
-            <Card>
-              <Text pb={0} fw="bold">
-                {responseSpan ? "Actual Response" : "Response"}
-              </Text>
-              <CopyCode text={runRequestMutation.data[1]}>
-                {runRequestMutation.data[1]}
-              </CopyCode>
-
-              <Stack>
-                <Text size="sm">
-                  Time Taken: {runRequestMutation.data[0].time_taken} ms
-                </Text>
-              </Stack>
-            </Card>
-
-            {responseSpan && (
+        {isPreviewing
+          ? exportRequest.isSuccess &&
+            exportRequest.data !== null && (
               <>
-                {!runRequestMutation.data[0].test_result.pass ? (
-                  <>
-                    <Alert color="red" title="Test Result: Failed!" w="100%">
-                      <CopyCode
-                        text={runRequestMutation.data[0].test_result.diff!}
-                      >
-                        {runRequestMutation.data[0].test_result.diff}
-                      </CopyCode>
-                    </Alert>
-                  </>
-                ) : (
-                  <Alert color="green" title="Test Result: Passed!"></Alert>
-                )}
+                <Text mb={0} size="xl" fw="bold">
+                  Results
+                </Text>
+                <Card>
+                  <Text pb={0} fw="bold">
+                    Request
+                  </Text>
+                  <CopyCode text={exportRequest.data!}>
+                    {exportRequest.data}
+                  </CopyCode>
+                </Card>
+              </>
+            )
+          : runRequestMutation.isSuccess &&
+            exportRequest.isSuccess && (
+              <>
+                <Text mb={0} size="xl" fw="bold">
+                  Results
+                </Text>
+                <Card>
+                  <Text pb={0} fw="bold">
+                    Request
+                  </Text>
+                  <CopyCode text={exportRequest.data!}>
+                    {exportRequest.data}
+                  </CopyCode>
+                </Card>
 
                 <Card>
                   <Text pb={0} fw="bold">
-                    Expected Response
+                    {responseSpan ? "Actual Response" : "Response"}
                   </Text>
+                  <CopyCode text={runRequestMutation.data[1]}>
+                    {runRequestMutation.data[1]}
+                  </CopyCode>
 
-                  <CopyCode text={responseText}>{responseText}</CopyCode>
+                  <Stack>
+                    <Text size="sm">
+                      Time Taken: {runRequestMutation.data[0].time_taken} ms
+                    </Text>
+                  </Stack>
                 </Card>
+
+                {responseSpan && (
+                  <>
+                    {!runRequestMutation.data[0].test_result.pass ? (
+                      <>
+                        <Alert
+                          color="red"
+                          title="Test Result: Failed!"
+                          w="100%"
+                        >
+                          <CopyCode
+                            text={runRequestMutation.data[0].test_result.diff!}
+                          >
+                            {runRequestMutation.data[0].test_result.diff}
+                          </CopyCode>
+                        </Alert>
+                      </>
+                    ) : (
+                      <Alert color="green" title="Test Result: Passed!"></Alert>
+                    )}
+
+                    <Card>
+                      <Text pb={0} fw="bold">
+                        Expected Response
+                      </Text>
+
+                      <CopyCode text={responseText}>{responseText}</CopyCode>
+                    </Card>
+                  </>
+                )}
               </>
             )}
-          </>
-        )}
       </Stack>
     </form>
   );
