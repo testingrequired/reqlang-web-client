@@ -1,7 +1,14 @@
 import { RequestRun } from "server-types";
 import { RequestRunHistoryItem } from "./RequestRunHistoryItem";
-import { useColorScheme, useDisclosure } from "@mantine/hooks";
-import { ActionIcon, Badge, Card, Group, TooltipFloating } from "@mantine/core";
+import { useColorScheme, useDisclosure, useMediaQuery } from "@mantine/hooks";
+import {
+  ActionIcon,
+  Badge,
+  Card,
+  Group,
+  TooltipFloating,
+  useMantineTheme,
+} from "@mantine/core";
 import { IconCaretDownFilled, IconCaretUpFilled } from "@tabler/icons-react";
 import { Link } from "@tanstack/react-router";
 import moment from "moment";
@@ -15,12 +22,18 @@ export const RequestRunHistoryItemCollapsable = ({ requestRun }: Props) => {
   const requestAt = moment(requestRun.request_at as unknown as number);
   const requestAtStr = requestAt.toLocaleString();
   const colorScheme = useColorScheme();
+  const theme = useMantineTheme();
+
+  const mdWidthMatches = useMediaQuery(`(max-width: ${theme.breakpoints.md})`);
+  const cardPadding = mdWidthMatches ? "xs" : "md";
+  const toggleButtonSize = mdWidthMatches ? "sm" : "md";
+  const collapseHeaderTextSize = mdWidthMatches ? "sm" : "md";
 
   return (
-    <Card>
+    <Card p={cardPadding}>
       <Group justify="space-between">
         <Group mb={isFullView ? "md" : "0"}>
-          <ActionIcon onClick={fullViewHandlers.toggle}>
+          <ActionIcon onClick={fullViewHandlers.toggle} size={toggleButtonSize}>
             {isFullView ? <IconCaretDownFilled /> : <IconCaretUpFilled />}
           </ActionIcon>
 
@@ -31,6 +44,8 @@ export const RequestRunHistoryItemCollapsable = ({ requestRun }: Props) => {
               style={{
                 cursor: "help",
               }}
+              p={0}
+              size={collapseHeaderTextSize}
             >
               {requestAt.fromNow()}
             </Badge>
@@ -48,6 +63,7 @@ export const RequestRunHistoryItemCollapsable = ({ requestRun }: Props) => {
               style={{
                 cursor: "pointer",
               }}
+              size={collapseHeaderTextSize}
             >
               {requestRun.request_file_path}
             </Badge>
@@ -70,6 +86,7 @@ export const RequestRunHistoryItemCollapsable = ({ requestRun }: Props) => {
               style={{
                 cursor: "pointer",
               }}
+              size={collapseHeaderTextSize}
             >
               {requestRun.pass ? "Pass" : "Fail"}
             </Badge>
@@ -87,6 +104,7 @@ export const RequestRunHistoryItemCollapsable = ({ requestRun }: Props) => {
               style={{
                 cursor: "pointer",
               }}
+              size={collapseHeaderTextSize}
             >
               {requestRun.uuid.slice(0, 5)}
             </Badge>
