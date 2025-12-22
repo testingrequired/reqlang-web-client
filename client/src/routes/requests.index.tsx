@@ -132,6 +132,7 @@ const RequestFileSelectForm = ({ value, onChange }: Props) => {
         onChange={setSelectFiles}
         value={selectedFiles}
         clearable
+        autoFocus
       />
 
       <ButtonGroup>

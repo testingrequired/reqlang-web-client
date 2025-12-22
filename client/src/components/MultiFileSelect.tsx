@@ -7,6 +7,7 @@ type Prop = {
   value: string[];
   clearable?: boolean;
   disabled?: boolean;
+  autoFocus?: boolean;
 };
 
 export const MultiFilesSelect = ({
@@ -14,6 +15,7 @@ export const MultiFilesSelect = ({
   value,
   clearable = false,
   disabled = false,
+  autoFocus = false,
 }: Prop) => {
   const filesQuery = useGetFilesQuery();
 
@@ -52,6 +54,7 @@ export const MultiFilesSelect = ({
       searchable
       clearable={clearable}
       disabled={disabled}
+      autoFocus={autoFocus}
     />
   );
 };
