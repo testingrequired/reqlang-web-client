@@ -56,24 +56,6 @@ export const RequestRunHistoryItemCollapsable = ({ requestRun }: Props) => {
         <Group justify="space-evenly">
           <Link
             to="/history"
-            search={{
-              runId: requestRun.uuid,
-            }}
-          >
-            <Badge
-              radius="lg"
-              variant="transparent"
-              color="dark"
-              style={{
-                cursor: "pointer",
-              }}
-            >
-              {requestRun.uuid.slice(0, 5)}
-            </Badge>
-          </Link>
-
-          <Link
-            to="/history"
             search={(prev) => ({
               ...prev,
               testResult: requestRun.pass ? "pass" : "fail",
@@ -88,6 +70,23 @@ export const RequestRunHistoryItemCollapsable = ({ requestRun }: Props) => {
               }}
             >
               {requestRun.pass ? "Pass" : "Fail"}
+            </Badge>
+          </Link>
+          <Link
+            to="/history"
+            search={{
+              runId: requestRun.uuid,
+            }}
+          >
+            <Badge
+              radius="lg"
+              variant="transparent"
+              color="dark"
+              style={{
+                cursor: "pointer",
+              }}
+            >
+              {requestRun.uuid.slice(0, 5)}
             </Badge>
           </Link>
         </Group>
