@@ -1,7 +1,7 @@
 import { RequestRun } from "server-types";
 import { RequestRunHistoryItem } from "./RequestRunHistoryItem";
 import { useDisclosure } from "@mantine/hooks";
-import { ActionIcon, Badge, Card, Group } from "@mantine/core";
+import { ActionIcon, Badge, Card, Group, TooltipFloating } from "@mantine/core";
 import { IconCaretDownFilled, IconCaretUpFilled } from "@tabler/icons-react";
 import { Link } from "@tanstack/react-router";
 import moment from "moment";
@@ -12,6 +12,9 @@ type Props = {
 
 export const RequestRunHistoryItemCollapsable = ({ requestRun }: Props) => {
   const [isFullView, fullViewHandlers] = useDisclosure(false);
+  const requestAt = moment(requestRun.request_at as unknown as number);
+  const requestAtStr = requestAt.toLocaleString();
+
   return (
     <Card>
       <Group justify="space-between">
@@ -20,9 +23,17 @@ export const RequestRunHistoryItemCollapsable = ({ requestRun }: Props) => {
             {isFullView ? <IconCaretDownFilled /> : <IconCaretUpFilled />}
           </ActionIcon>
 
-          <Badge variant="transparent" color="white">
-            {moment(requestRun.request_at as unknown as number).fromNow()}
-          </Badge>
+          <TooltipFloating label={requestAtStr} position="bottom">
+            <Badge
+              variant="transparent"
+              color="white"
+              style={{
+                cursor: "help",
+              }}
+            >
+              {requestAt.fromNow()}
+            </Badge>
+          </TooltipFloating>
 
           <Link
             to="/history"
@@ -40,7 +51,9 @@ export const RequestRunHistoryItemCollapsable = ({ requestRun }: Props) => {
               {requestRun.request_file_path}
             </Badge>
           </Link>
+        </Group>
 
+        <Group justify="space-evenly">
           <Link
             to="/history"
             search={{
@@ -55,29 +68,29 @@ export const RequestRunHistoryItemCollapsable = ({ requestRun }: Props) => {
                 cursor: "pointer",
               }}
             >
-              {requestRun.uuid.slice(0, 8)}
+              {requestRun.uuid.slice(0, 5)}
+            </Badge>
+          </Link>
+
+          <Link
+            to="/history"
+            search={(prev) => ({
+              ...prev,
+              testResult: requestRun.pass ? "pass" : "fail",
+            })}
+          >
+            <Badge
+              radius="lg"
+              variant="transparent"
+              color={requestRun.pass ? "green" : "red"}
+              style={{
+                cursor: "pointer",
+              }}
+            >
+              {requestRun.pass ? "Pass" : "Fail"}
             </Badge>
           </Link>
         </Group>
-
-        <Link
-          to="/history"
-          search={(prev) => ({
-            ...prev,
-            testResult: requestRun.pass ? "pass" : "fail",
-          })}
-        >
-          <Badge
-            radius="lg"
-            variant="transparent"
-            color={requestRun.pass ? "green" : "red"}
-            style={{
-              cursor: "pointer",
-            }}
-          >
-            {requestRun.pass ? "Pass" : "Fail"}
-          </Badge>
-        </Link>
       </Group>
 
       {isFullView && (
