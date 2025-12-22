@@ -25,9 +25,9 @@ export const RequestRunHistoryItemCollapsable = ({ requestRun }: Props) => {
   const theme = useMantineTheme();
 
   const mdWidthMatches = useMediaQuery(`(max-width: ${theme.breakpoints.md})`);
-  const cardPadding = mdWidthMatches ? "xs" : "md";
-  const toggleButtonSize = mdWidthMatches ? "sm" : "md";
-  const collapseHeaderTextSize = mdWidthMatches ? "sm" : "md";
+  const cardPadding = mdWidthMatches ? "xs" : "sm";
+  const toggleButtonSize = mdWidthMatches ? "xs" : "sm";
+  const collapseHeaderTextSize = mdWidthMatches ? "xs" : "md";
 
   return (
     <Card p={cardPadding}>
@@ -70,7 +70,7 @@ export const RequestRunHistoryItemCollapsable = ({ requestRun }: Props) => {
           </Link>
         </Group>
 
-        <Group justify="space-evenly">
+        <Group justify="space-evenly" visibleFrom="xs">
           <Link
             to="/history"
             search={(prev) => ({
