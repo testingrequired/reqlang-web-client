@@ -14,8 +14,8 @@ import {
 } from "@mantine/core";
 import {
   IconBrandGithubFilled,
-  IconFile,
   IconFolderRoot,
+  IconWorldWww,
 } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
 
@@ -90,7 +90,7 @@ function RouteComponent() {
           </List.Item>
           <List.Item>
             <Group>
-              <IconFile />
+              <IconWorldWww stroke={1.0} />
 
               <Anchor
                 href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Messages"
