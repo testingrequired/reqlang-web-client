@@ -60,16 +60,24 @@ export const RequestRunHistoryItemCollapsable = ({ requestRun }: Props) => {
           </Link>
         </Group>
 
-        <Badge
-          radius="lg"
-          variant="transparent"
-          color={requestRun.pass ? "green" : "red"}
-          style={{
-            cursor: "pointer",
-          }}
+        <Link
+          to="/history"
+          search={(prev) => ({
+            ...prev,
+            testResult: requestRun.pass ? "pass" : "fail",
+          })}
         >
-          {requestRun.pass ? "Pass" : "Fail"}
-        </Badge>
+          <Badge
+            radius="lg"
+            variant="transparent"
+            color={requestRun.pass ? "green" : "red"}
+            style={{
+              cursor: "pointer",
+            }}
+          >
+            {requestRun.pass ? "Pass" : "Fail"}
+          </Badge>
+        </Link>
       </Group>
 
       {isFullView && (

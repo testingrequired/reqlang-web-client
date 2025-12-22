@@ -6,6 +6,7 @@ import {
   ButtonGroup,
   Group,
   Loader,
+  Select,
   Stack,
   Text,
   Title,
@@ -22,17 +23,29 @@ import { RequestRunHistoryItemCollapsable } from "@/components/RequestRunHistory
 type Search = {
   runId?: string;
   requestFilePath?: string;
+  testResult?: "pass" | "fail";
 };
 
 export const Route = createFileRoute("/history")({
   component: RouteComponent,
-  validateSearch: (search): Search => ({
-    runId: typeof search.runId === "string" ? search.runId : undefined,
-    requestFilePath:
-      typeof search.requestFilePath === "string"
-        ? search.requestFilePath
-        : undefined,
-  }),
+  validateSearch: (search): Search => {
+    let testResult: "pass" | "fail" | undefined;
+
+    if (typeof search.testResult === "string") {
+      if (search.testResult === "pass" || search.testResult === "fail") {
+        testResult = search.testResult;
+      }
+    }
+
+    return {
+      runId: typeof search.runId === "string" ? search.runId : undefined,
+      requestFilePath:
+        typeof search.requestFilePath === "string"
+          ? search.requestFilePath
+          : undefined,
+      testResult,
+    };
+  },
 });
 
 function RouteComponent() {
@@ -43,6 +56,13 @@ function RouteComponent() {
 
   const selectedRequestFilePath = search.requestFilePath ?? null;
   const selectedRequestRunInHistory = search.runId ?? null;
+  let selectedTestResult: "pass" | "fail" | null;
+
+  if (typeof search.testResult === "undefined") {
+    selectedTestResult = null;
+  } else {
+    selectedTestResult = search.testResult;
+  }
 
   debugger;
 
@@ -59,13 +79,19 @@ function RouteComponent() {
     (run) => run.request_file_path === selectedRequestFilePath
   );
 
-  const history =
+  let history =
     selectedRequestFilePath === null ? allHistory : selectedRequestHistory;
 
   history.sort(
     (a, b) =>
       (b.request_at as unknown as number) - (a.request_at as unknown as number)
   );
+
+  if (typeof search.testResult !== "undefined") {
+    history = history.filter(
+      (item) => item.pass === (search.testResult === "pass")
+    );
+  }
 
   let selectedRun: RequestRun | null = null;
 
@@ -138,11 +164,30 @@ function RouteComponent() {
             showPathsInSelect={selectedRequestFilePath === null}
           />
 
+          <Select
+            label="Test Result"
+            value={selectedTestResult}
+            onChange={(value) =>
+              nav({
+                //@ts-ignore The `data` prop is being passed "pass" & "fail" below
+                search: (prev) => ({
+                  ...prev,
+                  testResult: value,
+                }),
+              })
+            }
+            data={[
+              { value: "pass", label: "Passed" },
+              { value: "fail", label: "Failed" },
+            ]}
+          />
+
           <Group>
             <Button
               disabled={
                 selectedRequestFilePath === null &&
-                selectedRequestRunInHistory === null
+                selectedRequestRunInHistory === null &&
+                selectedTestResult === null
               }
               onClick={() =>
                 nav({
