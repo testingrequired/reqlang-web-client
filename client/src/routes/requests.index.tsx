@@ -16,7 +16,12 @@ import {
   Tabs,
   Tooltip,
 } from "@mantine/core";
-import { IconCancel, IconFolderOpen, IconRefresh } from "@tabler/icons-react";
+import {
+  IconFileText,
+  IconFileTextFilled,
+  IconFileXFilled,
+  IconRefresh,
+} from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ParseResult } from "reqlang-types";
@@ -137,7 +142,11 @@ const RequestFileSelectForm = ({ value, onChange }: Props) => {
         }}
         aria-label="Open/Close Request Files"
       >
-        <IconFolderOpen stroke={1.0} />
+        {selectedFiles.length === 0 ? (
+          <IconFileText stroke={1.25} />
+        ) : (
+          <IconFileTextFilled stroke={1.25} />
+        )}
       </ActionIcon>
       {selectedFiles.length > 0 && (
         <ActionIcon
@@ -150,7 +159,7 @@ const RequestFileSelectForm = ({ value, onChange }: Props) => {
           }}
           aria-label="Close All Request Files"
         >
-          <IconCancel stroke={1.0} />
+          <IconFileXFilled stroke={1.25} />
         </ActionIcon>
       )}
     </ButtonGroup>
