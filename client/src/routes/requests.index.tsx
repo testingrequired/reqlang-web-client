@@ -135,7 +135,7 @@ const RequestFileSelectForm = ({ value, onChange }: Props) => {
   ) : (
     <ButtonGroup>
       <ActionIcon
-        size="input-xl"
+        size="input-lg"
         variant="light"
         onClick={() => {
           setShowOpenFiles(true);
@@ -150,7 +150,7 @@ const RequestFileSelectForm = ({ value, onChange }: Props) => {
       </ActionIcon>
       {selectedFiles.length > 0 && (
         <ActionIcon
-          size="input-xl"
+          size="input-lg"
           variant="light"
           color="red"
           onClick={() => {
