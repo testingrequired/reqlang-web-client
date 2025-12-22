@@ -1,6 +1,6 @@
 import { RequestRun } from "server-types";
 import { RequestRunHistoryItem } from "./RequestRunHistoryItem";
-import { useDisclosure } from "@mantine/hooks";
+import { useColorScheme, useDisclosure } from "@mantine/hooks";
 import { ActionIcon, Badge, Card, Group, TooltipFloating } from "@mantine/core";
 import { IconCaretDownFilled, IconCaretUpFilled } from "@tabler/icons-react";
 import { Link } from "@tanstack/react-router";
@@ -14,6 +14,7 @@ export const RequestRunHistoryItemCollapsable = ({ requestRun }: Props) => {
   const [isFullView, fullViewHandlers] = useDisclosure(false);
   const requestAt = moment(requestRun.request_at as unknown as number);
   const requestAtStr = requestAt.toLocaleString();
+  const colorScheme = useColorScheme();
 
   return (
     <Card>
@@ -26,7 +27,7 @@ export const RequestRunHistoryItemCollapsable = ({ requestRun }: Props) => {
           <TooltipFloating label={requestAtStr} position="bottom">
             <Badge
               variant="transparent"
-              color="white"
+              color={colorScheme === "dark" ? "white" : "dark"}
               style={{
                 cursor: "help",
               }}
@@ -43,7 +44,7 @@ export const RequestRunHistoryItemCollapsable = ({ requestRun }: Props) => {
           >
             <Badge
               variant="transparent"
-              color="white"
+              color={colorScheme === "dark" ? "white" : "dark"}
               style={{
                 cursor: "pointer",
               }}
@@ -59,11 +60,12 @@ export const RequestRunHistoryItemCollapsable = ({ requestRun }: Props) => {
             search={(prev) => ({
               ...prev,
               testResult: requestRun.pass ? "pass" : "fail",
+              requestFilePath: requestRun.request_file_path,
             })}
           >
             <Badge
-              radius="lg"
-              variant="transparent"
+              radius="sm"
+              variant={colorScheme === "dark" ? "transparent" : "light"}
               color={requestRun.pass ? "green" : "red"}
               style={{
                 cursor: "pointer",
