@@ -165,8 +165,8 @@ function RouteComponent() {
           />
 
           <Select
-            label="Test Result"
             value={selectedTestResult}
+            placeholder="Filter by test result"
             onChange={(value) =>
               nav({
                 //@ts-ignore The `data` prop is being passed "pass" & "fail" below
@@ -177,8 +177,8 @@ function RouteComponent() {
               })
             }
             data={[
-              { value: "pass", label: "Passed" },
-              { value: "fail", label: "Failed" },
+              { value: "pass", label: "Test Passed" },
+              { value: "fail", label: "Test Failed" },
             ]}
           />
 
