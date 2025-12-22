@@ -176,7 +176,7 @@ function RouteComponent() {
               placeholder="Limit number of results"
               onChange={(value) =>
                 nav({
-                  //@ts-ignore The `data` prop is being passed "pass" & "fail" below
+                  //@ts-ignore
                   search: (prev) => ({
                     ...prev,
                     limit: value === null ? null : parseInt(value, 10),
