@@ -24,6 +24,7 @@ type Search = {
   runId?: string;
   requestFilePath?: string;
   testResult?: "pass" | "fail";
+  limit?: number;
 };
 
 export const Route = createFileRoute("/history")({
@@ -44,6 +45,7 @@ export const Route = createFileRoute("/history")({
           ? search.requestFilePath
           : undefined,
       testResult,
+      limit: typeof search.limit === "number" ? search.limit : undefined,
     };
   },
 });
@@ -91,6 +93,10 @@ function RouteComponent() {
     history = history.filter(
       (item) => item.pass === (search.testResult === "pass")
     );
+  }
+
+  if (typeof search.limit !== "undefined") {
+    history = history.slice(0, search.limit);
   }
 
   let selectedRun: RequestRun | null = null;
@@ -164,30 +170,53 @@ function RouteComponent() {
             showPathsInSelect={selectedRequestFilePath === null}
           />
 
-          <Select
-            value={selectedTestResult}
-            placeholder="Filter by test result"
-            onChange={(value) =>
-              nav({
-                //@ts-ignore The `data` prop is being passed "pass" & "fail" below
-                search: (prev) => ({
-                  ...prev,
-                  testResult: value,
-                }),
-              })
-            }
-            data={[
-              { value: "pass", label: "Test Passed" },
-              { value: "fail", label: "Test Failed" },
-            ]}
-          />
+          <Group justify="space-between" grow>
+            <Select
+              value={search.limit?.toString(10) ?? null}
+              placeholder="Limit number of results"
+              onChange={(value) =>
+                nav({
+                  //@ts-ignore The `data` prop is being passed "pass" & "fail" below
+                  search: (prev) => ({
+                    ...prev,
+                    limit: value === null ? null : parseInt(value, 10),
+                  }),
+                })
+              }
+              data={[
+                { value: "10", label: "10 results" },
+                { value: "25", label: "25 results" },
+                { value: "50", label: "50 results" },
+                { value: "100", label: "100 results" },
+              ]}
+            />
+
+            <Select
+              value={selectedTestResult}
+              placeholder="Filter by test result"
+              onChange={(value) =>
+                nav({
+                  //@ts-ignore The `data` prop is being passed "pass" & "fail" below
+                  search: (prev) => ({
+                    ...prev,
+                    testResult: value,
+                  }),
+                })
+              }
+              data={[
+                { value: "pass", label: "Tests Passed" },
+                { value: "fail", label: "Tests Failed" },
+              ]}
+            />
+          </Group>
 
           <Group>
             <Button
               disabled={
                 selectedRequestFilePath === null &&
                 selectedRequestRunInHistory === null &&
-                selectedTestResult === null
+                selectedTestResult === null &&
+                typeof search.limit === "undefined"
               }
               onClick={() =>
                 nav({
