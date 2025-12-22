@@ -54,23 +54,22 @@ export const Route = createRootRoute({
       <AppShell
         header={{ height: 70 }}
         navbar={{
-          width: 225,
+          width: 175,
           breakpoint: "sm",
           collapsed: { mobile: !opened },
         }}
         data-testid="root"
       >
         <AppShell.Header>
-          <Group justify="space-between">
-            <Group>
-              <Burger
-                opened={opened}
-                onClick={toggle}
-                hiddenFrom="sm"
-                size="sm"
-              />
-              <Title m="sm">reqlang-web</Title>
-            </Group>
+          <Group align="center">
+            <Burger
+              opened={opened}
+              onClick={toggle}
+              size="sm"
+              hiddenFrom="sm"
+              p="xs"
+            />
+            <Title m="xs">reqlang-web</Title>
           </Group>
         </AppShell.Header>
 
