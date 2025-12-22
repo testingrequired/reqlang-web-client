@@ -4,6 +4,7 @@ import { IconRefresh } from "@tabler/icons-react";
 
 type Prop = {
   onChange: (value: string[]) => void;
+  onBlur: () => void;
   value: string[];
   clearable?: boolean;
   disabled?: boolean;
@@ -12,6 +13,7 @@ type Prop = {
 
 export const MultiFilesSelect = ({
   onChange,
+  onBlur,
   value,
   clearable = false,
   disabled = false,
@@ -55,6 +57,7 @@ export const MultiFilesSelect = ({
       clearable={clearable}
       disabled={disabled}
       autoFocus={autoFocus}
+      onBlur={onBlur}
     />
   );
 };

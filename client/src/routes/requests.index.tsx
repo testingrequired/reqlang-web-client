@@ -9,7 +9,6 @@ import { useOpenRequestFilesStore } from "@/stores/selectedRequestFile";
 import {
   ActionIcon,
   Alert,
-  Button,
   ButtonGroup,
   Card,
   Loader,
@@ -118,14 +117,6 @@ const RequestFileSelectForm = ({ value, onChange }: Props) => {
     setShowOpenFiles(false);
   };
 
-  const cancel = () => {
-    setSelectFiles(value);
-    setShowOpenFiles(false);
-  };
-
-  const changeHaveBeenMade =
-    JSON.stringify(value) !== JSON.stringify(selectedFiles);
-
   return showOpenFiles ? (
     <>
       <MultiFilesSelect
@@ -133,16 +124,8 @@ const RequestFileSelectForm = ({ value, onChange }: Props) => {
         value={selectedFiles}
         clearable
         autoFocus
+        onBlur={save}
       />
-
-      <ButtonGroup>
-        <Button onClick={save} disabled={!changeHaveBeenMade}>
-          Save
-        </Button>
-        <Button onClick={cancel} color="red">
-          Cancel
-        </Button>
-      </ButtonGroup>
     </>
   ) : (
     <ButtonGroup>
