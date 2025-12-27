@@ -41,12 +41,17 @@ export function getRequestRunHistory(
   }
 
   if (typeof options.query === "string") {
+    const query = options.query as string;
+
     history = history.filter((item) => {
       const params: RequestParamsFromClient = JSON.parse(
         item.params_from_client_json
       );
 
-      return params.reqfile.includes(options.query as string);
+      const isInReqfile = params.reqfile.includes(query);
+      const isInResponse = item.response.includes(query);
+
+      return isInReqfile || isInResponse;
     });
   }
 
