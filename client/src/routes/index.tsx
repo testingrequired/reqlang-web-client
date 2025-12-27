@@ -17,7 +17,7 @@ import {
   IconFolderRoot,
   IconWorldWww,
 } from "@tabler/icons-react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
   component: RouteComponent,
@@ -58,6 +58,10 @@ function RouteComponent() {
           {lastRuns.map((lastRun) => (
             <RequestRunHistoryItemCollapsable requestRun={lastRun} />
           ))}
+
+          <Anchor component={Link} to="/history" size="sm">
+            See more...
+          </Anchor>
         </Stack>
       ) : (
         <Alert>No requests have been ran yet.</Alert>

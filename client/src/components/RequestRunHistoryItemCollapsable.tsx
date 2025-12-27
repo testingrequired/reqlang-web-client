@@ -73,8 +73,7 @@ export const RequestRunHistoryItemCollapsable = ({ requestRun }: Props) => {
         <Group justify="space-evenly" visibleFrom="xs">
           <Link
             to="/history"
-            search={(prev) => ({
-              ...prev,
+            search={(_prev) => ({
               testResult: requestRun.pass ? "pass" : "fail",
               requestFilePath: requestRun.request_file_path,
             })}
