@@ -29,13 +29,23 @@ export default defineConfig(({ mode }) => ({
     emptyOutDir: true,
     rollupOptions: {
       output: {
+        compact: true,
         manualChunks: {
           react: ["react", "react-dom"],
-          tanstack: ["@tanstack/react-router", "@tanstack/react-query"],
+          tanstack: [
+            "@tanstack/react-router",
+            "@tanstack/react-query",
+            "@tanstack/react-form",
+          ],
           mantine_core: ["@mantine/core"],
           mantine_hooks: ["@mantine/hooks"],
           mantine_codehighlight: ["@mantine/code-highlight"],
           mantine_notifactions: ["@mantine/notifications"],
+          mantine_modals: ["@mantine/modals"],
+          mantine_dates: ["@mantine/dates"],
+          mantine_spotlight: ["@mantine/spotlight"],
+          tabler_icons: ["@tabler/icons-react"],
+          zustand: ["zustand"],
         },
       },
     },

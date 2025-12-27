@@ -25,8 +25,6 @@ import "@mantine/notifications/styles.css";
 import { Notifications } from "@mantine/notifications";
 
 import "@mantine/code-highlight/styles.css";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
 import { useLogger } from "@/hooks/useLogger";
 import { useSendNavigationToServer } from "./hooks/useSendNavigationToServer";
 
@@ -61,9 +59,7 @@ export const App = () => {
           <Notifications />
           <TypographyStylesProvider>
             <ModalsProvider>
-              <DndProvider backend={HTML5Backend}>
-                <RouterProvider router={router} />
-              </DndProvider>
+              <RouterProvider router={router} />
             </ModalsProvider>
           </TypographyStylesProvider>
         </MantineProvider>
