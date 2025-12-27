@@ -46,6 +46,7 @@ export const RequestRunHistory: React.FC<Props> = ({ requestFilePath }) => {
         to="/history"
         size="sm"
         search={{
+          // @ts-ignore
           requestFilePath,
         }}
       >
