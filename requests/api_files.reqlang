@@ -8,5 +8,5 @@ GET {{@clientUrl}}/api/files HTTP/1.1
 HTTP/1.1 200 OK
 content-type: application/json
 
-["requests/api_debug.reqlang","requests/api_file.reqlang","requests/api_files.reqlang","requests/api_run_history.reqlang","requests/status_code.reqlang"]
+["requests/api_debug.reqlang","requests/api_file.reqlang","requests/api_files.reqlang","requests/api_run_history.reqlang","requests/auth2_openid_configuration.reqlang","requests/auth2_token_client_credentials.reqlang","requests/auth2_token_password.reqlang","requests/auth2_userinfo.reqlang","requests/form.reqlang","requests/post.reqlang","requests/status_code.reqlang"]
 ```
