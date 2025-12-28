@@ -20,6 +20,12 @@ export const useRunRequestMutation = () => {
         },
       });
 
+      if (response.status === 500) {
+        const err = (await response.json()) as { error: string };
+
+        throw new Error(err.error);
+      }
+
       const data = (await response.json()) as [RequestRunResponse, string];
 
       data[0].test_result.diff = stripAnsi(data[0].test_result.diff ?? "");

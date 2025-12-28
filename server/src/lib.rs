@@ -442,16 +442,30 @@ async fn parse_request_file(
     }
 }
 
+#[derive(Serialize)]
+struct RunRequestError {
+    error: String,
+}
+
 async fn run_request(
     State(state): State<Arc<Mutex<AppState>>>,
     Host(hostname): Host,
     Json(run_request_from_client): Json<RunRequest>,
-) -> (StatusCode, Json<(RequestRunResponse, String)>) {
+) -> (
+    StatusCode,
+    Result<Json<(RequestRunResponse, String)>, Json<RunRequestError>>,
+) {
     let result = run_request_from_params(&hostname, &run_request_from_client, state).await;
 
-    dbg!(&result);
-
-    (StatusCode::OK, Json(result))
+    match result {
+        Ok(result) => (StatusCode::OK, Ok(Json(result))),
+        Err(err) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Err(Json(RunRequestError {
+                error: err.to_string(),
+            })),
+        ),
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]

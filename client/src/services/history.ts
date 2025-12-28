@@ -2,6 +2,7 @@ import { RequestParamsFromClient } from "reqlang-types";
 import { RequestRun } from "server-types";
 
 type GetHistoryOptions = {
+  env?: string;
   query?: string;
   filterToPath?: string;
   filterByTestResult?: "pass" | "fail";
@@ -33,6 +34,16 @@ export function getRequestRunHistory(
         );
 
   history.sort(options.sortBy);
+
+  if (typeof options.env !== "undefined") {
+    history = history.filter((item) => {
+      const params: RequestParamsFromClient = JSON.parse(
+        item.params_from_client_json
+      );
+
+      return options.env === params.env;
+    });
+  }
 
   if (typeof options.filterByTestResult !== "undefined") {
     history = history.filter(

@@ -3057,7 +3057,7 @@ checksum = "2b15c43186be67a4fd63bee50d0303afffcef381492ebe2c5d87f324e1b8815c"
 [[package]]
 name = "reqlang"
 version = "0.1.0"
-source = "git+https://github.com/testingrequired/reqlang.git?rev=02cb1c50d4ff59d4959b9cf8e1abd36a28125563#02cb1c50d4ff59d4959b9cf8e1abd36a28125563"
+source = "git+https://github.com/testingrequired/reqlang.git?rev=c980d60f49b57b78166b8ddf0dda4b6414f837ac#c980d60f49b57b78166b8ddf0dda4b6414f837ac"
 dependencies = [
  "codespan-reporting 0.11.1",
  "console",

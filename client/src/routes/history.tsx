@@ -22,11 +22,13 @@ import {
 } from "@/queries/history";
 import { RequestRunHistoryItemCollapsable } from "@/components/RequestRunHistoryItemCollapsable";
 import { getRequestRunHistory } from "@/services/history";
+import { RequestParamsFromClient } from "reqlang-types";
 
 type Search = {
   runId?: string;
   requestFilePath?: string;
   testResult?: "pass" | "fail";
+  env?: string;
   limit?: number;
   page?: number;
   query?: string;
@@ -50,6 +52,7 @@ export const Route = createFileRoute("/history")({
           ? search.requestFilePath
           : undefined,
       testResult,
+      env: typeof search.env === "string" ? search.env : undefined,
       limit: typeof search.limit === "number" ? search.limit : 10,
       page: typeof search.page === "number" ? search.page : 1,
       query: typeof search.query === "string" ? search.query : undefined,
@@ -117,6 +120,7 @@ function RouteComponent() {
       filterToPath: selectedRequestFilePath ?? undefined,
       filterByTestResult: selectedTestResult ?? undefined,
       query: search.query,
+      env: search.env,
     });
 
   let selectedRun: RequestRun | null = null;
@@ -126,6 +130,20 @@ function RouteComponent() {
       requestRunHistory.find((x) => x.uuid === selectedRequestRunInHistory) ??
       null;
   }
+
+  const envs = [
+    ...new Set(
+      getRunHistoryQuery.data
+        .map((item) => {
+          const params: RequestParamsFromClient = JSON.parse(
+            item.params_from_client_json
+          );
+
+          return params.env;
+        })
+        .filter((value) => value !== null)
+    ),
+  ];
 
   const historyFilters = (
     <>
@@ -158,6 +176,20 @@ function RouteComponent() {
         }
         requestRunHistory={requestRunHistory}
         showPathsInSelect={selectedRequestFilePath === null}
+      />
+
+      <Select
+        placeholder="Select an environment"
+        value={search.env ?? null}
+        onChange={(value) =>
+          nav({
+            search: (prev) => ({
+              ...prev,
+              env: value ?? undefined,
+            }),
+          })
+        }
+        data={envs}
       />
 
       <Group justify="space-between" grow>
@@ -197,7 +229,8 @@ function RouteComponent() {
           selectedRequestFilePath === null &&
           selectedRequestRunInHistory === null &&
           selectedTestResult === null &&
-          (!search.query || search.query.length === 0)
+          (!search.query || search.query.length === 0) &&
+          typeof search.env === "undefined"
         }
         onClick={() =>
           nav({

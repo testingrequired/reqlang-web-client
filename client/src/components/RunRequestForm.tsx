@@ -97,10 +97,6 @@ export const RunRequestForm: React.FC<Props> = ({
     responseSpan?.end
   );
 
-  if (runRequestMutation.isError) {
-    return <div>An error occurred: {runRequestMutation.error.message}</div>;
-  }
-
   if (exportRequest.isError) {
     return <div>An error occurred: {exportRequest.error.message}</div>;
   }
@@ -240,6 +236,12 @@ export const RunRequestForm: React.FC<Props> = ({
               />
             ))}
           </Card>
+        )}
+
+        {!isPreviewing && runRequestMutation.isError && (
+          <Alert title="Error Running Request" color="red">
+            {runRequestMutation.error.message}
+          </Alert>
         )}
 
         <Group grow>

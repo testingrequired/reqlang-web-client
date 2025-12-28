@@ -32,7 +32,7 @@ futures-util = "0.3.31"
 hyper = { version = "1", features = ["full"] }
 http-body-util = "0.1"
 hyper-util = { version = "0.1", features = ["full"] }
-reqlang = { git = "https://github.com/testingrequired/reqlang.git", rev = "02cb1c50d4ff59d4959b9cf8e1abd36a28125563" }
+reqlang = { git = "https://github.com/testingrequired/reqlang.git", rev = "c980d60f49b57b78166b8ddf0dda4b6414f837ac" }
 glob = "0.3.2"
 
 [dependencies.uuid]

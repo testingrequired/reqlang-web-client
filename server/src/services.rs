@@ -141,7 +141,7 @@ pub mod achievements_service {
 }
 
 pub mod request_service {
-    use std::{collections::HashMap, sync::Arc};
+    use std::{collections::HashMap, error::Error, sync::Arc};
 
     use chrono::Local;
     use futures_util::TryStreamExt;
@@ -268,7 +268,7 @@ pub mod request_service {
         client_hostname: &str,
         run_request_from_client: &RunRequest,
         state: Arc<Mutex<AppState>>,
-    ) -> (RequestRunResponse, std::string::String) {
+    ) -> Result<(RequestRunResponse, std::string::String), Box<dyn Error + Send>> {
         let mut from_client_params = run_request_from_client.params.clone();
 
         let mut provider_values: HashMap<String, String> = HashMap::new();
@@ -289,53 +289,57 @@ pub mod request_service {
 
         let response = Into::<HttpRequestFetcher>::into(from_client_params.clone())
             .fetch()
-            .await
-            .expect("Request should have succeeded");
+            .await;
 
-        let request_run_end = Local::now().timestamp_millis() as u64;
+        match response {
+            Ok(response) => {
+                let request_run_end = Local::now().timestamp_millis() as u64;
 
-        let templated = template(
-            &from_client_params.reqfile,
-            env,
-            &from_client_params.prompts,
-            &from_client_params.secrets,
-            &from_client_params.provider_values,
-        )
-        .unwrap();
+                let templated = template(
+                    &from_client_params.reqfile,
+                    env,
+                    &from_client_params.prompts,
+                    &from_client_params.secrets,
+                    &from_client_params.provider_values,
+                )
+                .unwrap();
 
-        let test_result = templated.response.and_then(|expected_response| {
-            assert_response::assert_response(&expected_response, &response)
-                .map_err(|err| err.to_string())
-                .err()
-        });
+                let test_result = templated.response.and_then(|expected_response| {
+                    assert_response::assert_response(&expected_response, &response)
+                        .map_err(|err| err.to_string())
+                        .err()
+                });
 
-        let response_exported =
-            reqlang::export::export_response(&response, ResponseFormat::HttpMessage);
+                let response_exported =
+                    reqlang::export::export_response(&response, ResponseFormat::HttpMessage);
 
-        let run: NewRequestRun = NewRequestRun {
-            request_file_path: String::from(&run_request_from_client.request_file_path),
-            request_file_hash: String::from("value"),
-            params_from_client_json: serde_json::to_string_pretty(&from_client_params)
-                .expect("unable to serialize from_client_params to json"),
-            response: response_exported.clone(),
-            pass: test_result.is_none(),
-            diff: test_result.clone(),
-            request_at: request_run_start as i64,
-            response_at: request_run_end as i64,
-        };
-
-        let _ = add_to_run_history(&run, state).await;
-
-        (
-            RequestRunResponse {
-                response,
-                time_taken: request_run_end - request_run_start,
-                test_result: RequestRunResponseTestResult {
+                let run: NewRequestRun = NewRequestRun {
+                    request_file_path: String::from(&run_request_from_client.request_file_path),
+                    request_file_hash: String::from("value"),
+                    params_from_client_json: serde_json::to_string_pretty(&from_client_params)
+                        .expect("unable to serialize from_client_params to json"),
+                    response: response_exported.clone(),
                     pass: test_result.is_none(),
-                    diff: test_result,
-                },
-            },
-            response_exported,
-        )
+                    diff: test_result.clone(),
+                    request_at: request_run_start as i64,
+                    response_at: request_run_end as i64,
+                };
+
+                let _ = add_to_run_history(&run, state).await;
+
+                Ok((
+                    RequestRunResponse {
+                        response,
+                        time_taken: request_run_end - request_run_start,
+                        test_result: RequestRunResponseTestResult {
+                            pass: test_result.is_none(),
+                            diff: test_result,
+                        },
+                    },
+                    response_exported,
+                ))
+            }
+            Err(err) => Err(err),
+        }
     }
 }
