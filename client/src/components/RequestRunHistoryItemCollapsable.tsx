@@ -1,14 +1,7 @@
 import { RequestRun } from "server-types";
 import { RequestRunHistoryItem } from "./RequestRunHistoryItem";
-import { useColorScheme, useDisclosure, useMediaQuery } from "@mantine/hooks";
-import {
-  ActionIcon,
-  Badge,
-  Card,
-  Group,
-  TooltipFloating,
-  useMantineTheme,
-} from "@mantine/core";
+import { useColorScheme, useDisclosure } from "@mantine/hooks";
+import { ActionIcon, Badge, Card, Group, TooltipFloating } from "@mantine/core";
 import { IconCaretDownFilled, IconCaretUpFilled } from "@tabler/icons-react";
 import { Link } from "@tanstack/react-router";
 import moment from "moment";
@@ -22,12 +15,10 @@ export const RequestRunHistoryItemCollapsable = ({ requestRun }: Props) => {
   const requestAt = moment(requestRun.request_at as unknown as number);
   const requestAtStr = requestAt.toLocaleString();
   const colorScheme = useColorScheme();
-  const theme = useMantineTheme();
 
-  const mdWidthMatches = useMediaQuery(`(max-width: ${theme.breakpoints.md})`);
-  const cardPadding = mdWidthMatches ? "xs" : "sm";
-  const toggleButtonSize = mdWidthMatches ? "xs" : "sm";
-  const collapseHeaderTextSize = mdWidthMatches ? "xs" : "md";
+  const cardPadding = "sm";
+  const toggleButtonSize = "sm";
+  const collapseHeaderTextSize = "md";
 
   return (
     <Card p={cardPadding}>

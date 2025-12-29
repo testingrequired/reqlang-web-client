@@ -1,18 +1,42 @@
 import "@testing-library/jest-dom/vitest";
-import { afterEach, beforeEach, vi } from "vitest";
+import { vi } from "vitest";
 
-/**
- * Mock window.matchMedia as jsdom doesn't support it
- */
-let matchMediaMock;
-let matchMediaOriginal;
-
-beforeEach(() => {
-  matchMediaMock = vi.fn();
-  matchMediaOriginal = window.matchMedia;
-  window.matchMedia = matchMediaMock;
+Object.defineProperty(window, "matchMedia", {
+  writable: true,
+  value: vi.fn().mockImplementation((query) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: vi.fn(), // Deprecated
+    removeListener: vi.fn(), // Deprecated
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  })),
 });
 
-afterEach(() => {
-  window.matchMedia = matchMediaOriginal;
+let copiedValue;
+
+navigator.clipboard = {};
+
+Object.defineProperty(navigator.clipboard, "writeText", {
+  writable: true,
+  enumerable: true,
+  value: vi.fn().mockImplementation((valueBeingCopied) => {
+    console.log("WHAT??");
+    copiedValue = valueBeingCopied;
+
+    return Promise.resolve(navigator.clipboard);
+  }),
 });
+
+Object.defineProperty(navigator.clipboard, "readText", {
+  writable: true,
+  enumerable: true,
+  value: vi.fn().mockImplementation(() => {
+    console.log(`READ TEXT: ${copiedValue}`);
+    return Promise.resolve(copiedValue);
+  }),
+});
+
+console.log(JSON.stringify(Object.keys(navigator.clipboard)));

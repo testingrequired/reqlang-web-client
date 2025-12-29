@@ -5,9 +5,10 @@ import { ReactNode } from "react";
 type Props = {
   text: string;
   children: string | ReactNode;
+  onCopy?: (copiedValue: string) => void;
 };
 
-export const CopyCode = ({ children, text }: Props) => {
+export const CopyCode = ({ children, text, onCopy }: Props) => {
   return (
     <Group align="stretch" justify="space-between" gap="xs">
       <Code block w="92%" m={0}>
@@ -15,7 +16,7 @@ export const CopyCode = ({ children, text }: Props) => {
       </Code>
 
       <ButtonGroup w="5%" m={0} p={0}>
-        <CopyTextButton value={text} />
+        <CopyTextButton value={text} onCopy={onCopy} />
       </ButtonGroup>
     </Group>
   );

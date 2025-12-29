@@ -1,15 +1,18 @@
-import React from "react";
 import { describe, expect, test } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { App } from "../src/App";
-
-import "@testing-library/jest-dom/vitest";
+import { MantineProvider } from "@mantine/core";
 
 describe("App", () => {
-  test.skip("renders", () => {
-    render(<App />);
+  test("renders", () => {
+    renderComponentForTest(<App />);
 
     expect(screen.getByText("Home")).toBeVisible();
-    expect(screen.getByText("...")).toBeVisible();
+    expect(screen.getByText("Requests")).toBeVisible();
+    expect(screen.getByText("Run History")).toBeVisible();
   });
 });
+
+function renderComponentForTest(children: React.ReactNode) {
+  render(<MantineProvider>{children}</MantineProvider>);
+}
