@@ -13,10 +13,10 @@ pub mod broadcast_service {
         if let Some(tx) = state.tx.as_ref() {
             let tx = tx.lock().await;
 
-            if let Ok(msg_json) = serde_json::to_string(&msg) {
-                if let Err(err) = tx.send(msg_json) {
-                    tracing::error!("Failed to broadcast socket message: {err}");
-                }
+            if let Ok(msg_json) = serde_json::to_string(&msg)
+                && let Err(err) = tx.send(msg_json)
+            {
+                tracing::error!("Failed to broadcast socket message: {err}");
             }
         }
     }
@@ -185,11 +185,7 @@ pub mod request_service {
             });
         }
 
-        request_runs
-            .clone()
-            .iter()
-            .map(|request_run| request_run.clone().into())
-            .collect()
+        request_runs.clone().to_vec()
     }
 
     pub async fn delete_run_history(state: Arc<Mutex<AppState>>) {
@@ -240,10 +236,10 @@ pub mod request_service {
         .bind(&run.request_file_hash)
         .bind(&run.params_from_client_json)
         .bind(&run.response)
-        .bind(&run.pass)
+        .bind(run.pass)
         .bind(&run.diff)
-        .bind(&run.request_at)
-        .bind(&run.response_at)
+        .bind(run.request_at)
+        .bind(run.response_at)
         .execute(conn)
         .await
         .unwrap();
@@ -259,8 +255,8 @@ pub mod request_service {
             response: run.response.clone(),
             pass: run.pass,
             diff: run.diff.clone(),
-            request_at: run.request_at.clone(),
-            response_at: run.response_at.clone(),
+            request_at: run.request_at,
+            response_at: run.response_at,
         }
     }
 

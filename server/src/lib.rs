@@ -67,8 +67,8 @@ pub mod services;
 
 static MIGRATOR: Migrator = sqlx::migrate!();
 
-const DATABASE_URL_ENV_VAR: &'static str = "DATABASE_URL";
-const DEFAULT_DB_FILENAME: &'static str = "reqlang.sqlite3";
+const DATABASE_URL_ENV_VAR: &str = "DATABASE_URL";
+const DEFAULT_DB_FILENAME: &str = "reqlang.sqlite3";
 
 #[derive(Debug)]
 pub enum Error {
@@ -231,14 +231,12 @@ pub async fn init_server(
     let default_db_path = {
         let db_path_env_var = std::env::var(DATABASE_URL_ENV_VAR);
 
-        let default_db_path = db_path_env_var.unwrap_or(
+        db_path_env_var.unwrap_or(
             current_dir_path
                 .join(DEFAULT_DB_FILENAME)
                 .to_string_lossy()
                 .to_string(),
-        );
-
-        default_db_path
+        )
     };
 
     let db_pool = connect_to_db(db.unwrap_or(default_db_path)).await;
@@ -322,9 +320,7 @@ async fn list_files(
     let cwd = {
         let state = state.lock().await;
 
-        let cwd = state.home_dir.clone();
-
-        cwd
+        state.home_dir.clone()
     };
 
     let mut files = vec![];
@@ -332,7 +328,7 @@ async fn list_files(
 
     for entry in glob(&format!(
         "{}/**/*.reqlang",
-        cwd.to_str().unwrap_or_default().to_string()
+        cwd.to_str().unwrap_or_default()
     ))
     .expect("Failed to read glob pattern")
     {
@@ -370,9 +366,7 @@ async fn get_file(
     let cwd = {
         let state = state.lock().await;
 
-        let cwd = state.home_dir.clone();
-
-        cwd
+        state.home_dir.clone()
     };
 
     let file_path = cwd.join(file);
@@ -486,7 +480,7 @@ async fn diff_response(
 }
 
 async fn connect_to_db(db_path: String) -> Pool<Sqlite> {
-    let db_pool = {
+    {
         let pool_options = SqliteConnectOptions::new()
             .filename(db_path)
             .create_if_missing(true);
@@ -498,8 +492,7 @@ async fn connect_to_db(db_path: String) -> Pool<Sqlite> {
         let _ = MIGRATOR.run(&pool).await;
 
         pool
-    };
-    db_pool
+    }
 }
 
 #[instrument(skip(state))]
@@ -531,7 +524,8 @@ pub async fn get_debug_info(
 
     let db = {
         let state = state.lock().await;
-        let db = state
+
+        state
             .db
             .as_ref()
             .unwrap()
@@ -539,9 +533,7 @@ pub async fn get_debug_info(
             .get_filename()
             .to_str()
             .unwrap_or_default()
-            .to_string();
-
-        db
+            .to_string()
     };
 
     let commit = env!("GIT_HASH").to_string();
