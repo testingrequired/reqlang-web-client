@@ -23,7 +23,6 @@ Object.defineProperty(navigator.clipboard, "writeText", {
   writable: true,
   enumerable: true,
   value: vi.fn().mockImplementation((valueBeingCopied) => {
-    console.log("WHAT??");
     copiedValue = valueBeingCopied;
 
     return Promise.resolve(navigator.clipboard);
@@ -33,10 +32,5 @@ Object.defineProperty(navigator.clipboard, "writeText", {
 Object.defineProperty(navigator.clipboard, "readText", {
   writable: true,
   enumerable: true,
-  value: vi.fn().mockImplementation(() => {
-    console.log(`READ TEXT: ${copiedValue}`);
-    return Promise.resolve(copiedValue);
-  }),
+  value: vi.fn().mockImplementation(async () => copiedValue),
 });
-
-console.log(JSON.stringify(Object.keys(navigator.clipboard)));
