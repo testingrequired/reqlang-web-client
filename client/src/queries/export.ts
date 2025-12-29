@@ -25,9 +25,16 @@ export const useExportRequestQuery = (
         },
       });
 
-      const data = (await response.text()) as string;
+      const body = await response.text();
 
-      return data;
+      if (!response.ok) {
+        switch (response.status) {
+          default:
+            throw new Error(`Failed to get export: ${body}`);
+        }
+      }
+
+      return body;
     },
   });
 };

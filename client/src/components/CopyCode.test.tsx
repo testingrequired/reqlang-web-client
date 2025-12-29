@@ -1,9 +1,9 @@
 import { describe, expect, test, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 
 import "@testing-library/jest-dom/vitest";
-import { MantineProvider } from "@mantine/core";
 import { CopyCode } from "./CopyCode";
+import { renderComponentForTest } from "@/testutils";
 
 describe("CopyCode", () => {
   test("copies text to navigator.clipboard when clicked", async () => {
@@ -25,7 +25,3 @@ describe("CopyCode", () => {
     expect(copiedCallbackSpy).toHaveBeenCalledExactlyOnceWith(expectedText);
   });
 });
-
-function renderComponentForTest(children: React.ReactNode) {
-  render(<MantineProvider>{children}</MantineProvider>);
-}

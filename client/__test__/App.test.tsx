@@ -1,7 +1,8 @@
 import { describe, expect, test } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import { App } from "../src/App";
-import { MantineProvider } from "@mantine/core";
+import { renderComponentForTest } from "../src/testutils";
+import "@testing-library/jest-dom/vitest";
 
 describe("App", () => {
   test("renders", () => {
@@ -12,7 +13,3 @@ describe("App", () => {
     expect(screen.getByText("Run History")).toBeVisible();
   });
 });
-
-function renderComponentForTest(children: React.ReactNode) {
-  render(<MantineProvider>{children}</MantineProvider>);
-}

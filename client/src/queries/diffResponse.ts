@@ -21,8 +21,15 @@ export const useDiffResponseMutation = () =>
         },
       });
 
-      const data = await response.text();
+      const body = await response.text();
 
-      return stripAnsi(data);
+      if (!response.ok) {
+        switch (response.status) {
+          default:
+            throw new Error(`Failed to get diff: ${body}`);
+        }
+      }
+
+      return stripAnsi(body);
     },
   });

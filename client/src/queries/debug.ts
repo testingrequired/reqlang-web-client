@@ -10,7 +10,17 @@ export const useGetDebugInfoQuery = () =>
     queryKey: DEBUG_KEYS.all,
     queryFn: async () => {
       const response = await fetch(`/api/debug`);
-      const data = (await response.json()) as DebugInfo;
+
+      const body = await response.text();
+
+      if (!response.ok) {
+        switch (response.status) {
+          default:
+            throw new Error(`Failed to get debug information: ${body}`);
+        }
+      }
+
+      const data = JSON.parse(body) as DebugInfo;
 
       return data;
     },
