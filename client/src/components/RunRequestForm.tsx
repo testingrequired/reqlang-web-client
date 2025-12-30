@@ -20,13 +20,13 @@ import { CopyCode } from "./CopyCode";
 import { useDisclosure } from "@mantine/hooks";
 
 type Props = {
-  result: ParseResult;
+  parseResult: ParseResult;
   requestFilePath: string;
   requestFileText: string;
 };
 
 export const RunRequestForm: React.FC<Props> = ({
-  result,
+  parseResult,
   requestFilePath,
   requestFileText,
 }) => {
@@ -51,11 +51,14 @@ export const RunRequestForm: React.FC<Props> = ({
   const form = useForm({
     ...formOptions({
       defaultValues: Object.fromEntries([
-        ["env", result.envs.length === 1 ? result.envs.at(0) : undefined],
-        ...result.secrets.map((secret) => [`secret-${secret}`, ""]),
-        ...result.prompts.map((prompt) => [
+        [
+          "env",
+          parseResult.envs.length === 1 ? parseResult.envs.at(0) : undefined,
+        ],
+        ...parseResult.secrets.map((secret) => [`secret-${secret}`, ""]),
+        ...parseResult.prompts.map((prompt) => [
           `prompt-${prompt}`,
-          result.default_prompt_values[prompt] ?? "",
+          parseResult.default_prompt_values[prompt] ?? "",
         ]),
       ]) as Record<string, string>,
     }),
@@ -73,7 +76,7 @@ export const RunRequestForm: React.FC<Props> = ({
         }
       }
 
-      const vars = result.full.config?.[0].envs?.[selectedEnv] ?? {};
+      const vars = parseResult.full.config?.[0].envs?.[selectedEnv] ?? {};
 
       const params = {
         reqfile: requestFileText,
@@ -89,9 +92,9 @@ export const RunRequestForm: React.FC<Props> = ({
   });
 
   const selectedEnv = useStore(form.store, (state) => state.values.env);
-  const envVarValues = result.full.config?.[0].envs?.[selectedEnv];
+  const envVarValues = parseResult.full.config?.[0].envs?.[selectedEnv];
 
-  const responseSpan = result.full.response?.[1];
+  const responseSpan = parseResult.full.response?.[1];
   const responseText = requestFileText.slice(
     responseSpan?.start,
     responseSpan?.end
@@ -115,7 +118,7 @@ export const RunRequestForm: React.FC<Props> = ({
       }}
     >
       <Stack>
-        {result.envs.length > 0 && (
+        {parseResult.envs.length > 0 && (
           <Card>
             <Stack>
               <form.Field
@@ -123,9 +126,9 @@ export const RunRequestForm: React.FC<Props> = ({
                 children={(field) => (
                   <Select
                     label="Environment"
-                    required={result.envs.length > 1}
-                    disabled={result.envs.length === 1}
-                    data={result.envs}
+                    required={parseResult.envs.length > 1}
+                    disabled={parseResult.envs.length === 1}
+                    data={parseResult.envs}
                     value={field.state.value}
                     onChange={(value) => {
                       if (value !== null) {
@@ -155,7 +158,7 @@ export const RunRequestForm: React.FC<Props> = ({
                   </Table.Tbody>
                 </Table>
               ) : (
-                result.vars.length > 0 && (
+                parseResult.vars.length > 0 && (
                   <>
                     <Alert>Select an environment to view variable values</Alert>
                     <Table>
@@ -167,7 +170,7 @@ export const RunRequestForm: React.FC<Props> = ({
                       </Table.Thead>
 
                       <Table.Tbody>
-                        {result.vars.map((key) => {
+                        {parseResult.vars.map((key) => {
                           return (
                             <Table.Tr>
                               <Table.Td>{key}</Table.Td>
@@ -184,10 +187,10 @@ export const RunRequestForm: React.FC<Props> = ({
           </Card>
         )}
 
-        {result.prompts.length > 0 && (
+        {parseResult.prompts.length > 0 && (
           <Card>
             <Text>Prompts</Text>
-            {result.prompts.map((prompts, i) => (
+            {parseResult.prompts.map((prompts, i) => (
               <form.Field
                 name={`prompt-${prompts}`}
                 key={i}
@@ -211,10 +214,10 @@ export const RunRequestForm: React.FC<Props> = ({
           </Card>
         )}
 
-        {result.secrets.length > 0 && (
+        {parseResult.secrets.length > 0 && (
           <Card>
             <Text>Secrets</Text>
-            {result.secrets.map((secret, i) => (
+            {parseResult.secrets.map((secret, i) => (
               <form.Field
                 name={`secret-${secret}`}
                 key={i}
