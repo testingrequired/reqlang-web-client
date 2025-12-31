@@ -94,6 +94,7 @@ export const Route = createRootRoute({
             activeProps={{
               style: { fontWeight: "bold" },
             }}
+            aria-label="Home"
           />
 
           <NavLink

@@ -47,7 +47,9 @@ function RouteComponent() {
       <Card>
         <Group>
           <IconFolderRoot />
-          <Text m={0}>{debugInfoQuery.data.cwd} </Text>
+          <Text m={0} data-testid="project-cwd">
+            {debugInfoQuery.data.cwd}
+          </Text>
         </Group>
       </Card>
 

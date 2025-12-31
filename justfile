@@ -143,7 +143,7 @@ test:
 clean-git-branches:
     git branch -d $(git branch --merged=main | grep -v main) && git fetch --prune
 
-e2e: build-release
+e2e:
   cd e2e && just test
 
 e2e-report:

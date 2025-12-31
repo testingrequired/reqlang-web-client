@@ -213,7 +213,10 @@ pub async fn init_server(
         StaticServeDir::new(&ASSETS_DIR)
     };
 
-    let current_dir_path = current_dir().expect("should have current directory");
+    let current_dir_path = match std::env::var("REQLANG_PROJECT_DIR") {
+        Ok(current_dir_path_env) => PathBuf::from(&current_dir_path_env),
+        Err(_) => current_dir().expect("should have current directory"),
+    };
 
     #[cfg(feature = "development_mode")]
     let current_dir_path = {

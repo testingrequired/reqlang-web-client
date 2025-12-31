@@ -1,5 +1,5 @@
 import { useOpenRequestFilesStore } from "@/stores/selectedRequestFile";
-import { CloseButton, Tabs } from "@mantine/core";
+import { CloseButton, Group, Tabs, Text } from "@mantine/core";
 import { useStore } from "zustand";
 import { OpenRequestFile } from "./OpenRequestFile";
 
@@ -21,8 +21,8 @@ export const OpenRequestFilesTabs = () => {
       onChange={openRequestFilesStore.setSelectedRequestFile}
     >
       <Tabs.List>
-        {openRequestFilesStore.openRequestFiles.map((selectedFile) => {
-          const selectedFileParts = selectedFile.split("/");
+        {openRequestFilesStore.openRequestFiles.map((openRequestFile) => {
+          const selectedFileParts = openRequestFile.split("/");
 
           let j = 0;
 
@@ -44,14 +44,28 @@ export const OpenRequestFilesTabs = () => {
           }
 
           return (
-            <Tabs.Tab value={selectedFile}>
-              {label}{" "}
-              <CloseButton
-                size="xs"
-                onClick={() => {
-                  openRequestFilesStore.closeRequestfile(selectedFile);
-                }}
-              />
+            <Tabs.Tab
+              value={openRequestFile}
+              fw={
+                openRequestFilesStore.selectedRequestFile === openRequestFile
+                  ? "bold"
+                  : "normal"
+              }
+              aria-label={openRequestFile}
+            >
+              <Group gap="xs">
+                <Text mb={0} size="sm">
+                  {label}
+                </Text>
+
+                <CloseButton
+                  size="sm"
+                  onClick={() => {
+                    openRequestFilesStore.closeRequestfile(openRequestFile);
+                  }}
+                  aria-label={`Close ${label}`}
+                />
+              </Group>
             </Tabs.Tab>
           );
         })}
