@@ -143,7 +143,18 @@ test:
 clean-git-branches:
     git branch -d $(git branch --merged=main | grep -v main) && git fetch --prune
 
-e2e:
+# Build the code for release
+build-for-e2e-release:
+    cd types && just build-release
+    just build-client-release
+    just build-server-for-e2e-release
+
+# Build the server for release
+[private]
+build-server-for-e2e-release:
+    cd server && just build-for-e2e-release
+
+e2e: build-for-e2e-release
   cd e2e && just test
 
 e2e-report:

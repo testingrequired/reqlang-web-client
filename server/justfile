@@ -14,6 +14,10 @@ build:
 build-release:
     cargo build --release
 
+# Build the code for release
+build-for-e2e-release:
+    cargo build --bin reqlang-web-browser --release
+
 run-dev port open:
     cargo run -F development_mode -- --port {{port}} --open {{open}} --db '../db.sqlite3'
 
