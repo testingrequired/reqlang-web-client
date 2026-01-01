@@ -154,7 +154,10 @@ build-for-e2e-release:
 build-server-for-e2e-release:
     cd server && just build-for-e2e-release
 
-e2e: build-for-e2e-release
+e2e-with-build: build-for-e2e-release
+  cd e2e && just test
+
+e2e:
   cd e2e && just test
 
 e2e-report:
