@@ -45,4 +45,26 @@ test.describe("Home", () => {
   test("has project cwd", async () => {
     await expect(home.projectCwdText()).resolves.toBe(REQLANG_PROJECT_DIR);
   });
+
+  test("has alert that no requests have ran yet", async () => {
+    await expect(home.latestRunsAlert).toBeVisible();
+  });
+
+  test("has documentation links", async () => {
+    await expect
+      .soft(home.doclinks)
+      .toHaveText([
+        "testingrequired/reqlang",
+        "testingrequired/reqlang-expr",
+        "HTTP messages - MDN",
+      ]);
+
+    await expect
+      .soft(home.docLinkUrls())
+      .resolves.toStrictEqual([
+        "https://github.com/testingrequired/reqlang",
+        "https://github.com/testingrequired/reqlang-expr",
+        "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Messages",
+      ]);
+  });
 });

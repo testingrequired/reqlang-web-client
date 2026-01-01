@@ -39,14 +39,40 @@ export class RootView {
 
 export class HomeView {
   readonly root: Locator;
+  readonly projectHeader: Locator;
+
+  /**
+   * Displays the absolute path to the open reqlang project
+   */
   private readonly projectCwd: Locator;
 
+  /**
+   * Advises user there hasn't been able request runs yet
+   */
+  readonly latestRunsAlert: Locator;
+
+  readonly doclinks: Locator;
+
   constructor(private readonly page: Page) {
-    this.root = this.page.getByTestId("root");
+    this.root = this.page.getByTestId("home-view");
+    this.projectHeader = this.root.getByRole("heading", {
+      name: "Project",
+    });
     this.projectCwd = this.root.getByTestId("project-cwd");
+    this.latestRunsAlert = this.root.getByTestId("latest-runs-alert");
+    this.doclinks = this.root
+      .getByTestId("doclinks")
+      .getByRole("listitem")
+      .getByRole("link");
   }
 
   async projectCwdText(): Promise<string> {
     return this.projectCwd.textContent();
+  }
+
+  async docLinkUrls(): Promise<string[]> {
+    return await Promise.all(
+      (await this.doclinks.all()).map((link) => link.getAttribute("href"))
+    );
   }
 }

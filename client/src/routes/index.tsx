@@ -42,7 +42,7 @@ function RouteComponent() {
   const lastRuns = runHistory.data.slice(0, 5);
 
   return (
-    <>
+    <Stack gap="xs" data-testid="home-view">
       <Title order={2}>Project</Title>
       <Card>
         <Group>
@@ -66,11 +66,13 @@ function RouteComponent() {
           </Anchor>
         </Stack>
       ) : (
-        <Alert>No requests have been ran yet.</Alert>
+        <Alert data-testid="latest-runs-alert">
+          No requests have been ran yet.
+        </Alert>
       )}
 
       <Title order={2}>Documentation</Title>
-      <Card>
+      <Card data-testid="doclinks">
         <List m={0} listStyleType="none" p={0}>
           <List.Item>
             <Group>
@@ -108,6 +110,6 @@ function RouteComponent() {
           </List.Item>
         </List>
       </Card>
-    </>
+    </Stack>
   );
 }
