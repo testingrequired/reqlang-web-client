@@ -12,6 +12,7 @@ import { defineConfig, devices } from "@playwright/test";
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
+  globalSetup: "./setup.ts",
   testDir: "./tests",
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -67,5 +68,8 @@ export default defineConfig({
     command: "just run-server",
     url: "http://[::1]:3123",
     reuseExistingServer: true,
+    env: {
+      REQLANG_PROJECT_DIR: process.env.REQLANG_PROJECT_DIR,
+    },
   },
 });

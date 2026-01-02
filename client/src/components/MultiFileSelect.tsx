@@ -48,6 +48,7 @@ export const MultiFilesSelect = ({
 
   return (
     <MultiSelect
+      name="multifile-select"
       placeholder="Select a request file"
       data={filesQuery.data}
       onChange={onChange}
@@ -58,6 +59,9 @@ export const MultiFilesSelect = ({
       disabled={disabled}
       autoFocus={autoFocus}
       onBlur={onBlur}
+      comboboxProps={{
+        withinPortal: false,
+      }}
     />
   );
 };

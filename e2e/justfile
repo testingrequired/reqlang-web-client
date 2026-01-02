@@ -21,5 +21,5 @@ run-server:
     cd ../target/release && ./reqlang-web-browser --db 'sqlite::memory:' --port=3123 --open false
 
 # Run all tests
-test $REQLANG_PROJECT_DIR="{{cache_directory()}}/uuid()":
-    rm -rf $REQLANG_PROJECT_DIR && npm run test
+test:
+    REQLANG_PROJECT_DIR={{join(cache_directory(), "reqlang-web-e2e", uuid())}} npm run test

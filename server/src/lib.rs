@@ -213,17 +213,17 @@ pub async fn init_server(
         StaticServeDir::new(&ASSETS_DIR)
     };
 
-    let current_dir_path = match std::env::var("REQLANG_PROJECT_DIR") {
-        Ok(current_dir_path_env) => PathBuf::from(&current_dir_path_env),
+    let reqlang_project_dir = match std::env::var("REQLANG_PROJECT_DIR") {
+        Ok(reqlang_project_dir) => PathBuf::from(&reqlang_project_dir),
         Err(_) => current_dir().expect("should have current directory"),
     };
 
     #[cfg(feature = "development_mode")]
-    let current_dir_path = {
-        let current_dir_path = current_dir_path.parent().unwrap().to_path_buf();
-        dbg!(&current_dir_path);
+    let reqlang_project_dir = {
+        let reqlang_project_dir = reqlang_project_dir.parent().unwrap().to_path_buf();
+        dbg!(&reqlang_project_dir);
 
-        current_dir_path
+        reqlang_project_dir
     };
 
     // Default path to database in order of priority
@@ -235,7 +235,7 @@ pub async fn init_server(
         let db_path_env_var = std::env::var(DATABASE_URL_ENV_VAR);
 
         db_path_env_var.unwrap_or(
-            current_dir_path
+            reqlang_project_dir
                 .join(DEFAULT_DB_FILENAME)
                 .to_string_lossy()
                 .to_string(),
@@ -245,12 +245,10 @@ pub async fn init_server(
     let db_pool = connect_to_db(db.unwrap_or(default_db_path)).await;
 
     let state = AppState {
-        home_dir: current_dir_path,
+        home_dir: reqlang_project_dir,
         db: Some(db_pool),
         tx: None,
     };
-
-    dbg!(&state);
 
     let state = Arc::new(Mutex::new(state));
 
@@ -517,7 +515,7 @@ pub async fn get_debug_info(
 ) -> (StatusCode, Json<DebugInfo>) {
     let state = state.clone();
 
-    let cwd = {
+    let reqlang_project_dir = {
         let state = state.lock().await;
 
         let cwd = state.home_dir.clone();
@@ -541,7 +539,11 @@ pub async fn get_debug_info(
 
     let commit = env!("GIT_HASH").to_string();
 
-    let debug_info = DebugInfo { cwd, db, commit };
+    let debug_info = DebugInfo {
+        cwd: reqlang_project_dir,
+        db,
+        commit,
+    };
 
     let _ = achievements_service::complete_achievement(state.clone(), AchievementId::WHATS_IN_HERE)
         .await;

@@ -9,7 +9,7 @@ export const Route = createFileRoute("/requests/")({
 
 function RouteComponent() {
   return (
-    <Stack>
+    <Stack data-testid="requests-view">
       <OpenedRequestFilesForm />
 
       <OpenRequestFilesTabs />

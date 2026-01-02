@@ -19,6 +19,7 @@ export const OpenRequestFilesTabs = () => {
     <Tabs
       value={openRequestFilesStore.selectedRequestFile}
       onChange={openRequestFilesStore.setSelectedRequestFile}
+      data-testid="open-request-file-tabs"
     >
       <Tabs.List>
         {openRequestFilesStore.openRequestFiles.map((openRequestFile) => {

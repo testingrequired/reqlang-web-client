@@ -35,6 +35,12 @@ export class RootView {
 
     return new HomeView(this.page);
   }
+
+  public async gotoRequests(): Promise<RequestsView> {
+    await this.requestLink.click();
+
+    return new RequestsView(this.page);
+  }
 }
 
 export class HomeView {
@@ -74,5 +80,43 @@ export class HomeView {
     return await Promise.all(
       (await this.doclinks.all()).map((link) => link.getAttribute("href"))
     );
+  }
+}
+
+export class RequestsView {
+  readonly root: Locator;
+  readonly openFileSelectorButton: Locator;
+  readonly closeAllFilesButton: Locator;
+  readonly fileSelectorTextbox: Locator;
+  readonly fileSelectorOptions: Locator;
+  readonly openFileTabs: Locator;
+
+  constructor(private readonly page: Page) {
+    this.root = this.page.getByTestId("requests-view");
+    this.openFileSelectorButton = this.root.getByRole("button", {
+      name: "Open/Close Request Files",
+    });
+    this.closeAllFilesButton = this.root.getByRole("button", {
+      name: "Close All Request Files",
+    });
+    this.fileSelectorTextbox = this.root.getByRole("textbox", {
+      name: "Select a request file",
+    });
+    this.fileSelectorOptions = this.root.getByRole("option");
+    this.openFileTabs = this.root.getByTestId("open-request-file-tabs");
+  }
+
+  async selectRequestFile(requestFile: string) {
+    return this.root
+      .getByRole("option", {
+        name: requestFile,
+      })
+      .click();
+  }
+
+  requestFileTabByName(requestFile: string): Locator {
+    return this.openFileTabs.getByRole("tab", {
+      name: requestFile,
+    });
   }
 }
