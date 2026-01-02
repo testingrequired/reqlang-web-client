@@ -2,9 +2,11 @@ import { test, expect } from "@playwright/test";
 import { REQLANG_PROJECT_DIR } from "@/test";
 import { HomeView, RequestsView, RootView } from "@/test/page_objects";
 
+const { beforeEach, describe } = test;
+
 let root: RootView;
 
-test.beforeEach(async ({ page }) => {
+beforeEach(async ({ page }) => {
   root = new RootView(page);
 
   await root.goto();
@@ -14,7 +16,7 @@ test("has title", async ({ page }) => {
   await expect(page).toHaveTitle("reqlang-web");
 });
 
-test.describe("Root", () => {
+describe("Root", () => {
   test("has home link", async ({ page }) => {
     await expect(root.homeLink).toBeVisible();
   });
@@ -32,10 +34,10 @@ test.describe("Root", () => {
   });
 });
 
-test.describe("Home", () => {
+describe("Home", () => {
   let home: HomeView;
 
-  test.beforeEach(async () => {
+  beforeEach(async () => {
     home = await root.gotoHome();
   });
 
@@ -73,10 +75,10 @@ test.describe("Home", () => {
   });
 });
 
-test.describe("Requests", () => {
+describe("Requests", () => {
   let requests: RequestsView;
 
-  test.beforeEach(async () => {
+  beforeEach(async () => {
     requests = await root.gotoRequests();
   });
 
@@ -84,7 +86,7 @@ test.describe("Requests", () => {
     await expect(page).toHaveTitle("reqlang-web");
   });
 
-  test.describe("when no request files open", () => {
+  describe("when no request files open", () => {
     test("has open files button", async () => {
       await expect(
         requests.openRequestFilesForm.openFileSelectorButton
@@ -97,8 +99,8 @@ test.describe("Requests", () => {
       ).not.toBeVisible();
     });
 
-    test.describe("when click to open request file selector", () => {
-      test.beforeEach(async () => {
+    describe("when click to open request file selector", () => {
+      beforeEach(async () => {
         await requests.openRequestFilesForm.openFileSelectorButton.click();
       });
 
@@ -134,8 +136,8 @@ test.describe("Requests", () => {
         ]);
       });
 
-      test.describe("when selected a request file", () => {
-        test.beforeEach(async () => {
+      describe("when selected a request file", () => {
+        beforeEach(async () => {
           await requests.openRequestFilesForm.selectRequestFile(
             "api_debug.reqlang"
           );
@@ -169,8 +171,8 @@ test.describe("Requests", () => {
           await expect(requests.openFileTabs.tabPanel).toBeVisible();
         });
 
-        test.describe("when closing all files", () => {
-          test.beforeEach(async () => {
+        describe("when closing all files", () => {
+          beforeEach(async () => {
             await requests.openRequestFilesForm.closeAllButton.click();
           });
 
