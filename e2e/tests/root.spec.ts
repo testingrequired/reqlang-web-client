@@ -159,6 +159,30 @@ test.describe("Requests", () => {
             requests.requestFileTabByName("api_debug.reqlang")
           ).toBeVisible();
         });
+
+        test.describe("when closing all files", () => {
+          test.beforeEach(async () => {
+            await requests.openRequestFilesForm.closeAllButton.click();
+          });
+
+          test("has open files button", async () => {
+            await expect(
+              requests.openRequestFilesForm.openFileSelectorButton
+            ).toBeVisible();
+          });
+
+          test("does not have close all files button", async () => {
+            await expect(
+              requests.openRequestFilesForm.closeAllButton
+            ).not.toBeVisible();
+          });
+
+          test("does not display the open request files", async () => {
+            await expect(
+              requests.requestFileTabByName("api_debug.reqlang")
+            ).not.toBeVisible();
+          });
+        });
       });
     });
   });
