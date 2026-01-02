@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
-import { HomeView, REQLANG_PROJECT_DIR, RequestsView, RootView } from "@/test";
+import { REQLANG_PROJECT_DIR } from "@/test";
+import { HomeView, RequestsView, RootView } from "@/test/page_objects";
 
 let root: RootView;
 
