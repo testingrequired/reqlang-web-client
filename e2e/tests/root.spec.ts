@@ -85,32 +85,40 @@ test.describe("Requests", () => {
 
   test.describe("when no request files open", () => {
     test("has open files button", async () => {
-      await expect(requests.openFileSelectorButton).toBeVisible();
+      await expect(
+        requests.openRequestFilesForm.openFileSelectorButton
+      ).toBeVisible();
     });
 
     test("does not have  close all files button", async () => {
-      await expect(requests.closeAllFilesButton).not.toBeVisible();
+      await expect(
+        requests.openRequestFilesForm.closeAllButton
+      ).not.toBeVisible();
     });
 
     test.describe("when click to open request file selector", () => {
       test.beforeEach(async () => {
-        await requests.openFileSelectorButton.click();
+        await requests.openRequestFilesForm.openFileSelectorButton.click();
       });
 
       test("does not have open files button", async () => {
-        await expect(requests.openFileSelectorButton).not.toBeVisible();
+        await expect(
+          requests.openRequestFilesForm.openFileSelectorButton
+        ).not.toBeVisible();
       });
 
       test("does not have  close all files button", async () => {
-        await expect(requests.closeAllFilesButton).not.toBeVisible();
+        await expect(
+          requests.openRequestFilesForm.closeAllButton
+        ).not.toBeVisible();
       });
 
       test("has request file selector textbox", async () => {
-        await expect(requests.fileSelectorTextbox).toBeVisible();
+        await expect(requests.openRequestFilesForm.selectTextbox).toBeVisible();
       });
 
       test("has request file selector options", async () => {
-        await expect(requests.fileSelectorOptions).toHaveText([
+        await expect(requests.openRequestFilesForm.selectOptions).toHaveText([
           "api_debug.reqlang",
           "api_file.reqlang",
           "api_files.reqlang",
@@ -127,17 +135,23 @@ test.describe("Requests", () => {
 
       test.describe("when selected a request file", () => {
         test.beforeEach(async () => {
-          await requests.selectRequestFile("api_debug.reqlang");
+          await requests.openRequestFilesForm.selectRequestFile(
+            "api_debug.reqlang"
+          );
 
-          await requests.fileSelectorTextbox.press("Tab");
+          await requests.openRequestFilesForm.blur();
         });
 
         test("has open files button", async () => {
-          await expect(requests.openFileSelectorButton).toBeVisible();
+          await expect(
+            requests.openRequestFilesForm.openFileSelectorButton
+          ).toBeVisible();
         });
 
         test("has close all files button", async () => {
-          await expect(requests.closeAllFilesButton).toBeVisible();
+          await expect(
+            requests.openRequestFilesForm.closeAllButton
+          ).toBeVisible();
         });
 
         test("displays the open request file", async () => {

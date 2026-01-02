@@ -5,16 +5,27 @@ import { expect, Locator, Page } from "@playwright/test";
  */
 export const REQLANG_PROJECT_DIR = process.env.REQLANG_PROJECT_DIR;
 
-export class RootView {
-  readonly root: Locator;
+class PageObject {
+  constructor(
+    protected readonly page: Page,
+    protected readonly root: Locator
+  ) {}
+
+  getLocator(): Locator {
+    return this.root;
+  }
+}
+
+export class RootView extends PageObject {
   readonly nav: Locator;
   readonly homeLink: Locator;
   readonly requestLink: Locator;
   readonly runHistoryLink: Locator;
   readonly debugLink: Locator;
 
-  constructor(private readonly page: Page) {
-    this.root = this.page.getByTestId("root");
+  constructor(page: Page) {
+    super(page, page.getByTestId("root"));
+
     this.nav = this.root.getByRole("navigation");
     this.homeLink = this.nav.getByRole("link", { name: "Home" });
     this.requestLink = this.nav.getByRole("link", { name: "Request" });
@@ -43,8 +54,7 @@ export class RootView {
   }
 }
 
-export class HomeView {
-  readonly root: Locator;
+export class HomeView extends PageObject {
   readonly projectHeader: Locator;
 
   /**
@@ -59,8 +69,8 @@ export class HomeView {
 
   readonly doclinks: Locator;
 
-  constructor(private readonly page: Page) {
-    this.root = this.page.getByTestId("home-view");
+  constructor(page: Page) {
+    super(page, page.getByTestId("home-view"));
     this.projectHeader = this.root.getByRole("heading", {
       name: "Project",
     });
@@ -83,27 +93,25 @@ export class HomeView {
   }
 }
 
-export class RequestsView {
-  readonly root: Locator;
+export class OpenedRequestFilesForm extends PageObject {
   readonly openFileSelectorButton: Locator;
-  readonly closeAllFilesButton: Locator;
-  readonly fileSelectorTextbox: Locator;
-  readonly fileSelectorOptions: Locator;
-  readonly openFileTabs: Locator;
+  readonly closeAllButton: Locator;
+  readonly selectTextbox: Locator;
+  readonly selectOptions: Locator;
 
-  constructor(private readonly page: Page) {
-    this.root = this.page.getByTestId("requests-view");
+  constructor(readonly page: Page) {
+    super(page, page.getByTestId("requests-view"));
+
     this.openFileSelectorButton = this.root.getByRole("button", {
       name: "Open/Close Request Files",
     });
-    this.closeAllFilesButton = this.root.getByRole("button", {
+    this.closeAllButton = this.root.getByRole("button", {
       name: "Close All Request Files",
     });
-    this.fileSelectorTextbox = this.root.getByRole("textbox", {
+    this.selectTextbox = this.root.getByRole("textbox", {
       name: "Select a request file",
     });
-    this.fileSelectorOptions = this.root.getByRole("option");
-    this.openFileTabs = this.root.getByTestId("open-request-file-tabs");
+    this.selectOptions = this.root.getByRole("option");
   }
 
   async selectRequestFile(requestFile: string) {
@@ -112,6 +120,21 @@ export class RequestsView {
         name: requestFile,
       })
       .click();
+  }
+
+  async blur() {
+    return this.selectTextbox.press("Tab");
+  }
+}
+
+export class RequestsView extends PageObject {
+  readonly openRequestFilesForm: OpenedRequestFilesForm;
+  readonly openFileTabs: Locator;
+
+  constructor(page: Page) {
+    super(page, page.getByTestId("requests-view"));
+    this.openRequestFilesForm = new OpenedRequestFilesForm(page);
+    this.openFileTabs = this.root.getByTestId("open-request-file-tabs");
   }
 
   requestFileTabByName(requestFile: string): Locator {
