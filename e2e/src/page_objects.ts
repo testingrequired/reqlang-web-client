@@ -141,4 +141,10 @@ export class OpenRequestFilesTabs extends PageObject {
       name: requestFile,
     });
   }
+
+  closeTab(requestFile: string): Locator {
+    return this.tabList.getByRole("button", {
+      name: `Close ${requestFile}`,
+    });
+  }
 }

@@ -137,9 +137,11 @@ describe("Requests", () => {
       });
 
       describe("when selected a request file", () => {
+        const expectedRequestFile = "api_debug.reqlang";
+
         beforeEach(async () => {
           await requests.openRequestFilesForm.selectRequestFile(
-            "api_debug.reqlang"
+            expectedRequestFile
           );
 
           await requests.openRequestFilesForm.blur();
@@ -163,12 +165,36 @@ describe("Requests", () => {
 
         test("displays the open request file tab", async () => {
           await expect(
-            requests.openFileTabs.getTab("api_debug.reqlang")
+            requests.openFileTabs.getTab(expectedRequestFile)
           ).toBeVisible();
         });
 
         test("displays the open request file tab panel", async () => {
           await expect(requests.openFileTabs.tabPanel).toBeVisible();
+        });
+
+        describe("when closing single file", () => {
+          beforeEach(async () => {
+            await requests.openFileTabs.closeTab(expectedRequestFile).click();
+          });
+
+          test("has open files button", async () => {
+            await expect(
+              requests.openRequestFilesForm.openFileSelectorButton
+            ).toBeVisible();
+          });
+
+          test("does not have close all files button", async () => {
+            await expect(
+              requests.openRequestFilesForm.closeAllButton
+            ).not.toBeVisible();
+          });
+
+          test("does not display the open request files", async () => {
+            await expect(
+              requests.openFileTabs.getTab(expectedRequestFile)
+            ).not.toBeVisible();
+          });
         });
 
         describe("when closing all files", () => {
@@ -190,7 +216,7 @@ describe("Requests", () => {
 
           test("does not display the open request files", async () => {
             await expect(
-              requests.openFileTabs.getTab("api_debug.reqlang")
+              requests.openFileTabs.getTab(expectedRequestFile)
             ).not.toBeVisible();
           });
         });
