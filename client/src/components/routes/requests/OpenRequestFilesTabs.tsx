@@ -73,7 +73,11 @@ export const OpenRequestFilesTabs = () => {
       </Tabs.List>
 
       {openRequestFilesStore.openRequestFiles.map((selectedFile) => (
-        <Tabs.Panel value={selectedFile} key={selectedFile}>
+        <Tabs.Panel
+          value={selectedFile}
+          key={selectedFile}
+          data-testid="open-request-file-tabs-panel"
+        >
           <OpenRequestFile requestFilePath={selectedFile} />
         </Tabs.Panel>
       ))}

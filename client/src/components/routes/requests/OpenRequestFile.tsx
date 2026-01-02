@@ -66,7 +66,7 @@ export const OpenRequestFile = ({ requestFilePath }: OpenRequestFileProps) => {
               <Tabs.Tab value="file">File</Tabs.Tab>
             </Tabs.List>
 
-            <Tabs.Panel value="run" p="md">
+            <Tabs.Panel value="run" p="md" aria-level={2}>
               <RunRequestForm
                 parseResult={parseResult}
                 requestFilePath={requestFilePath}
@@ -74,11 +74,11 @@ export const OpenRequestFile = ({ requestFilePath }: OpenRequestFileProps) => {
               />
             </Tabs.Panel>
 
-            <Tabs.Panel value="history" p="md">
+            <Tabs.Panel value="history" p="md" aria-level={2}>
               <RequestRunHistory requestFilePath={requestFilePath} />
             </Tabs.Panel>
 
-            <Tabs.Panel value="file" p="md">
+            <Tabs.Panel value="file" p="md" aria-level={2}>
               <Card>
                 <CopyCode text={requestFileContent}>
                   {requestFileContent}

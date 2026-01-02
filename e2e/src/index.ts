@@ -5,7 +5,11 @@ import { expect, Locator, Page } from "@playwright/test";
  */
 export const REQLANG_PROJECT_DIR = process.env.REQLANG_PROJECT_DIR;
 
-class PageObject {
+interface IPageObject {
+  getLocator(): Locator;
+}
+
+class PageObject implements IPageObject {
   constructor(
     protected readonly page: Page,
     protected readonly root: Locator
@@ -129,16 +133,30 @@ export class OpenedRequestFilesForm extends PageObject {
 
 export class RequestsView extends PageObject {
   readonly openRequestFilesForm: OpenedRequestFilesForm;
-  readonly openFileTabs: Locator;
+  readonly openFileTabs: OpenRequestFilesTabs;
 
   constructor(page: Page) {
     super(page, page.getByTestId("requests-view"));
     this.openRequestFilesForm = new OpenedRequestFilesForm(page);
-    this.openFileTabs = this.root.getByTestId("open-request-file-tabs");
+    this.openFileTabs = new OpenRequestFilesTabs(page);
+  }
+}
+
+export class OpenRequestFilesTabs extends PageObject {
+  readonly tabList: Locator;
+  readonly tabs: Locator;
+  readonly tabPanel: Locator;
+
+  constructor(page: Page) {
+    super(page, page.getByTestId("open-request-file-tabs"));
+
+    this.tabList = this.root.getByRole("tablist");
+    this.tabs = this.tabList.getByRole("tab");
+    this.tabPanel = this.root.getByTestId("open-request-file-tabs-panel");
   }
 
-  requestFileTabByName(requestFile: string): Locator {
-    return this.openFileTabs.getByRole("tab", {
+  getTab(requestFile: string): Locator {
+    return this.tabList.getByRole("tab", {
       name: requestFile,
     });
   }

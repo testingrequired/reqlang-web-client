@@ -154,10 +154,18 @@ test.describe("Requests", () => {
           ).toBeVisible();
         });
 
-        test("displays the open request file", async () => {
+        test("displays the open request file tabs", async () => {
+          await expect(requests.openFileTabs.getLocator()).toBeVisible();
+        });
+
+        test("displays the open request file tab", async () => {
           await expect(
-            requests.requestFileTabByName("api_debug.reqlang")
+            requests.openFileTabs.getTab("api_debug.reqlang")
           ).toBeVisible();
+        });
+
+        test("displays the open request file tab panel", async () => {
+          await expect(requests.openFileTabs.tabPanel).toBeVisible();
         });
 
         test.describe("when closing all files", () => {
@@ -179,7 +187,7 @@ test.describe("Requests", () => {
 
           test("does not display the open request files", async () => {
             await expect(
-              requests.requestFileTabByName("api_debug.reqlang")
+              requests.openFileTabs.getTab("api_debug.reqlang")
             ).not.toBeVisible();
           });
         });
