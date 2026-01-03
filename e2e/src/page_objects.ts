@@ -111,6 +111,10 @@ export class OpenedRequestFilesForm extends PageObject {
     this.selectOptions = this.root.getByRole("option");
   }
 
+  async openFileSelector() {
+    await this.openFileSelectorButton.click();
+  }
+
   async selectRequestFile(requestFile: string) {
     return this.root
       .getByRole("option", {

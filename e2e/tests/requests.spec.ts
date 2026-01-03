@@ -27,13 +27,13 @@ describe("Requests", () => {
       await requests.openRequestFilesForm.expectHasOpenFileSelectorButton();
     });
 
-    test("does not have  close all files button", async () => {
+    test("does not have close all files button", async () => {
       await requests.openRequestFilesForm.expectNotToHaveCloseAllButton();
     });
 
     describe("when click to open request file selector", () => {
       beforeEach(async () => {
-        await requests.openRequestFilesForm.openFileSelectorButton.click();
+        await requests.openRequestFilesForm.openFileSelector();
       });
 
       test("does not have open files button", async () => {
