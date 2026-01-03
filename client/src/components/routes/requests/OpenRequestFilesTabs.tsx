@@ -76,7 +76,7 @@ export const OpenRequestFilesTabs = () => {
         <Tabs.Panel
           value={selectedFile}
           key={selectedFile}
-          data-testid="open-request-file-tabs-panel"
+          data-testid="active-request-file-tab-panel"
         >
           <OpenRequestFile requestFilePath={selectedFile} />
         </Tabs.Panel>

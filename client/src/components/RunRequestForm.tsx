@@ -110,6 +110,7 @@ export const RunRequestForm: React.FC<Props> = ({
 
   return (
     <form
+      data-testid="run-request-form"
       onSubmit={(e) => {
         e.preventDefault();
         e.stopPropagation();

@@ -49,8 +49,8 @@ export const OpenRequestFile = ({ requestFilePath }: OpenRequestFileProps) => {
   const requestFileContent = requestFileContentQuery.data as string;
 
   return (
-    <Stack>
-      <Card>
+    <Stack data-testid="active-request-file">
+      <Card data-testid="request-body-template">
         <RequestFromRequestFile
           result={parseResult}
           requestFileText={requestFileContent}

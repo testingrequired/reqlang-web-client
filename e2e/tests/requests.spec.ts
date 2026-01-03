@@ -87,12 +87,24 @@ describe("Requests", () => {
           await requests.openFileTabs.expectToBeVisible();
         });
 
-        test("displays the open request file tab", async () => {
-          await requests.openFileTabs.expectHasTab(expectedRequestFile);
+        test("displays the expected request file tab", async () => {
+          await requests.openFileTabs.expectHasFileTabOpen(expectedRequestFile);
+        });
+
+        test("displays the expected request file tab as active", async () => {
+          await requests.openFileTabs.expectIsFileTabActive(
+            expectedRequestFile
+          );
         });
 
         test("displays the open request file tab panel", async () => {
-          await requests.openFileTabs.expectTabPanelOpen();
+          await requests.openFileTabs.expectHasActiveRequestTabContents();
+        });
+
+        test("displays the expected request file's HTTP request", async () => {
+          await requests.openFileTabs.activeRequestFile.expectToHaveRequestBodyTemplate(
+            "GET {{@clientUrl}}/api/debug HTTP/1.1"
+          );
         });
 
         describe("when closing single file", () => {

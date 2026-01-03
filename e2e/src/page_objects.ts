@@ -163,39 +163,69 @@ export class RequestsView extends PageObject {
   }
 }
 
+export class ActiveRequestFile extends PageObject {
+  readonly requestBodyTemplate: Locator;
+
+  constructor(page: Page) {
+    super(page, page.getByTestId("active-request-file"));
+    this.requestBodyTemplate = this.root.getByTestId("request-body-template");
+  }
+
+  async expectToHaveRequestBodyTemplate(expected: string) {
+    await expect(this.requestBodyTemplate).toHaveText(expected);
+  }
+}
+
+export class RunRequestForm extends PageObject {
+  constructor(page: Page) {
+    super(page, page.getByTestId("run-request-form"));
+  }
+}
+
 export class OpenRequestFilesTabs extends PageObject {
   readonly tabList: Locator;
   readonly tabs: Locator;
   readonly tabPanel: Locator;
+  readonly activeRequestFile: ActiveRequestFile;
 
   constructor(page: Page) {
     super(page, page.getByTestId("open-request-file-tabs"));
 
     this.tabList = this.root.getByRole("tablist");
     this.tabs = this.tabList.getByRole("tab");
-    this.tabPanel = this.root.getByTestId("open-request-file-tabs-panel");
+    this.tabPanel = this.root.getByTestId("active-request-file-tab-panel");
+    this.activeRequestFile = new ActiveRequestFile(page);
   }
 
-  getTab(requestFile: string): Locator {
+  getTabByName(requestFile: string): Locator {
     return this.tabList.getByRole("tab", {
       name: requestFile,
     });
   }
 
-  async expectHasTab(requestFile: string) {
-    await expect(this.getTab(requestFile)).toBeVisible();
+  async expectHasFileTabOpen(requestFile: string) {
+    await expect(this.getTabByName(requestFile)).toBeVisible();
+  }
+
+  async expectIsFileTabActive(requestFile: string) {
+    await expect(this.getTabByName(requestFile)).toHaveAttribute(
+      "data-active",
+      "true"
+    );
   }
 
   async expectNotHaveTab(requestFile: string) {
-    await expect(this.getTab(requestFile)).toBeHidden();
+    await expect(this.getTabByName(requestFile)).toBeHidden();
   }
 
-  async expectTabPanelOpen() {
-    await expect(this.tabPanel).toBeVisible();
+  async expectHasActiveRequestTabContents() {
+    await expect.soft(this.tabPanel).toBeVisible();
+    await expect.soft(this.activeRequestFile.getLocator()).toBeVisible();
   }
 
-  async expectTabPanelClosed() {
-    await expect(this.tabPanel).toBeHidden();
+  async expectNotHaveActiveRequestTabContents() {
+    await expect.soft(this.tabPanel).toBeHidden();
+    await expect.soft(this.activeRequestFile.getLocator()).toBeHidden();
   }
 
   closeTab(requestFile: string): Locator {
