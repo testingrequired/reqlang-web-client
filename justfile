@@ -160,6 +160,9 @@ e2e-with-build: build-for-e2e-release
 e2e:
   cd e2e && just test
 
+e2e-ui-mode:
+  cd e2e && just test-ui-mode
+
 e2e-report:
   cd e2e && npm run report
 

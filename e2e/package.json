@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "npx playwright test --trace on",
+    "test-ui-mode": "npm test -- --ui",
     "report": "npx playwright show-report"
   },
   "keywords": [],
