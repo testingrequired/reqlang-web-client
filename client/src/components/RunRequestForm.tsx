@@ -272,9 +272,11 @@ export const RunRequestForm: React.FC<Props> = ({
                   <Text pb={0} fw="bold">
                     Request
                   </Text>
-                  <CopyCode text={exportRequest.data!}>
-                    {exportRequest.data}
-                  </CopyCode>
+                  <div data-testid="request-body-preview">
+                    <CopyCode text={exportRequest.data!}>
+                      {exportRequest.data}
+                    </CopyCode>
+                  </div>
                 </Card>
               </>
             )

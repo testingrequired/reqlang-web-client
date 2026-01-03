@@ -107,6 +107,19 @@ describe("Requests", () => {
           );
         });
 
+        describe("when previewing the request", () => {
+          beforeEach(async () => {
+            await requests.openFileTabs.activeRequestFile.runRequestForm.enablePreviewRequest();
+          });
+
+          test("has the request body preview", async () => {
+            await requests.openFileTabs.activeRequestFile.runRequestForm.submitForm();
+            await requests.openFileTabs.activeRequestFile.runRequestForm.expectRequestBodyPreview(
+              "GET http://[::1]:3123/api/debug HTTP/1.1"
+            );
+          });
+        });
+
         describe("when closing single file", () => {
           beforeEach(async () => {
             await requests.openFileTabs.closeTab(expectedRequestFile).click();

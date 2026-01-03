@@ -165,10 +165,12 @@ export class RequestsView extends PageObject {
 
 export class ActiveRequestFile extends PageObject {
   readonly requestBodyTemplate: Locator;
+  readonly runRequestForm: RunRequestForm;
 
   constructor(page: Page) {
     super(page, page.getByTestId("active-request-file"));
     this.requestBodyTemplate = this.root.getByTestId("request-body-template");
+    this.runRequestForm = new RunRequestForm(page);
   }
 
   async expectToHaveRequestBodyTemplate(expected: string) {
@@ -177,8 +179,41 @@ export class ActiveRequestFile extends PageObject {
 }
 
 export class RunRequestForm extends PageObject {
+  readonly previewRequestToggle: Locator;
+  readonly runRequestButton: Locator;
+  readonly requestBodyPreview: Locator;
+
   constructor(page: Page) {
     super(page, page.getByTestId("run-request-form"));
+
+    this.previewRequestToggle = this.root.getByText("Preview Request");
+
+    this.runRequestButton = this.root.getByRole("button", {
+      name: /^(Run)(?: \(Preview\))?$/,
+    });
+
+    this.requestBodyPreview = this.root.getByTestId("request-body-preview");
+  }
+
+  async enablePreviewRequest() {
+    await this.previewRequestToggle.click({
+      timeout: 5000,
+    });
+    // await this.previewRequestToggle.setChecked(true, {
+    //   timeout: 5000,
+    // });
+  }
+
+  async disablePreviewRequest() {
+    await this.previewRequestToggle.setChecked(false);
+  }
+
+  async submitForm() {
+    await this.runRequestButton.click();
+  }
+
+  async expectRequestBodyPreview(expected: string) {
+    await expect(this.requestBodyPreview).toHaveText(expected);
   }
 }
 
