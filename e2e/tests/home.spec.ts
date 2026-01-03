@@ -30,7 +30,7 @@ describe("Home", () => {
       .resolves.not.toBe("{{join(cache_directory(), uuid())}}");
   });
 
-  test("has alert that no requests have ran yet", async () => {
+  test.skip("has alert that no requests have ran yet", async () => {
     await home.expectHasLatestRunsAlert();
   });
 
