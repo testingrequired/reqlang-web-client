@@ -18,4 +18,8 @@ export class PageObject implements IPageObject {
   getLocator(): Locator {
     return this.root;
   }
+
+  async expectToBeVisible() {
+    await expect(this.getLocator()).toBeVisible();
+  }
 }

@@ -76,6 +76,18 @@ export class HomeView extends PageObject {
       (await this.doclinks.all()).map((link) => link.getAttribute("href"))
     );
   }
+
+  async expectHasLatestRunsAlert() {
+    await expect(this.latestRunsAlert).toBeVisible();
+  }
+
+  async expectHasDocLinks(expected: Record<string, string>) {
+    await expect.soft(this.doclinks).toHaveText(Object.keys(expected));
+
+    await expect
+      .soft(this.docLinkUrls())
+      .resolves.toStrictEqual(Object.values(expected));
+  }
 }
 
 export class OpenedRequestFilesForm extends PageObject {
@@ -110,6 +122,30 @@ export class OpenedRequestFilesForm extends PageObject {
   async blur() {
     return this.selectTextbox.press("Tab");
   }
+
+  async expectHasOpenFileSelectorButton() {
+    await expect(this.openFileSelectorButton).toBeVisible();
+  }
+
+  async expectNotToHaveOpenFileSelectorButton() {
+    await expect(this.openFileSelectorButton).not.toBeVisible();
+  }
+
+  async expectHasCloseAllButton() {
+    await expect(this.closeAllButton).toBeVisible();
+  }
+
+  async expectNotToHaveCloseAllButton() {
+    await expect(this.closeAllButton).not.toBeVisible();
+  }
+
+  async expectToHaveTextbox() {
+    await expect(this.selectTextbox).toBeVisible();
+  }
+
+  async expectToHaveSelectOptions(expectedOptions: string[]) {
+    await expect(this.selectOptions).toHaveText(expectedOptions);
+  }
 }
 
 export class RequestsView extends PageObject {
@@ -140,6 +176,22 @@ export class OpenRequestFilesTabs extends PageObject {
     return this.tabList.getByRole("tab", {
       name: requestFile,
     });
+  }
+
+  async expectHasTab(requestFile: string) {
+    await expect(this.getTab(requestFile)).toBeVisible();
+  }
+
+  async expectNotHaveTab(requestFile: string) {
+    await expect(this.getTab(requestFile)).toBeHidden();
+  }
+
+  async expectTabPanelOpen() {
+    await expect(this.tabPanel).toBeVisible();
+  }
+
+  async expectTabPanelClosed() {
+    await expect(this.tabPanel).toBeHidden();
   }
 
   closeTab(requestFile: string): Locator {

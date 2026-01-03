@@ -53,25 +53,17 @@ describe("Home", () => {
   });
 
   test("has alert that no requests have ran yet", async () => {
-    await expect(home.latestRunsAlert).toBeVisible();
+    await home.expectHasLatestRunsAlert();
   });
 
   test("has documentation links", async () => {
-    await expect
-      .soft(home.doclinks)
-      .toHaveText([
-        "testingrequired/reqlang",
-        "testingrequired/reqlang-expr",
-        "HTTP messages - MDN",
-      ]);
-
-    await expect
-      .soft(home.docLinkUrls())
-      .resolves.toStrictEqual([
-        "https://github.com/testingrequired/reqlang",
+    await home.expectHasDocLinks({
+      "testingrequired/reqlang": "https://github.com/testingrequired/reqlang",
+      "testingrequired/reqlang-expr":
         "https://github.com/testingrequired/reqlang-expr",
+      "HTTP messages - MDN":
         "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Messages",
-      ]);
+    });
   });
 });
 
@@ -88,15 +80,11 @@ describe("Requests", () => {
 
   describe("when no request files open", () => {
     test("has open files button", async () => {
-      await expect(
-        requests.openRequestFilesForm.openFileSelectorButton
-      ).toBeVisible();
+      await requests.openRequestFilesForm.expectHasOpenFileSelectorButton();
     });
 
     test("does not have  close all files button", async () => {
-      await expect(
-        requests.openRequestFilesForm.closeAllButton
-      ).not.toBeVisible();
+      await requests.openRequestFilesForm.expectNotToHaveCloseAllButton();
     });
 
     describe("when click to open request file selector", () => {
@@ -105,23 +93,19 @@ describe("Requests", () => {
       });
 
       test("does not have open files button", async () => {
-        await expect(
-          requests.openRequestFilesForm.openFileSelectorButton
-        ).not.toBeVisible();
+        await requests.openRequestFilesForm.expectNotToHaveOpenFileSelectorButton();
       });
 
       test("does not have  close all files button", async () => {
-        await expect(
-          requests.openRequestFilesForm.closeAllButton
-        ).not.toBeVisible();
+        await requests.openRequestFilesForm.expectNotToHaveCloseAllButton();
       });
 
       test("has request file selector textbox", async () => {
-        await expect(requests.openRequestFilesForm.selectTextbox).toBeVisible();
+        await requests.openRequestFilesForm.expectToHaveTextbox();
       });
 
       test("has request file selector options", async () => {
-        await expect(requests.openRequestFilesForm.selectOptions).toHaveText([
+        await requests.openRequestFilesForm.expectToHaveSelectOptions([
           "api_debug.reqlang",
           "api_file.reqlang",
           "api_files.reqlang",
@@ -148,29 +132,23 @@ describe("Requests", () => {
         });
 
         test("has open files button", async () => {
-          await expect(
-            requests.openRequestFilesForm.openFileSelectorButton
-          ).toBeVisible();
+          await requests.openRequestFilesForm.expectHasOpenFileSelectorButton();
         });
 
         test("has close all files button", async () => {
-          await expect(
-            requests.openRequestFilesForm.closeAllButton
-          ).toBeVisible();
+          await requests.openRequestFilesForm.expectHasCloseAllButton();
         });
 
         test("displays the open request file tabs", async () => {
-          await expect(requests.openFileTabs.getLocator()).toBeVisible();
+          await requests.openFileTabs.expectToBeVisible();
         });
 
         test("displays the open request file tab", async () => {
-          await expect(
-            requests.openFileTabs.getTab(expectedRequestFile)
-          ).toBeVisible();
+          await requests.openFileTabs.expectHasTab(expectedRequestFile);
         });
 
         test("displays the open request file tab panel", async () => {
-          await expect(requests.openFileTabs.tabPanel).toBeVisible();
+          await requests.openFileTabs.expectTabPanelOpen();
         });
 
         describe("when closing single file", () => {
@@ -179,21 +157,15 @@ describe("Requests", () => {
           });
 
           test("has open files button", async () => {
-            await expect(
-              requests.openRequestFilesForm.openFileSelectorButton
-            ).toBeVisible();
+            await requests.openRequestFilesForm.expectHasOpenFileSelectorButton();
           });
 
           test("does not have close all files button", async () => {
-            await expect(
-              requests.openRequestFilesForm.closeAllButton
-            ).not.toBeVisible();
+            await requests.openRequestFilesForm.expectNotToHaveCloseAllButton();
           });
 
           test("does not display the open request files", async () => {
-            await expect(
-              requests.openFileTabs.getTab(expectedRequestFile)
-            ).not.toBeVisible();
+            await requests.openFileTabs.expectNotHaveTab(expectedRequestFile);
           });
         });
 
@@ -203,21 +175,15 @@ describe("Requests", () => {
           });
 
           test("has open files button", async () => {
-            await expect(
-              requests.openRequestFilesForm.openFileSelectorButton
-            ).toBeVisible();
+            await requests.openRequestFilesForm.expectHasOpenFileSelectorButton();
           });
 
           test("does not have close all files button", async () => {
-            await expect(
-              requests.openRequestFilesForm.closeAllButton
-            ).not.toBeVisible();
+            await requests.openRequestFilesForm.expectNotToHaveCloseAllButton();
           });
 
           test("does not display the open request files", async () => {
-            await expect(
-              requests.openFileTabs.getTab(expectedRequestFile)
-            ).not.toBeVisible();
+            await requests.openFileTabs.expectNotHaveTab(expectedRequestFile);
           });
         });
       });
