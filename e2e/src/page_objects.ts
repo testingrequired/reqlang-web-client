@@ -182,6 +182,8 @@ export class RunRequestForm extends PageObject {
   readonly previewRequestToggle: Locator;
   readonly runRequestButton: Locator;
   readonly requestBodyPreview: Locator;
+  readonly requestBody: Locator;
+  readonly responseBody: Locator;
 
   constructor(page: Page) {
     super(page, page.getByTestId("run-request-form"));
@@ -193,15 +195,14 @@ export class RunRequestForm extends PageObject {
     });
 
     this.requestBodyPreview = this.root.getByTestId("request-body-preview");
+    this.requestBody = this.root.getByTestId("request-body");
+    this.responseBody = this.root.getByTestId("response-body");
   }
 
   async enablePreviewRequest() {
     await this.previewRequestToggle.click({
       timeout: 5000,
     });
-    // await this.previewRequestToggle.setChecked(true, {
-    //   timeout: 5000,
-    // });
   }
 
   async disablePreviewRequest() {
@@ -214,6 +215,26 @@ export class RunRequestForm extends PageObject {
 
   async expectRequestBodyPreview(expected: string) {
     await expect(this.requestBodyPreview).toHaveText(expected);
+  }
+
+  async expectNoRequestBodyPreview() {
+    await expect(this.requestBodyPreview).toBeHidden();
+  }
+
+  async expectHasRequestBody(expected: string) {
+    await expect(this.requestBody).toHaveText(expected);
+  }
+
+  async expectNoRequestBody() {
+    await expect(this.requestBody).toBeHidden();
+  }
+
+  async expectHasResponseBody(expected: string) {
+    await expect(this.responseBody).toContainText(expected);
+  }
+
+  async expectNoResponseBody() {
+    await expect(this.responseBody).toBeHidden();
   }
 }
 

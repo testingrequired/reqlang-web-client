@@ -290,18 +290,23 @@ export const RunRequestForm: React.FC<Props> = ({
                   <Text pb={0} fw="bold">
                     Request
                   </Text>
-                  <CopyCode text={exportRequest.data!}>
-                    {exportRequest.data}
-                  </CopyCode>
+                  <div data-testid="request-body">
+                    <CopyCode text={exportRequest.data!}>
+                      {exportRequest.data}
+                    </CopyCode>
+                  </div>
                 </Card>
 
                 <Card>
                   <Text pb={0} fw="bold">
                     {responseSpan ? "Actual Response" : "Response"}
                   </Text>
-                  <CopyCode text={runRequestMutation.data[1]}>
-                    {runRequestMutation.data[1]}
-                  </CopyCode>
+
+                  <div data-testid="response-body">
+                    <CopyCode text={runRequestMutation.data[1]}>
+                      {runRequestMutation.data[1]}
+                    </CopyCode>
+                  </div>
 
                   <Stack>
                     <Text size="sm">
