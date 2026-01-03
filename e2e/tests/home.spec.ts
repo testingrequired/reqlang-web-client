@@ -1,0 +1,46 @@
+import { test, expect } from "@playwright/test";
+import { REQLANG_PROJECT_DIR } from "@/test";
+import { HomeView, RootView } from "@/test/page_objects";
+
+const { beforeEach, describe } = test;
+
+let root: RootView;
+
+beforeEach(async ({ page }) => {
+  root = new RootView(page);
+
+  await root.goto();
+});
+
+describe("Home", () => {
+  let home: HomeView;
+
+  beforeEach(async () => {
+    home = await root.gotoHome();
+  });
+
+  test("has title", async ({ page }) => {
+    await expect(page).toHaveTitle("reqlang-web");
+  });
+
+  test("has project cwd", async () => {
+    await expect.soft(home.projectCwdText()).resolves.toBe(REQLANG_PROJECT_DIR);
+    await expect
+      .soft(home.projectCwdText())
+      .resolves.not.toBe("{{join(cache_directory(), uuid())}}");
+  });
+
+  test("has alert that no requests have ran yet", async () => {
+    await home.expectHasLatestRunsAlert();
+  });
+
+  test("has documentation links", async () => {
+    await home.expectHasDocLinks({
+      "testingrequired/reqlang": "https://github.com/testingrequired/reqlang",
+      "testingrequired/reqlang-expr":
+        "https://github.com/testingrequired/reqlang-expr",
+      "HTTP messages - MDN":
+        "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Messages",
+    });
+  });
+});
