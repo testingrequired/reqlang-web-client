@@ -30,7 +30,20 @@ describe("Home", () => {
       .resolves.not.toBe("{{join(cache_directory(), uuid())}}");
   });
 
-  test.skip("has alert that no requests have ran yet", async () => {
+  test("has alert that no requests have ran yet", async () => {
+    /**
+     * This ensures the alert will show up since the tests run in parallel
+     */
+    (async () => {
+      const response = await fetch("http://[::1]:3123/api/history", {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete history");
+      }
+    })();
+
     await home.expectHasLatestRunsAlert();
   });
 
