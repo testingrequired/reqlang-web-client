@@ -16,6 +16,7 @@ import { Route as DebugImport } from './routes/debug'
 import { Route as AchievementsImport } from './routes/achievements'
 import { Route as IndexImport } from './routes/index'
 import { Route as RequestsIndexImport } from './routes/requests.index'
+import { Route as HistoryRunIdImport } from './routes/history_.$runId'
 
 // Create/Update Routes
 
@@ -46,6 +47,12 @@ const IndexRoute = IndexImport.update({
 const RequestsIndexRoute = RequestsIndexImport.update({
   id: '/requests/',
   path: '/requests/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const HistoryRunIdRoute = HistoryRunIdImport.update({
+  id: '/history_/$runId',
+  path: '/history/$runId',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -81,6 +88,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HistoryImport
       parentRoute: typeof rootRoute
     }
+    '/history_/$runId': {
+      id: '/history_/$runId'
+      path: '/history/$runId'
+      fullPath: '/history/$runId'
+      preLoaderRoute: typeof HistoryRunIdImport
+      parentRoute: typeof rootRoute
+    }
     '/requests/': {
       id: '/requests/'
       path: '/requests'
@@ -98,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/achievements': typeof AchievementsRoute
   '/debug': typeof DebugRoute
   '/history': typeof HistoryRoute
+  '/history/$runId': typeof HistoryRunIdRoute
   '/requests': typeof RequestsIndexRoute
 }
 
@@ -106,6 +121,7 @@ export interface FileRoutesByTo {
   '/achievements': typeof AchievementsRoute
   '/debug': typeof DebugRoute
   '/history': typeof HistoryRoute
+  '/history/$runId': typeof HistoryRunIdRoute
   '/requests': typeof RequestsIndexRoute
 }
 
@@ -115,15 +131,35 @@ export interface FileRoutesById {
   '/achievements': typeof AchievementsRoute
   '/debug': typeof DebugRoute
   '/history': typeof HistoryRoute
+  '/history_/$runId': typeof HistoryRunIdRoute
   '/requests/': typeof RequestsIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/achievements' | '/debug' | '/history' | '/requests'
+  fullPaths:
+    | '/'
+    | '/achievements'
+    | '/debug'
+    | '/history'
+    | '/history/$runId'
+    | '/requests'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/achievements' | '/debug' | '/history' | '/requests'
-  id: '__root__' | '/' | '/achievements' | '/debug' | '/history' | '/requests/'
+  to:
+    | '/'
+    | '/achievements'
+    | '/debug'
+    | '/history'
+    | '/history/$runId'
+    | '/requests'
+  id:
+    | '__root__'
+    | '/'
+    | '/achievements'
+    | '/debug'
+    | '/history'
+    | '/history_/$runId'
+    | '/requests/'
   fileRoutesById: FileRoutesById
 }
 
@@ -132,6 +168,7 @@ export interface RootRouteChildren {
   AchievementsRoute: typeof AchievementsRoute
   DebugRoute: typeof DebugRoute
   HistoryRoute: typeof HistoryRoute
+  HistoryRunIdRoute: typeof HistoryRunIdRoute
   RequestsIndexRoute: typeof RequestsIndexRoute
 }
 
@@ -140,6 +177,7 @@ const rootRouteChildren: RootRouteChildren = {
   AchievementsRoute: AchievementsRoute,
   DebugRoute: DebugRoute,
   HistoryRoute: HistoryRoute,
+  HistoryRunIdRoute: HistoryRunIdRoute,
   RequestsIndexRoute: RequestsIndexRoute,
 }
 
@@ -157,6 +195,7 @@ export const routeTree = rootRoute
         "/achievements",
         "/debug",
         "/history",
+        "/history_/$runId",
         "/requests/"
       ]
     },
@@ -171,6 +210,9 @@ export const routeTree = rootRoute
     },
     "/history": {
       "filePath": "history.tsx"
+    },
+    "/history_/$runId": {
+      "filePath": "history_.$runId.tsx"
     },
     "/requests/": {
       "filePath": "requests.index.tsx"

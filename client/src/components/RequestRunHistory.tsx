@@ -1,9 +1,9 @@
-import { Alert, Anchor, Card, Stack, Text } from "@mantine/core";
+import { Alert, Anchor, Stack, Text } from "@mantine/core";
 import { useState } from "react";
-import { RequestRunHistoryItem } from "./RequestRunHistoryItem";
 import { RequestRunSelect } from "./RequestRunSelect";
 import { useGetRunHistoryForRequestQuery } from "@/queries/history";
 import { Link } from "@tanstack/react-router";
+import { RequestRunHistoryItemCollapsable } from "./RequestRunHistoryItemCollapsable";
 
 type Props = {
   requestFilePath: string | null;
@@ -54,9 +54,10 @@ export const RequestRunHistory: React.FC<Props> = ({ requestFilePath }) => {
       </Anchor>
 
       {requestRun && (
-        <Card>
-          <RequestRunHistoryItem requestRun={requestRun} />
-        </Card>
+        <RequestRunHistoryItemCollapsable
+          requestRun={requestRun}
+          disableCollapsing={true}
+        />
       )}
     </Stack>
   );

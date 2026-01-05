@@ -8,10 +8,14 @@ import moment from "moment";
 
 type Props = {
   requestRun: RequestRun;
+  disableCollapsing?: boolean;
 };
 
-export const RequestRunHistoryItemCollapsable = ({ requestRun }: Props) => {
-  const [isFullView, fullViewHandlers] = useDisclosure(false);
+export const RequestRunHistoryItemCollapsable = ({
+  requestRun,
+  disableCollapsing = false,
+}: Props) => {
+  const [isFullView, fullViewHandlers] = useDisclosure(disableCollapsing);
   const requestAt = moment(requestRun.request_at as unknown as number);
   const requestAtStr = requestAt.toLocaleString();
   const colorScheme = useColorScheme();
@@ -24,9 +28,14 @@ export const RequestRunHistoryItemCollapsable = ({ requestRun }: Props) => {
     <Card p={cardPadding}>
       <Group justify="space-between">
         <Group mb={isFullView ? "md" : "0"}>
-          <ActionIcon onClick={fullViewHandlers.toggle} size={toggleButtonSize}>
-            {isFullView ? <IconCaretDownFilled /> : <IconCaretUpFilled />}
-          </ActionIcon>
+          {!disableCollapsing && (
+            <ActionIcon
+              onClick={fullViewHandlers.toggle}
+              size={toggleButtonSize}
+            >
+              {isFullView ? <IconCaretDownFilled /> : <IconCaretUpFilled />}
+            </ActionIcon>
+          )}
 
           <TooltipFloating label={requestAtStr} position="bottom">
             <Badge
@@ -82,8 +91,8 @@ export const RequestRunHistoryItemCollapsable = ({ requestRun }: Props) => {
             </Badge>
           </Link>
           <Link
-            to="/history"
-            search={{
+            to="/history/$runId"
+            params={{
               runId: requestRun.uuid,
             }}
           >
