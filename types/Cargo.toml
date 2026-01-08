@@ -10,7 +10,7 @@ serde_json = "1.0"
 chrono = { version = "0.4.41", features = ["serde"] }
 thiserror = "2"
 sqlx = { version = "0.8" }
-reqlang = { git = "https://github.com/testingrequired/reqlang.git", rev = "c980d60f49b57b78166b8ddf0dda4b6414f837ac" }
+reqlang = { git = "https://github.com/testingrequired/reqlang.git", rev = "6085a89283b940a181aebc51f1e13fec75e302e1" }
 
 [features]
 bundle_types = []
