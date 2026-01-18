@@ -1,7 +1,7 @@
 import { Alert, Anchor, Card, Stack, Text } from "@mantine/core";
 import { useState } from "react";
-import { RequestRunHistoryItem } from "./RequestRunHistoryItem";
-import { RequestRunSelect } from "./RequestRunSelect";
+import { RequestRunHistoryItem } from "@/components/common/RequestRunHistoryItem";
+import { RequestRunSelect } from "@/components/common/RequestRunSelect";
 import { useGetRunHistoryForRequestQuery } from "@/queries/history";
 import { Link } from "@tanstack/react-router";
 

@@ -1,41 +1,27 @@
-import { CopyCode } from "@/components/CopyCode";
-import { EditableRequestFromRequestFile } from "@/components/EditableRequestFromRequestFile";
-import { RequestRunHistory } from "@/components/RequestRunHistory";
-import { RunRequestForm } from "@/components/RunRequestForm";
+import { CopyCode } from "@/components/common/CopyCode";
+import { EditableRequest } from "@/components/routes/requests/EditableRequest";
+import { RequestRunHistory } from "@/components/routes/requests/RequestRunHistory";
+import { RunRequestForm } from "@/components/routes/requests/RunRequestForm";
 import { useGetFileQuery } from "@/queries/files";
 import { useParsedRequestFileMutation } from "@/queries/parse";
-import {
-  ActionIcon,
-  Alert,
-  Card,
-  Loader,
-  Stack,
-  Tabs,
-  Tooltip,
-} from "@mantine/core";
+import { ActionIcon, Card, Loader, Stack, Tabs, Tooltip } from "@mantine/core";
 import { IconRefresh } from "@tabler/icons-react";
 import { useState } from "react";
 import { ParseResult } from "reqlang-types";
+import { RequestFileError } from "@/components/routes/requests/RequestFileError";
 
-type OpenRequestFileProps = {
+type Props = {
   requestFilePath: string;
 };
 
-/**
- * Displays the request file with several sub tabs
- *
- * - Run request
- * - History of request's runs
- * - Text content of the request file
- */
-export const OpenRequestFile = ({ requestFilePath }: OpenRequestFileProps) => {
+export const ActiveRequestFile = ({ requestFilePath }: Props) => {
   const [isEditing, setIsEditing] = useState(false);
   const requestFileContentQuery = useGetFileQuery(requestFilePath);
   const parsedRequestFileMutation =
     useParsedRequestFileMutation(requestFilePath);
 
   if (requestFileContentQuery.isError || parsedRequestFileMutation.isError) {
-    return <Alert color="red">Error loading or parsing request file</Alert>;
+    return <RequestFileError />;
   }
 
   if (
@@ -45,24 +31,20 @@ export const OpenRequestFile = ({ requestFilePath }: OpenRequestFileProps) => {
     return <Loader />;
   }
 
-  const parseResult: ParseResult =
-    parsedRequestFileMutation.data as ParseResult;
-
-  const requestFileContent = requestFileContentQuery.data as string;
-
-  const displayRequestTabs = typeof parseResult !== "undefined" && !isEditing;
+  const shouldDisplayRequestTabs =
+    typeof parsedRequestFileMutation.data !== "undefined" && !isEditing;
 
   return (
     <Stack data-testid="active-request-file">
       <Card data-testid="request-body-template" p="xs">
-        <EditableRequestFromRequestFile
+        <EditableRequest
           requestFilePath={requestFilePath}
           isEditing={isEditing}
           onIsEditingChange={setIsEditing}
         />
       </Card>
 
-      {displayRequestTabs && (
+      {shouldDisplayRequestTabs && (
         <>
           <Tabs defaultValue="run">
             <Tabs.List>
@@ -73,9 +55,9 @@ export const OpenRequestFile = ({ requestFilePath }: OpenRequestFileProps) => {
 
             <Tabs.Panel value="run" p="md" aria-level={2}>
               <RunRequestForm
-                parseResult={parseResult}
+                parseResult={parsedRequestFileMutation.data as ParseResult}
                 requestFilePath={requestFilePath}
-                requestFileText={requestFileContent}
+                requestFileText={requestFileContentQuery.data as string}
               />
             </Tabs.Panel>
 
@@ -85,8 +67,8 @@ export const OpenRequestFile = ({ requestFilePath }: OpenRequestFileProps) => {
 
             <Tabs.Panel value="file" p="md" aria-level={2}>
               <Card>
-                <CopyCode text={requestFileContent}>
-                  {requestFileContent}
+                <CopyCode text={requestFileContentQuery.data as string}>
+                  {requestFileContentQuery.data as string}
                 </CopyCode>
 
                 <Tooltip label="Reload Request File">

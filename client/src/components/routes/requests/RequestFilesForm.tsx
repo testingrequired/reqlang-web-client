@@ -1,4 +1,4 @@
-import { MultiFilesSelect } from "@/components/MultiFileSelect";
+import { MultiFilesSelect } from "@/components/common/MultiFileSelect";
 import { useOpenRequestFilesStore } from "@/stores/selectedRequestFile";
 import { ActionIcon, ButtonGroup } from "@mantine/core";
 import {
@@ -12,7 +12,7 @@ import { useStore } from "zustand";
 /**
  * A two button form to select/deselect which request files are "open"
  */
-export const OpenedRequestFilesForm = () => {
+export const RequestFilesForm = () => {
   const openRequestFilesStore = useStore(useOpenRequestFilesStore);
   const [showMultiFileSelect, setShowMultiFileSelect] = useState(false);
   const [newSelectedFiles, setNewSelectedFiles] = useState<string[]>([]);

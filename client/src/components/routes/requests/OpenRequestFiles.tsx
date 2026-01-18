@@ -1,12 +1,12 @@
 import { useOpenRequestFilesStore } from "@/stores/selectedRequestFile";
 import { CloseButton, Group, Tabs, Text } from "@mantine/core";
 import { useStore } from "zustand";
-import { OpenRequestFile } from "./OpenRequestFile";
+import { ActiveRequestFile } from "@/components/routes/requests/ActiveRequestFile";
 
 /**
  * A tabs component where each open request file is a table
  */
-export const OpenRequestFilesTabs = () => {
+export const OpenRequestFiles = () => {
   const openRequestFilesStore = useStore(useOpenRequestFilesStore);
 
   if (openRequestFilesStore.openRequestFiles.length === 0) {
@@ -78,7 +78,7 @@ export const OpenRequestFilesTabs = () => {
           key={selectedFile}
           data-testid="active-request-file-tab-panel"
         >
-          <OpenRequestFile requestFilePath={selectedFile} />
+          <ActiveRequestFile requestFilePath={selectedFile} />
         </Tabs.Panel>
       ))}
     </Tabs>

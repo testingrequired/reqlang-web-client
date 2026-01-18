@@ -16,7 +16,7 @@ import {
 import { useEffect, useState } from "react";
 import { useRunRequestMutation } from "@/queries/runRequest";
 import { useExportRequestQuery } from "@/queries/export";
-import { CopyCode } from "./CopyCode";
+import { CopyCode } from "@/components/common/CopyCode";
 import { useDisclosure } from "@mantine/hooks";
 
 type Props = {
