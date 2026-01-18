@@ -42,7 +42,7 @@ use tower_http::{compression::CompressionLayer, trace::TraceLayer};
 use tracing::{error, info, info_span, instrument};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use types::{
-    DebugInfo, RequestRunResponse,
+    DebugInfo, RequestRunResponse, UpdateRequestFileBody,
     achievement::{AchievementDto, AchievementId},
     request_run::RequestRun,
     run_request::RunRequest,
@@ -269,7 +269,7 @@ pub async fn init_server(
         .route("/api/parse", post(parse_request_file))
         .route("/api/run", post(run_request))
         .route("/api/files", get(list_files))
-        .route("/api/files/{*file}", get(get_file))
+        .route("/api/files/{*file}", get(get_file).patch(update_file))
         .route(
             "/api/history",
             get(get_run_history).delete(delete_run_history),
@@ -378,6 +378,54 @@ async fn get_file(
 
     match fs::read_to_string(file_path) {
         Ok(file_content) => (StatusCode::OK, Ok(file_content)),
+        Err(err) => (StatusCode::INTERNAL_SERVER_ERROR, Err(err.to_string())),
+    }
+}
+
+#[axum::debug_handler]
+async fn update_file(
+    State(state): State<Arc<Mutex<AppState>>>,
+    Path(file): Path<String>,
+    Json(body): Json<UpdateRequestFileBody>,
+) -> (StatusCode, Result<(), String>) {
+    let cwd = {
+        let state = state.lock().await;
+
+        state.home_dir.clone()
+    };
+
+    let file_path = cwd.join(file);
+
+    if !fs::exists(&file_path).expect("unable to tell if file exists") {
+        return (
+            StatusCode::NOT_FOUND,
+            Err("file does not exist".to_string()),
+        );
+    }
+
+    match fs::read_to_string(&file_path) {
+        Ok(file_content) => match &body.updated_http_request {
+            Some(updated_http_request) => {
+                let ast = Ast::from(&file_content);
+                let parsed = parse(&ast)
+                    .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, Err("WHHOPS".to_string())))
+                    .map(|parsed| &file_content[parsed.request.1]);
+
+                match parsed {
+                    Ok(original_request_message) => {
+                        let updated =
+                            file_content.replace(original_request_message, updated_http_request);
+
+                        match fs::write(&file_path, updated) {
+                            Ok(()) => (StatusCode::OK, Ok(())),
+                            Err(err) => (StatusCode::INTERNAL_SERVER_ERROR, Err(err.to_string())),
+                        }
+                    }
+                    Err(err) => err,
+                }
+            }
+            None => (StatusCode::OK, Ok(())),
+        },
         Err(err) => (StatusCode::INTERNAL_SERVER_ERROR, Err(err.to_string())),
     }
 }

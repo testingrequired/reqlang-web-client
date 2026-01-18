@@ -1,4 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { UpdateRequestFileBody } from "server-types";
 
 export const FILES_KEYS = {
   all: ["files"] as const,
@@ -44,3 +45,36 @@ export const useGetFileQuery = (path: string | null) =>
       return data;
     },
   });
+
+export const useUpdateFileMutation = (path: string | null) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (body: UpdateRequestFileBody) => {
+      if (path === null) {
+        return null;
+      }
+
+      const response = await fetch(`/api/files/${path}`, {
+        method: "PATCH",
+        body: JSON.stringify(body),
+        headers: {
+          "content-type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`There was an issue fetching file: ${path}`);
+      }
+
+      const data = await response.text();
+
+      return data;
+    },
+    onSuccess() {
+      queryClient.invalidateQueries({
+        queryKey: FILES_KEYS.detail(path),
+      });
+    },
+  });
+};

@@ -31,3 +31,9 @@ pub struct RequestRunResponseTestResult {
     pub pass: bool,
     pub diff: Option<String>,
 }
+
+#[derive(TS, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[ts(export)]
+pub struct UpdateRequestFileBody {
+    pub updated_http_request: Option<String>,
+}

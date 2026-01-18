@@ -1,5 +1,5 @@
 import { CopyCode } from "@/components/CopyCode";
-import { RequestFromRequestFile } from "@/components/RequestFromRequestFile";
+import { EditableRequestFromRequestFile } from "@/components/EditableRequestFromRequestFile";
 import { RequestRunHistory } from "@/components/RequestRunHistory";
 import { RunRequestForm } from "@/components/RunRequestForm";
 import { useGetFileQuery } from "@/queries/files";
@@ -14,6 +14,7 @@ import {
   Tooltip,
 } from "@mantine/core";
 import { IconRefresh } from "@tabler/icons-react";
+import { useState } from "react";
 import { ParseResult } from "reqlang-types";
 
 type OpenRequestFileProps = {
@@ -28,6 +29,7 @@ type OpenRequestFileProps = {
  * - Text content of the request file
  */
 export const OpenRequestFile = ({ requestFilePath }: OpenRequestFileProps) => {
+  const [isEditing, setIsEditing] = useState(false);
   const requestFileContentQuery = useGetFileQuery(requestFilePath);
   const parsedRequestFileMutation =
     useParsedRequestFileMutation(requestFilePath);
@@ -48,16 +50,19 @@ export const OpenRequestFile = ({ requestFilePath }: OpenRequestFileProps) => {
 
   const requestFileContent = requestFileContentQuery.data as string;
 
+  const displayRequestTabs = typeof parseResult !== "undefined" && !isEditing;
+
   return (
     <Stack data-testid="active-request-file">
-      <Card data-testid="request-body-template">
-        <RequestFromRequestFile
-          result={parseResult}
-          requestFileText={requestFileContent}
+      <Card data-testid="request-body-template" p="xs">
+        <EditableRequestFromRequestFile
+          requestFilePath={requestFilePath}
+          isEditing={isEditing}
+          onIsEditingChange={setIsEditing}
         />
       </Card>
 
-      {typeof parseResult !== "undefined" && (
+      {displayRequestTabs && (
         <>
           <Tabs defaultValue="run">
             <Tabs.List>

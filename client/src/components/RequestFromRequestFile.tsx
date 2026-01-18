@@ -1,20 +1,20 @@
 import { ParseResult } from "reqlang-types";
-import { CopyCode } from "./CopyCode";
+import { CopyCode } from "@/components/CopyCode";
 import { ReactNode } from "react";
+import { getRequestFromRequestFile } from "@/services/requestFile";
 
 type Props = {
-  result: ParseResult;
+  parseResult: ParseResult;
   requestFileText: string;
   renderText?: (text: string) => ReactNode;
 };
 
 export const RequestFromRequestFile = ({
-  result,
+  parseResult: result,
   requestFileText,
   renderText = (text: string) => text,
 }: Props) => {
-  const requestSpan = result.full.request[1];
-  const requestText = requestFileText.slice(requestSpan.start, requestSpan.end);
+  const requestText = getRequestFromRequestFile(result, requestFileText);
 
   const codeText = renderText ? renderText(requestText) : requestText;
 
