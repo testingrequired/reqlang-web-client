@@ -1,5 +1,5 @@
 import { useGetFileQuery } from "@/queries/files";
-import { useParsedRequestFileMutation } from "@/queries/parse";
+import { useParsedRequestFileQuery } from "@/queries/parse";
 import { Alert, Code, Loader, Stack, Table, Text } from "@mantine/core";
 import { RequestParamsFromClient } from "reqlang-types";
 import { RequestRun } from "server-types";
@@ -12,7 +12,7 @@ type Props = {
 };
 
 export const RequestRunHistoryItem = ({ requestRun }: Props) => {
-  const parseRequestFileMutation = useParsedRequestFileMutation(
+  const parseRequestFileMutation = useParsedRequestFileQuery(
     requestRun.request_file_path
   );
   const fileQuery = useGetFileQuery(requestRun.request_file_path);

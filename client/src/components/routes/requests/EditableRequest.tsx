@@ -1,17 +1,11 @@
 import { ParseResult } from "reqlang-types";
 import { ReactNode, useEffect, useState } from "react";
 import { getRequestFromRequestFile } from "@/services/requestFile";
-import {
-  Alert,
-  Button,
-  ButtonGroup,
-  Loader,
-  Stack,
-  Textarea,
-} from "@mantine/core";
+import { Button, ButtonGroup, Loader, Stack, Textarea } from "@mantine/core";
 import { useGetFileQuery, useUpdateFileMutation } from "@/queries/files";
-import { useParsedRequestFileMutation } from "@/queries/parse";
+import { useParsedRequestFileQuery } from "@/queries/parse";
 import { CopyCode } from "@/components/common/CopyCode";
+import { RequestFileError } from "./RequestFileError";
 
 type Props = {
   requestFilePath: string;
@@ -29,34 +23,38 @@ export const EditableRequest = ({
   const [editContent, setEditContent] = useState<string | undefined>(undefined);
   const updateFileMutation = useUpdateFileMutation(requestFilePath);
   const requestFileContentQuery = useGetFileQuery(requestFilePath);
-  const parsedRequestFileMutation =
-    useParsedRequestFileMutation(requestFilePath);
+  const parsedRequestFileQuery = useParsedRequestFileQuery(requestFilePath);
 
   useEffect(() => {
-    if (parsedRequestFileMutation.data && requestFileContentQuery.data) {
+    if (parsedRequestFileQuery.data && requestFileContentQuery.data) {
       setEditContent(
         getRequestFromRequestFile(
-          parsedRequestFileMutation.data as ParseResult,
+          parsedRequestFileQuery.data as ParseResult,
           requestFileContentQuery.data as string
         )
       );
     }
-  }, [parsedRequestFileMutation.data, requestFileContentQuery.data]);
+  }, [parsedRequestFileQuery.data, requestFileContentQuery.data]);
 
-  if (requestFileContentQuery.isError || parsedRequestFileMutation.isError) {
-    return <Alert color="red">Error loading or parsing request file</Alert>;
+  if (requestFileContentQuery.isError || parsedRequestFileQuery.isError) {
+    return (
+      <RequestFileError
+        fileContentError={requestFileContentQuery.error}
+        fileParseError={parsedRequestFileQuery.error}
+      />
+    );
   }
 
   if (
     requestFileContentQuery.isPending ||
-    parsedRequestFileMutation.isPending ||
+    parsedRequestFileQuery.isPending ||
     updateFileMutation.isPending
   ) {
     return <Loader />;
   }
 
   const requestText = getRequestFromRequestFile(
-    parsedRequestFileMutation.data,
+    parsedRequestFileQuery.data,
     requestFileContentQuery.data!
   );
 

@@ -3,7 +3,7 @@ import { EditableRequest } from "@/components/routes/requests/EditableRequest";
 import { RequestRunHistory } from "@/components/routes/requests/RequestRunHistory";
 import { RunRequestForm } from "@/components/routes/requests/RunRequestForm";
 import { useGetFileQuery } from "@/queries/files";
-import { useParsedRequestFileMutation } from "@/queries/parse";
+import { useParsedRequestFileQuery } from "@/queries/parse";
 import { ActionIcon, Card, Loader, Stack, Tabs, Tooltip } from "@mantine/core";
 import { IconRefresh } from "@tabler/icons-react";
 import { useState } from "react";
@@ -17,11 +17,15 @@ type Props = {
 export const ActiveRequestFile = ({ requestFilePath }: Props) => {
   const [isEditing, setIsEditing] = useState(false);
   const requestFileContentQuery = useGetFileQuery(requestFilePath);
-  const parsedRequestFileMutation =
-    useParsedRequestFileMutation(requestFilePath);
+  const parsedRequestFileMutation = useParsedRequestFileQuery(requestFilePath);
 
   if (requestFileContentQuery.isError || parsedRequestFileMutation.isError) {
-    return <RequestFileError />;
+    return (
+      <RequestFileError
+        fileContentError={requestFileContentQuery.error}
+        fileParseError={parsedRequestFileMutation.error}
+      />
+    );
   }
 
   if (

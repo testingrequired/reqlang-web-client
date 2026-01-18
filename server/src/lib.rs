@@ -408,7 +408,10 @@ async fn update_file(
             Some(updated_http_request) => {
                 let ast = Ast::from(&file_content);
                 let parsed = parse(&ast)
-                    .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, Err("WHHOPS".to_string())))
+                    .map_err(|err| {
+                        let errs = format!("{err:?}");
+                        (StatusCode::INTERNAL_SERVER_ERROR, Err(errs))
+                    })
                     .map(|parsed| &file_content[parsed.request.1]);
 
                 match parsed {

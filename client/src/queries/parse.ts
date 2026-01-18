@@ -6,7 +6,7 @@ export const PARSE_KEYS = {
   parse: (input: string | null) => ["parse", input] as const,
 } as const;
 
-export const useParsedRequestFileMutation = (requestFilePath: string) => {
+export const useParsedRequestFileQuery = (requestFilePath: string) => {
   const requestFileContentQuery = useGetFileQuery(requestFilePath);
 
   const requestFileContent = requestFileContentQuery.data ?? null;
