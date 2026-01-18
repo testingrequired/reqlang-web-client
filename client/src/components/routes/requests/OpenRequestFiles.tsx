@@ -1,4 +1,4 @@
-import { useOpenRequestFilesStore } from "@/stores/selectedRequestFile";
+import { useRequestFilesStore } from "@/stores/requestFiles";
 import { CloseButton, Group, Tabs, Text } from "@mantine/core";
 import { useStore } from "zustand";
 import { ActiveRequestFile } from "@/components/routes/requests/ActiveRequestFile";
@@ -7,9 +7,9 @@ import { ActiveRequestFile } from "@/components/routes/requests/ActiveRequestFil
  * A tabs component where each open request file is a table
  */
 export const OpenRequestFiles = () => {
-  const openRequestFilesStore = useStore(useOpenRequestFilesStore);
+  const openRequestFilesStore = useStore(useRequestFilesStore);
 
-  if (openRequestFilesStore.openRequestFiles.length === 0) {
+  if (openRequestFilesStore.openedFiles.length === 0) {
     return null;
   }
 
@@ -17,12 +17,12 @@ export const OpenRequestFiles = () => {
 
   return (
     <Tabs
-      value={openRequestFilesStore.selectedRequestFile}
-      onChange={openRequestFilesStore.setSelectedRequestFile}
+      value={openRequestFilesStore.activeFile}
+      onChange={openRequestFilesStore.setActiveFile}
       data-testid="open-request-file-tabs"
     >
       <Tabs.List>
-        {openRequestFilesStore.openRequestFiles.map((openRequestFile) => {
+        {openRequestFilesStore.openedFiles.map((openRequestFile) => {
           const selectedFileParts = openRequestFile.split("/");
 
           let j = 0;
@@ -48,7 +48,7 @@ export const OpenRequestFiles = () => {
             <Tabs.Tab
               value={openRequestFile}
               fw={
-                openRequestFilesStore.selectedRequestFile === openRequestFile
+                openRequestFilesStore.activeFile === openRequestFile
                   ? "bold"
                   : "normal"
               }
@@ -62,7 +62,7 @@ export const OpenRequestFiles = () => {
                 <CloseButton
                   size="sm"
                   onClick={() => {
-                    openRequestFilesStore.closeRequestfile(openRequestFile);
+                    openRequestFilesStore.closeFile(openRequestFile);
                   }}
                   aria-label={`Close ${label}`}
                 />
@@ -72,7 +72,7 @@ export const OpenRequestFiles = () => {
         })}
       </Tabs.List>
 
-      {openRequestFilesStore.openRequestFiles.map((selectedFile) => (
+      {openRequestFilesStore.openedFiles.map((selectedFile) => (
         <Tabs.Panel
           value={selectedFile}
           key={selectedFile}

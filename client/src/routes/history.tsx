@@ -1,5 +1,5 @@
-import { FilesSelect } from "@/components/FileSelect";
-import { RequestRunSelect } from "@/components/RequestRunSelect";
+import { FilesSelect } from "@/components/common/FileSelect";
+import { RequestRunSelect } from "@/components/common/RequestRunSelect";
 import {
   Alert,
   Button,
@@ -20,7 +20,7 @@ import {
   useClearRunHistoryMutation,
   useGetRunHistoryQuery,
 } from "@/queries/history";
-import { RequestRunHistoryItemCollapsable } from "@/components/RequestRunHistoryItemCollapsable";
+import { RequestRunHistoryItemCollapsable } from "@/components/common/RequestRunHistoryItemCollapsable";
 import { getRequestRunHistory } from "@/services/history";
 import { RequestParamsFromClient } from "reqlang-types";
 

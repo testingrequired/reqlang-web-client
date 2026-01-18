@@ -1,4 +1,4 @@
-import { RequestRunHistoryItemCollapsable } from "@/components/RequestRunHistoryItemCollapsable";
+import { RequestRunHistoryItemCollapsable } from "@/components/common/RequestRunHistoryItemCollapsable";
 import { useGetDebugInfoQuery } from "@/queries/debug";
 import { useGetRunHistoryQuery } from "@/queries/history";
 import {
