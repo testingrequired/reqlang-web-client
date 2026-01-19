@@ -7,7 +7,11 @@ import path from "path";
 export default defineConfig(({ mode }) => ({
   plugins: [
     TanStackRouterVite({ target: "react", autoCodeSplitting: true }),
-    react(),
+    react({
+      babel: {
+        plugins: ["babel-plugin-react-compiler"],
+      },
+    }),
   ],
   optimizeDeps: {
     force: true,
