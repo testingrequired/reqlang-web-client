@@ -18,18 +18,54 @@ import { useRunRequestMutation } from "@/queries/runRequest";
 import { useExportRequestQuery } from "@/queries/export";
 import { CopyCode } from "@/components/common/CopyCode";
 import { useDisclosure } from "@mantine/hooks";
+import { useGetFileQuery } from "@/queries/files";
+import { useParsedRequestFileQuery } from "@/queries/parse";
+import { RequestFileLoadError } from "./RequestFileLoadError";
+import { RequestFileUpdateError } from "./RequestFileUpdateError";
 
 type Props = {
+  requestFilePath: string;
+};
+
+export const RunRequestForm: React.FC<Props> = ({ requestFilePath }) => {
+  const requestFileContentQuery = useGetFileQuery(requestFilePath);
+  const parsedRequestFileMutation = useParsedRequestFileQuery(requestFilePath);
+
+  if (
+    requestFileContentQuery.isPending ||
+    parsedRequestFileMutation.isPending
+  ) {
+    return <Loader />;
+  }
+
+  if (requestFileContentQuery.isError) {
+    return <RequestFileLoadError error={requestFileContentQuery.error} />;
+  }
+
+  if (parsedRequestFileMutation.isError) {
+    return <RequestFileUpdateError error={parsedRequestFileMutation.error} />;
+  }
+
+  return (
+    <RunRequestFormInner
+      requestFilePath={requestFilePath}
+      parseResult={parsedRequestFileMutation.data}
+      requestFileText={requestFileContentQuery.data!}
+    />
+  );
+};
+
+type InnerProps = {
   parseResult: ParseResult;
   requestFilePath: string;
   requestFileText: string;
 };
 
-export const RunRequestForm: React.FC<Props> = ({
+const RunRequestFormInner = ({
   parseResult,
   requestFilePath,
   requestFileText,
-}) => {
+}: InnerProps) => {
   const runRequestMutation = useRunRequestMutation();
   const [params, setParams] = useState<RequestParamsFromClient | null>(null);
   const exportRequest = useExportRequestQuery(requestFilePath, params);

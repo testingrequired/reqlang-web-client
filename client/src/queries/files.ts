@@ -1,9 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ReqlangError } from "reqlang-types";
 import { UpdateRequestFileBody } from "server-types";
 
 export const FILES_KEYS = {
   all: ["files"] as const,
   detail: (path: string | null) => [...FILES_KEYS.all, "file", path] as const,
+  update: (path: string | null) =>
+    [...FILES_KEYS.detail(path), "update"] as const,
 } as const;
 
 export const useGetFilesQuery = () =>
@@ -50,24 +53,41 @@ export const useUpdateFileMutation = (path: string | null) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (body: UpdateRequestFileBody) => {
+    mutationKey: FILES_KEYS.update(path),
+    mutationFn: async (mutateData: {
+      body: UpdateRequestFileBody;
+      onSuccess?: () => void;
+    }) => {
       if (path === null) {
         return null;
       }
 
       const response = await fetch(`/api/files/${path}`, {
         method: "PATCH",
-        body: JSON.stringify(body),
+        body: JSON.stringify(mutateData.body),
         headers: {
           "content-type": "application/json",
         },
       });
 
       if (!response.ok) {
-        throw new Error(`There was an issue fetching file: ${path}`);
+        if (response.status === 400) {
+          const errorsText = await response.text();
+
+          const errs = JSON.parse(errorsText) as [
+            ReqlangError,
+            { start: number; end: number },
+          ][];
+
+          throw new Error("Unable to update request file", {
+            cause: errs,
+          });
+        }
       }
 
       const data = await response.text();
+
+      mutateData.onSuccess?.call(null);
 
       return data;
     },

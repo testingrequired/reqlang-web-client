@@ -419,9 +419,22 @@ async fn update_file(
                         let updated =
                             file_content.replace(original_request_message, updated_http_request);
 
-                        match fs::write(&file_path, updated) {
-                            Ok(()) => (StatusCode::OK, Ok(())),
-                            Err(err) => (StatusCode::INTERNAL_SERVER_ERROR, Err(err.to_string())),
+                        let ast = Ast::from(&updated);
+                        let parsed = parse(&ast);
+
+                        match parsed {
+                            Ok(_) => match fs::write(&file_path, updated) {
+                                Ok(()) => (StatusCode::OK, Ok(())),
+                                Err(err) => {
+                                    (StatusCode::INTERNAL_SERVER_ERROR, Err(err.to_string()))
+                                }
+                            },
+                            Err(err) => match serde_json::to_string_pretty(&err) {
+                                Ok(result) => (StatusCode::BAD_REQUEST, Err(result)),
+                                Err(err) => {
+                                    (StatusCode::INTERNAL_SERVER_ERROR, Err(err.to_string()))
+                                }
+                            },
                         }
                     }
                     Err(err) => err,

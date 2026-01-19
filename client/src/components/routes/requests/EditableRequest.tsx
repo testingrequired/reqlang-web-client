@@ -1,25 +1,24 @@
 import { ParseResult } from "reqlang-types";
-import { ReactNode, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { getRequestFromRequestFile } from "@/services/requestFile";
 import { Button, ButtonGroup, Loader, Stack, Textarea } from "@mantine/core";
 import { useGetFileQuery, useUpdateFileMutation } from "@/queries/files";
 import { useParsedRequestFileQuery } from "@/queries/parse";
 import { CopyCode } from "@/components/common/CopyCode";
-import { RequestFileError } from "./RequestFileError";
+import { RequestFileLoadError } from "./RequestFileLoadError";
+import { notifications } from "@mantine/notifications";
+import { RequestFileUpdateError } from "./RequestFileUpdateError";
 
 type Props = {
   requestFilePath: string;
-  isEditing: boolean;
-  onIsEditingChange: (isEditing: boolean) => void;
-  renderText?: (text: string) => ReactNode;
+  onEditModeChange: (isEditing: boolean) => void;
 };
 
 export const EditableRequest = ({
   requestFilePath,
-  isEditing,
-  onIsEditingChange,
-  renderText,
+  onEditModeChange: onIsEditingChange,
 }: Props) => {
+  const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState<string | undefined>(undefined);
   const updateFileMutation = useUpdateFileMutation(requestFilePath);
   const requestFileContentQuery = useGetFileQuery(requestFilePath);
@@ -36,13 +35,12 @@ export const EditableRequest = ({
     }
   }, [parsedRequestFileQuery.data, requestFileContentQuery.data]);
 
-  if (requestFileContentQuery.isError || parsedRequestFileQuery.isError) {
-    return (
-      <RequestFileError
-        fileContentError={requestFileContentQuery.error}
-        fileParseError={parsedRequestFileQuery.error}
-      />
-    );
+  if (requestFileContentQuery.isError) {
+    return <RequestFileLoadError error={requestFileContentQuery.error} />;
+  }
+
+  if (parsedRequestFileQuery.isError) {
+    return <RequestFileUpdateError error={parsedRequestFileQuery.error} />;
   }
 
   if (
@@ -58,59 +56,71 @@ export const EditableRequest = ({
     requestFileContentQuery.data!
   );
 
-  const codeText = renderText ? renderText(requestText) : requestText;
+  const handleChangeEditContent = (
+    e: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
+    setEditContent(e.target.value);
+  };
 
-  return (
-    <>
-      {isEditing ? (
-        <Stack>
-          <Textarea
-            value={editContent!}
-            onChange={(e) => {
-              setEditContent(e.target.value);
-            }}
-            autosize
-            autoFocus
-            styles={{
-              input: {
-                fontFamily: "var(--mantine-font-family-monospace)",
-                fontSize: "var(--mantine-font-size-xs)",
-                padding: "var(--mantine-spacing-xs)",
-              },
-            }}
-          />
+  const handleSave = () => {
+    updateFileMutation.mutate({
+      body: {
+        updated_http_request: editContent ?? null,
+      },
+      onSuccess() {
+        onIsEditingChange(false);
+        notifications.show({
+          message: "Save successful",
+        });
+      },
+    });
+  };
 
-          <ButtonGroup>
-            <Button
-              onClick={() => {
-                onIsEditingChange(false);
-                updateFileMutation.mutate({
-                  updated_http_request: editContent ?? null,
-                });
-              }}
-            >
-              Save
-            </Button>
-            <Button
-              color="red"
-              onClick={() => {
-                onIsEditingChange(false);
-                setEditContent(requestText);
-              }}
-            >
-              Cancel
-            </Button>
-          </ButtonGroup>
-        </Stack>
-      ) : (
-        <div
-          onClick={() => {
-            onIsEditingChange(true);
-          }}
-        >
-          <CopyCode text={requestText}>{codeText}</CopyCode>
-        </div>
+  const handleCancel = () => {
+    onIsEditingChange(false);
+    setEditContent(requestText);
+    updateFileMutation.reset();
+  };
+
+  const handleClickRequest = () => {
+    setIsEditing(true);
+    onIsEditingChange(true);
+  };
+
+  const requestInEditMode = (
+    <Stack>
+      <Textarea
+        value={editContent!}
+        onChange={handleChangeEditContent}
+        autosize
+        autoFocus
+        styles={{
+          input: {
+            fontFamily: "var(--mantine-font-family-monospace)",
+            fontSize: "var(--mantine-font-size-xs)",
+            padding: "var(--mantine-spacing-xs)",
+          },
+        }}
+      />
+
+      <ButtonGroup>
+        <Button onClick={handleSave}>Save</Button>
+        <Button color="red" onClick={handleCancel}>
+          Cancel
+        </Button>
+      </ButtonGroup>
+
+      {updateFileMutation.isError && (
+        <RequestFileUpdateError error={updateFileMutation.error} />
       )}
-    </>
+    </Stack>
   );
+
+  const requestInReadOnlyMode = (
+    <CopyCode text={requestText} onClick={handleClickRequest}>
+      {requestText}
+    </CopyCode>
+  );
+
+  return isEditing ? requestInEditMode : requestInReadOnlyMode;
 };
