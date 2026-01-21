@@ -79,6 +79,7 @@ export const EditableRequest = ({
   };
 
   const handleCancel = () => {
+    setIsEditing(false);
     onIsEditingChange(false);
     setEditContent(requestText);
     updateFileMutation.reset();

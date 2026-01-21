@@ -1,12 +1,12 @@
 import { useGetFileQuery } from "@/queries/files";
 import { useParsedRequestFileQuery } from "@/queries/parse";
-import { Alert, Code, Loader, Stack, Table, Text } from "@mantine/core";
+import { Code, Loader, Stack, Table, Text } from "@mantine/core";
 import { RequestParamsFromClient } from "reqlang-types";
 import { RequestRun } from "server-types";
 import { CopyCode } from "./CopyCode";
 import { useExportRequestMutation } from "@/queries/export";
-import stripAnsi from "strip-ansi";
 import { useEffect } from "react";
+import { TestResultAlert } from "../routes/requests/TestResultAlert";
 
 type Props = {
   requestRun: RequestRun;
@@ -184,19 +184,7 @@ export const RequestRunHistoryItem = ({ requestRun }: Props) => {
           <CopyCode text={requestRun.response}>{requestRun.response}</CopyCode>
         </Stack>
 
-        {result.full.response && (
-          <>
-            {requestRun.pass ? (
-              <Alert color="green" title="Test Result: Passed!"></Alert>
-            ) : (
-              <Alert color="red" title="Test Result: Failed!" w="100%">
-                <CopyCode text={stripAnsi(requestRun.diff?.trim() ?? "")}>
-                  {stripAnsi(requestRun.diff?.trim() ?? "")}
-                </CopyCode>
-              </Alert>
-            )}
-          </>
-        )}
+        {result.full.response && <TestResultAlert testResult={requestRun} />}
       </Stack>
     </Stack>
   );
