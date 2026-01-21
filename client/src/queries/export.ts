@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { RequestParamsFromClient } from "reqlang-types";
 
 export const EXPORT_KEYS = {
@@ -6,17 +6,9 @@ export const EXPORT_KEYS = {
     ["export", requestFilePath, params] as const,
 } as const;
 
-export const useExportRequestQuery = (
-  requestFilePath: string,
-  params: RequestParamsFromClient | null
-) => {
-  return useQuery({
-    queryKey: EXPORT_KEYS.export(requestFilePath, params),
-    queryFn: async () => {
-      if (params === null) {
-        return null;
-      }
-
+export const useExportRequestMutation = () => {
+  return useMutation({
+    mutationFn: async (params: RequestParamsFromClient) => {
       const response = await fetch(`/api/export_request`, {
         method: "POST",
         body: JSON.stringify(params),

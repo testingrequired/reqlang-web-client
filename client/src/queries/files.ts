@@ -54,17 +54,14 @@ export const useUpdateFileMutation = (path: string | null) => {
 
   return useMutation({
     mutationKey: FILES_KEYS.update(path),
-    mutationFn: async (mutateData: {
-      body: UpdateRequestFileBody;
-      onSuccess?: () => void;
-    }) => {
+    mutationFn: async (body: UpdateRequestFileBody) => {
       if (path === null) {
         return null;
       }
 
       const response = await fetch(`/api/files/${path}`, {
         method: "PATCH",
-        body: JSON.stringify(mutateData.body),
+        body: JSON.stringify(body),
         headers: {
           "content-type": "application/json",
         },
@@ -86,8 +83,6 @@ export const useUpdateFileMutation = (path: string | null) => {
       }
 
       const data = await response.text();
-
-      mutateData.onSuccess?.call(null);
 
       return data;
     },

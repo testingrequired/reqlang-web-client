@@ -4,8 +4,9 @@ import { Alert, Code, Loader, Stack, Table, Text } from "@mantine/core";
 import { RequestParamsFromClient } from "reqlang-types";
 import { RequestRun } from "server-types";
 import { CopyCode } from "./CopyCode";
-import { useExportRequestQuery } from "@/queries/export";
+import { useExportRequestMutation } from "@/queries/export";
 import stripAnsi from "strip-ansi";
+import { useEffect } from "react";
 
 type Props = {
   requestRun: RequestRun;
@@ -13,16 +14,17 @@ type Props = {
 
 export const RequestRunHistoryItem = ({ requestRun }: Props) => {
   const parseRequestFileMutation = useParsedRequestFileQuery(
-    requestRun.request_file_path
+    requestRun.request_file_path,
   );
   const fileQuery = useGetFileQuery(requestRun.request_file_path);
   const params: RequestParamsFromClient = JSON.parse(
-    requestRun.params_from_client_json
+    requestRun.params_from_client_json,
   );
-  const exportRequestMutation = useExportRequestQuery(
-    requestRun.request_file_path,
-    params
-  );
+  const exportRequestMutation = useExportRequestMutation();
+
+  useEffect(() => {
+    exportRequestMutation.mutate(params);
+  }, [params]);
 
   if (
     parseRequestFileMutation.isPending ||

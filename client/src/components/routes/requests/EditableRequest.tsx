@@ -29,8 +29,8 @@ export const EditableRequest = ({
       setEditContent(
         getRequestFromRequestFile(
           parsedRequestFileQuery.data as ParseResult,
-          requestFileContentQuery.data as string
-        )
+          requestFileContentQuery.data as string,
+        ),
       );
     }
   }, [parsedRequestFileQuery.data, requestFileContentQuery.data]);
@@ -53,27 +53,29 @@ export const EditableRequest = ({
 
   const requestText = getRequestFromRequestFile(
     parsedRequestFileQuery.data,
-    requestFileContentQuery.data!
+    requestFileContentQuery.data!,
   );
 
   const handleChangeEditContent = (
-    e: React.ChangeEvent<HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLTextAreaElement>,
   ) => {
     setEditContent(e.target.value);
   };
 
   const handleSave = () => {
-    updateFileMutation.mutate({
-      body: {
+    updateFileMutation.mutate(
+      {
         updated_http_request: editContent ?? null,
       },
-      onSuccess() {
-        onIsEditingChange(false);
-        notifications.show({
-          message: "Save successful",
-        });
+      {
+        onSuccess: () => {
+          onIsEditingChange(false);
+          notifications.show({
+            message: "Save successful",
+          });
+        },
       },
-    });
+    );
   };
 
   const handleCancel = () => {

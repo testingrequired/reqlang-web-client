@@ -7,7 +7,7 @@ import {
   beforeEach,
   afterAll,
 } from "vitest";
-import { EXPORT_KEYS, useExportRequestQuery } from "@/queries/export";
+import { EXPORT_KEYS, useExportRequestMutation } from "@/queries/export";
 import { RequestParamsFromClient } from "reqlang-types";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactNode } from "react";
@@ -80,22 +80,20 @@ describe("useExportRequestQuery", () => {
       handler.mockReturnValue(new HttpResponse(expectedError, { status: 500 }));
 
       const { result } = renderHook(
-        () => useExportRequestQuery("", expectedParams),
-        renderHookOptions
+        () => useExportRequestMutation(),
+        renderHookOptions,
       );
 
       expect(
-        queryClient.getQueryData(EXPORT_KEYS.export("", expectedParams))
+        queryClient.getQueryData(EXPORT_KEYS.export("", expectedParams)),
       ).toBeUndefined();
+
+      result.current.mutate(expectedParams);
 
       await waitFor(() => expect(result.current.isError).toBe(true));
 
-      expect(
-        queryClient.getQueryData(EXPORT_KEYS.export("", expectedParams))
-      ).toBeUndefined();
-
       expect(result.current.error).toStrictEqual(
-        new Error(`Failed to get export: ${expectedError}`)
+        new Error(`Failed to get export: ${expectedError}`),
       );
     });
   });
@@ -104,25 +102,19 @@ describe("useExportRequestQuery", () => {
     test("returns export", async () => {
       const expectedExport = "expectedExport";
       handler.mockReturnValue(
-        new HttpResponse(expectedExport, { status: 200 })
+        new HttpResponse(expectedExport, { status: 200 }),
       );
 
       const { result } = renderHook(
-        () => useExportRequestQuery("", expectedParams),
-        renderHookOptions
+        () => useExportRequestMutation(),
+        renderHookOptions,
       );
 
-      expect(
-        queryClient.getQueryData(EXPORT_KEYS.export("", expectedParams))
-      ).toBeUndefined();
+      result.current.mutate(expectedParams);
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
       expect(result.current.data).toStrictEqual(expectedExport);
-
-      expect(
-        queryClient.getQueryData(EXPORT_KEYS.export("", expectedParams))
-      ).toBe(expectedExport);
     });
   });
 });
