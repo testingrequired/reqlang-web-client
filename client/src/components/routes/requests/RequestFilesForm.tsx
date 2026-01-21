@@ -1,6 +1,6 @@
 import { MultiFilesSelect } from "@/components/common/MultiFileSelect";
 import { useRequestFilesStore } from "@/stores/requestFiles";
-import { ActionIcon, ButtonGroup } from "@mantine/core";
+import { ActionIcon, ButtonGroup, TooltipFloating } from "@mantine/core";
 import {
   IconFileText,
   IconFileTextFilled,
@@ -44,31 +44,43 @@ export const RequestFilesForm = () => {
 
   return (
     <ButtonGroup>
-      <ActionIcon
-        size="input-lg"
-        variant="light"
-        onClick={() => {
-          setShowMultiFileSelect(true);
-        }}
-        aria-label="Open/Close Request Files"
+      <TooltipFloating
+        label="Open/Close Request Files"
+        position="bottom"
+        color="dark"
       >
-        {newSelectedFiles.length === 0 ? (
-          <IconFileText stroke={1.25} />
-        ) : (
-          <IconFileTextFilled stroke={1.25} />
-        )}
-      </ActionIcon>
+        <ActionIcon
+          size="input-sm"
+          variant="light"
+          onClick={() => {
+            setShowMultiFileSelect(true);
+          }}
+          aria-label="Open/Close Request Files"
+        >
+          {newSelectedFiles.length === 0 ? (
+            <IconFileText stroke={1.25} />
+          ) : (
+            <IconFileTextFilled stroke={1.25} />
+          )}
+        </ActionIcon>
+      </TooltipFloating>
 
       {newSelectedFiles.length > 0 && (
-        <ActionIcon
-          size="input-lg"
-          variant="light"
-          color="red"
-          onClick={clear}
-          aria-label="Close All Request Files"
+        <TooltipFloating
+          label="Close All Request Files"
+          position="bottom"
+          color="dark"
         >
-          <IconFileXFilled stroke={1.25} />
-        </ActionIcon>
+          <ActionIcon
+            size="input-sm"
+            variant="light"
+            color="red"
+            onClick={clear}
+            aria-label="Close All Request Files"
+          >
+            <IconFileXFilled stroke={1.25} />
+          </ActionIcon>
+        </TooltipFloating>
       )}
     </ButtonGroup>
   );
