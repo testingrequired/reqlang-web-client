@@ -306,7 +306,7 @@ const RunRequestFormInner = ({
           <RequestFileRunError error={runRequestMutation.error} />
         )}
 
-        <Group grow>
+        <Group>
           <Button type="submit" loading={runRequestMutation.isPending}>
             {isPreviewing ? "Run (Preview)" : "Run"}
           </Button>
