@@ -306,13 +306,17 @@ const RunRequestFormInner = ({
           <RequestFileRunError error={runRequestMutation.error} />
         )}
 
-        <Group>
-          <Button type="submit" loading={runRequestMutation.isPending}>
-            {isPreviewing ? "Run (Preview)" : "Run"}
+        <Group justify="space-between">
+          <Button
+            type="submit"
+            loading={runRequestMutation.isPending}
+            variant={isPreviewing ? "light" : "primary"}
+          >
+            {isPreviewing ? "Preview Request" : "Run Request"}
           </Button>
 
           <Switch
-            label="Preview Request"
+            label="Preview"
             checked={isPreviewing}
             onChange={isPreviewingHandlers.toggle}
             radius="sm"

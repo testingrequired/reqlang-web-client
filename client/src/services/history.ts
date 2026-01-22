@@ -24,13 +24,13 @@ export function getRequestRunHistory(
   options: GetHistoryOptions = {
     sortBy: (a: RequestRun, b: RequestRun) =>
       (b.request_at as unknown as number) - (a.request_at as unknown as number),
-  }
+  },
 ): GetHistoryReturn {
   let history =
     typeof options.filterToPath === "undefined"
       ? allHistory
       : allHistory.filter(
-          (run) => run.request_file_path === options.filterToPath
+          (run) => run.request_file_path === options.filterToPath,
         );
 
   history.sort(options.sortBy);
@@ -38,7 +38,7 @@ export function getRequestRunHistory(
   if (typeof options.env !== "undefined") {
     history = history.filter((item) => {
       const params: RequestParamsFromClient = JSON.parse(
-        item.params_from_client_json
+        item.params_from_client_json,
       );
 
       return options.env === params.env;
@@ -47,7 +47,7 @@ export function getRequestRunHistory(
 
   if (typeof options.filterByTestResult !== "undefined") {
     history = history.filter(
-      (item) => item.pass === (options.filterByTestResult === "pass")
+      (item) => item.pass === (options.filterByTestResult === "pass"),
     );
   }
 
@@ -56,7 +56,7 @@ export function getRequestRunHistory(
 
     history = history.filter((item) => {
       const params: RequestParamsFromClient = JSON.parse(
-        item.params_from_client_json
+        item.params_from_client_json,
       );
 
       const isInReqfile = params.reqfile.includes(query);
@@ -95,4 +95,22 @@ function chunk<T>(array: T[], size: number = array.length): T[][] {
   const head = array.slice(0, size);
   const tail = array.slice(size);
   return [head, ...chunk(tail, size)];
+}
+
+export function getEnvsFromRunHistory(history: RequestRun[]): string[] {
+  const envs = [
+    ...new Set(
+      history
+        .map((item) => {
+          const params: RequestParamsFromClient = JSON.parse(
+            item.params_from_client_json,
+          );
+
+          return params.env;
+        })
+        .filter((value) => value !== null),
+    ),
+  ];
+
+  return envs;
 }
