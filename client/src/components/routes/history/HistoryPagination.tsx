@@ -1,8 +1,6 @@
 import { useFilteredHistoryPagination } from "@/hooks/routes/history/useFilteredHistoryPagination";
 import { Pagination } from "@mantine/core";
-import { getRouteApi } from "@tanstack/react-router";
-
-const routeApi = getRouteApi("/history");
+import { routeApi } from "@/components/routes/history/HistoryRoute";
 
 export const HistoryPagination = () => {
   const nav = routeApi.useNavigate();

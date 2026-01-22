@@ -11,15 +11,15 @@ import {
 } from "@mantine/core";
 import { getRouteApi } from "@tanstack/react-router";
 import { RequestRun } from "server-types";
-import { HistoryPagination } from "./HistoryPagination";
+import { HistoryPagination } from "@/components/routes/history/HistoryPagination";
 import { RequestRunHistoryItemCollapsable } from "@/components/common/RequestRunHistoryItemCollapsable";
-import { FilesSelectFilter } from "./FilesSelectFilter";
-import { RequestRunSelectFilter } from "./RequestRunSelectFilter";
-import { EnvFilter } from "./EnvFilter";
-import { QuerySearchFilter } from "./QuerySearchFilter";
-import { TestResultFilter } from "./TestResultsFilter";
-import { ClearHistoryFiltersButton } from "./ClearHistoryFiltersButton";
-import { DeleteHistoryButton } from "./DeleteHistoryButton";
+import { FilesSelectFilter } from "@/components/routes/history/FilesSelectFilter";
+import { RequestRunSelectFilter } from "@/components/routes/history/RequestRunSelectFilter";
+import { EnvFilter } from "@/components/routes/history/EnvFilter";
+import { QuerySearchFilter } from "@/components/routes/history/QuerySearchFilter";
+import { TestResultFilter } from "@/components/routes/history/TestResultsFilter";
+import { ClearHistoryFiltersButton } from "@/components/routes/history/ClearHistoryFiltersButton";
+import { DeleteHistoryButton } from "@/components/routes/history/DeleteHistoryButton";
 
 export const routeApi = getRouteApi("/history");
 

@@ -1,7 +1,5 @@
 import { Select } from "@mantine/core";
-import { getRouteApi } from "@tanstack/react-router";
-
-const routeApi = getRouteApi("/history");
+import { routeApi } from "@/components/routes/history/HistoryRoute";
 
 export const TestResultFilter = () => {
   const nav = routeApi.useNavigate();

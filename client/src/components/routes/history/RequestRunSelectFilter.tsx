@@ -1,8 +1,6 @@
 import { RequestRunSelect } from "@/components/common/RequestRunSelect";
-import { getRouteApi } from "@tanstack/react-router";
 import { RequestRun } from "server-types";
-
-const routeApi = getRouteApi("/history");
+import { routeApi } from "@/components/routes/history/HistoryRoute";
 
 type Props = {
   history: RequestRun[];

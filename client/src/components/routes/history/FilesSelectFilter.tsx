@@ -1,7 +1,5 @@
 import { FilesSelect } from "@/components/common/FileSelect";
-import { getRouteApi } from "@tanstack/react-router";
-
-const routeApi = getRouteApi("/history");
+import { routeApi } from "@/components/routes/history/HistoryRoute";
 
 export const FilesSelectFilter = () => {
   const nav = routeApi.useNavigate();
