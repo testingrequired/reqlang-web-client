@@ -6,7 +6,7 @@ build = "build.rs"
 
 [dependencies]
 axum = { version = "0.8.0", features = ["macros", "ws"] }
-axum-extra = { version = "0.10.1", features = ["typed-header"] }
+axum-extra = { version = "0.10.1" }
 tokio = { version = "1.0", features = ["macros", "rt-multi-thread"] }
 tower = { version = "0.5.2", features = ["util"] }
 tower-http = { version = "0.6.1", features = [
@@ -31,13 +31,12 @@ sqlx = { version = "0.8", features = ["runtime-tokio", "sqlite", "chrono"] }
 futures-util = "0.3.31"
 hyper = { version = "1", features = ["full"] }
 http-body-util = "0.1"
-hyper-util = { version = "0.1", features = ["full"] }
+hyper-util = { version = "0.1" }
 reqlang = { git = "https://github.com/testingrequired/reqlang.git", rev = "6085a89283b940a181aebc51f1e13fec75e302e1" }
 glob = "0.3.2"
 
 [dependencies.uuid]
 version = "1.19.0"
-# Lets you generate random UUIDs
 features = ["v4"]
 
 [dev-dependencies]
