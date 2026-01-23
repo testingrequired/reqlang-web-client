@@ -9,7 +9,7 @@ axum = { version = "0.8.0", features = ["macros", "ws"] }
 axum-extra = { version = "0.10.1" }
 tokio = { version = "1.0", features = ["macros", "rt-multi-thread"] }
 tower = { version = "0.5.2", features = ["util"] }
-tower-http = { version = "0.6.1", features = [
+tower-http = { version = "0.6.8", features = [
     "fs",
     "trace",
     "compression-br",
@@ -32,7 +32,7 @@ futures-util = "0.3.31"
 hyper = { version = "1", features = ["full"] }
 http-body-util = "0.1"
 hyper-util = { version = "0.1" }
-reqlang = { git = "https://github.com/testingrequired/reqlang.git", rev = "6085a89283b940a181aebc51f1e13fec75e302e1" }
+reqlang = { git = "https://github.com/testingrequired/reqlang.git", rev = "344df6523c32e1f471edbf403c9c42d0765563f3" }
 glob = "0.3.2"
 
 [dependencies.uuid]
