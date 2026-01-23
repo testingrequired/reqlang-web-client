@@ -6,14 +6,6 @@ export const HistoryPagination = () => {
   const nav = routeApi.useNavigate();
   const search = routeApi.useSearch();
 
-  let selectedTestResult: "pass" | "fail" | null;
-
-  if (typeof search.testResult === "undefined") {
-    selectedTestResult = null;
-  } else {
-    selectedTestResult = search.testResult;
-  }
-
   let { totalHistoryPages } = useFilteredHistoryPagination();
 
   return (
