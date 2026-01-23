@@ -50,6 +50,7 @@ export default defineConfig(({ mode }) => ({
           mantine_spotlight: ["@mantine/spotlight"],
           tabler_icons: ["@tabler/icons-react"],
           zustand: ["zustand"],
+          reqlang_types: ["reqlang-types"],
         },
       },
     },
