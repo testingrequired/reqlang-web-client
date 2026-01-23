@@ -59,7 +59,7 @@
     "react-dom": "^19.0.0",
     "react-rewards": "2.1.0",
     "react-use-websocket": "^4.0.0",
-    "reqlang-types": "file:../../reqlang/reqlang",
+    "reqlang-types": "1.0.0",
     "server-types": "file:../types",
     "strip-ansi": "^7.1.2",
     "zustand": "^5.0.8"
