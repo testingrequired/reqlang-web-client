@@ -7,6 +7,7 @@ clean:
 
 # Build the code for development
 build: clean
+    npm ci
     npm run build
 
 # Build the code for release

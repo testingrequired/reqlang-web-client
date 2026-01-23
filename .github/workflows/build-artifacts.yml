@@ -47,9 +47,9 @@ jobs:
         with:
           tool: just
       - name: Build
-        run: just build_release
+        run: just build-release
       - name: Upload CLI Binary
         uses: actions/upload-artifact@v4
         with:
-          name: reqlang
-          path: target/release/reqlang
+          name: reqlang-web
+          path: target/release/reqlang-web
