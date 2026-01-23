@@ -98,6 +98,17 @@ function RouteComponent() {
           </List.Item>
           <List.Item>
             <Group>
+              <IconBrandGithubFilled />
+              <Anchor
+                href="https://github.com/testingrequired/reqlang-web-client"
+                target="_blank"
+              >
+                testingrequired/reqlang-web-client
+              </Anchor>
+            </Group>
+          </List.Item>
+          <List.Item>
+            <Group>
               <IconWorldWww stroke={1.0} />
 
               <Anchor
