@@ -3,7 +3,8 @@ import { formOptions, useForm } from "@tanstack/react-form";
 import {
   Alert,
   Button,
-  Card,
+  Code,
+  Fieldset,
   Group,
   Loader,
   Select,
@@ -168,9 +169,9 @@ const RunRequestFormInner = ({
         form.handleSubmit(e);
       }}
     >
-      <Stack>
+      <Stack gap="md">
         {parseResult.envs.length > 0 && (
-          <Card>
+          <Fieldset legend={<Text size="md">Variables</Text>} variant="filled">
             <Stack>
               <form.Field
                 name="env"
@@ -209,7 +210,9 @@ const RunRequestFormInner = ({
                           ([key, value]) => (
                             <Table.Tr>
                               <Table.Td>{key}</Table.Td>
-                              <Table.Td>{value}</Table.Td>
+                              <Table.Td>
+                                <Code block>{value}</Code>
+                              </Table.Td>
                             </Table.Tr>
                           ),
                         )}
@@ -246,12 +249,11 @@ const RunRequestFormInner = ({
                 }}
               />
             </Stack>
-          </Card>
+          </Fieldset>
         )}
 
         {parseResult.prompts.length > 0 && (
-          <Card>
-            <Text>Prompts</Text>
+          <Fieldset legend={<Text size="md">Prompts</Text>} variant="filled">
             {parseResult.prompts.map((prompts, i) => (
               <form.Field
                 name={`prompt-${prompts}`}
@@ -273,12 +275,11 @@ const RunRequestFormInner = ({
                 )}
               />
             ))}
-          </Card>
+          </Fieldset>
         )}
 
         {parseResult.secrets.length > 0 && (
-          <Card>
-            <Text>Secrets</Text>
+          <Fieldset legend={<Text size="md">Secrets</Text>} variant="filled">
             {parseResult.secrets.map((secret, i) => (
               <form.Field
                 name={`secret-${secret}`}
@@ -300,14 +301,14 @@ const RunRequestFormInner = ({
                 )}
               />
             ))}
-          </Card>
+          </Fieldset>
         )}
 
         {!isPreviewing && runRequestMutation.isError && (
           <RequestFileRunError error={runRequestMutation.error} />
         )}
 
-        <Group justify="space-between">
+        <Group justify="space-between" mt="sm">
           <Button
             type="submit"
             loading={runRequestMutation.isPending}
