@@ -1,7 +1,7 @@
 import { RequestRunResponse } from "server-types";
 import { TestResultAlert } from "@/components/routes/requests/TestResultAlert";
 import { CopyCodeCard } from "@/components/common/CopyCodeCard";
-import { Stack, Tabs } from "@mantine/core";
+import { Indicator, Stack, Tabs } from "@mantine/core";
 import { useEffect, useState } from "react";
 
 type RunRequestResultsProps =
@@ -33,7 +33,16 @@ export const RunRequestResults = (props: RunRequestResultsProps) => {
         {isNotPreview && (
           <>
             <Tabs.Tab value="response">Response</Tabs.Tab>
-            {props.expectedResponse && <Tabs.Tab value="test">Test</Tabs.Tab>}
+            {props.expectedResponse && (
+              <Indicator
+                color={
+                  props.requestRunResponse.test_result.pass ? "green" : "red"
+                }
+                size={6}
+              >
+                <Tabs.Tab value="test">Test</Tabs.Tab>
+              </Indicator>
+            )}
           </>
         )}
         <Tabs.Tab value="request">Request</Tabs.Tab>

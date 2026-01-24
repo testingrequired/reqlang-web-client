@@ -7,6 +7,7 @@ import {
   Group,
   Loader,
   Select,
+  Space,
   Stack,
   Switch,
   Table,
@@ -322,6 +323,8 @@ const RunRequestFormInner = ({
             radius="sm"
           />
         </Group>
+
+        <Space h="xs" />
 
         {runResultsComponent}
       </Stack>
