@@ -35,12 +35,22 @@ export const RunRequestResults = (props: RunRequestResultsProps) => {
             <Tabs.Tab value="response">Response</Tabs.Tab>
             {props.expectedResponse && (
               <Indicator
+                disabled={currentTab === "test"}
                 color={
                   props.requestRunResponse.test_result.pass ? "green" : "red"
                 }
+                position="top-end"
+                offset={9}
                 size={6}
               >
-                <Tabs.Tab value="test">Test</Tabs.Tab>
+                <Tabs.Tab
+                  value="test"
+                  color={
+                    props.requestRunResponse.test_result.pass ? "green" : "red"
+                  }
+                >
+                  Test
+                </Tabs.Tab>
               </Indicator>
             )}
           </>
