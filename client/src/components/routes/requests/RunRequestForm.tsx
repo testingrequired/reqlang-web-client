@@ -73,6 +73,11 @@ const RunRequestFormInner = ({
   const runRequestMutation = useRunRequestMutation();
   const exportRequestMutation = useExportRequestMutation();
 
+  const handlePreviewToggle = () => {
+    exportRequestMutation.reset();
+    isPreviewingHandlers.toggle();
+  };
+
   useEffect(() => {
     if (typeof runParams === "undefined") return;
 
@@ -320,7 +325,7 @@ const RunRequestFormInner = ({
           <Switch
             label="Preview"
             checked={isPreviewing}
-            onChange={isPreviewingHandlers.toggle}
+            onChange={handlePreviewToggle}
             radius="sm"
           />
         </Group>
