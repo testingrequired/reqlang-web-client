@@ -36,3 +36,29 @@ jobs:
         with:
           name: reqlang-web
           path: target/release/reqlang-web
+  build-mac:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+          cache-dependency-path: "**/package-lock.json"
+      - name: Install just
+        uses: taiki-e/install-action@v2
+        with:
+          tool: just
+      - name: Build
+        run: just build-release
+      - name: Upload CLI Binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: reqlang-web (macos)
+          path: target/release/reqlang-web
