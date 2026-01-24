@@ -11,3 +11,7 @@ A single binary webview executable REST client for [reqlang](https://github.com/
 ![Screenshot of running a second request](./screenshot-run-request1.png)
 
 ![Screenshot of the run history](./screenshot-run-history.png)
+
+## Development
+
+See [DEVELOPMENT.md](./DEVELOPMENT.md) for details.
