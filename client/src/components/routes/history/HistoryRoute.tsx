@@ -49,7 +49,7 @@ export function HistoryRoute() {
       null;
   }
 
-  const pagination = requestRunHistory.length >= 10 && (
+  const pagination = totalFilteredRequestRuns >= 10 && (
     <Group justify="space-between">
       <Group>
         <HistoryPagination />
