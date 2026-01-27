@@ -23,7 +23,9 @@ export const RequestRunHistoryItem = ({ requestRun }: Props) => {
   const exportRequestMutation = useExportRequestMutation();
 
   useEffect(() => {
-    exportRequestMutation.mutate(params);
+    exportRequestMutation.mutate({
+      params,
+    });
   }, [params]);
 
   if (

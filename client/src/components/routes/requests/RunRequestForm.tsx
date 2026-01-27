@@ -68,28 +68,27 @@ const RunRequestFormInner = ({
   requestFileText,
 }: InnerProps) => {
   const [runParams, setRunParams] = useState<RequestParamsFromClient>();
-  const [isPreviewing, isPreviewingHandlers] = useDisclosure(false);
+  const [isExporting, isExportingHandlers] = useDisclosure(false);
+  const [exportFormat, setExportFormat] = useState<string>();
 
   const runRequestMutation = useRunRequestMutation();
   const exportRequestMutation = useExportRequestMutation();
 
-  const handlePreviewToggle = () => {
-    exportRequestMutation.reset();
-    isPreviewingHandlers.toggle();
-  };
-
   useEffect(() => {
     if (typeof runParams === "undefined") return;
 
-    exportRequestMutation.mutate(runParams);
+    exportRequestMutation.mutate({
+      params: runParams,
+      format: exportFormat,
+    });
 
-    if (!isPreviewing) {
+    if (!isExporting) {
       runRequestMutation.mutate({
         request_file_path: requestFilePath,
         params: runParams,
       });
     }
-  }, [runParams]);
+  }, [runParams, exportFormat]);
 
   const envs = parseResult.full.config?.[0].envs;
   const defaultValues = getFormDefaultValues(parseResult);
@@ -114,6 +113,10 @@ const RunRequestFormInner = ({
 
       const vars = envs?.[values.value.env] ?? {};
 
+      setExportFormat(
+        isExporting ? values.value.exportRequestFormat : undefined,
+      );
+
       setRunParams({
         reqfile: requestFileText,
         prompts,
@@ -124,6 +127,12 @@ const RunRequestFormInner = ({
       });
     },
   });
+
+  useEffect(() => {
+    if (!isExporting) {
+      form.setFieldValue("exportRequestFormat", "http");
+    }
+  }, [isExporting]);
 
   if (exportRequestMutation.isPending) {
     return <Loader />;
@@ -144,17 +153,17 @@ const RunRequestFormInner = ({
   let runResultsComponent: ReactNode;
 
   if (exportRequestMutation.isSuccess) {
-    if (isPreviewing) {
+    if (isExporting) {
       runResultsComponent = (
         <RunRequestResults
-          isPreview={isPreviewing}
+          isExporting={isExporting}
           exportedRequest={exportRequestMutation.data}
         />
       );
     } else if (runRequestMutation.isSuccess) {
       runResultsComponent = (
         <RunRequestResults
-          isPreview={isPreviewing}
+          isExporting={isExporting}
           exportedRequest={exportRequestMutation.data}
           exportedResponse={runRequestMutation.data[1]}
           requestRunResponse={runRequestMutation.data[0]}
@@ -163,6 +172,11 @@ const RunRequestFormInner = ({
       );
     }
   }
+
+  const handleExportingToggle = () => {
+    exportRequestMutation.reset();
+    isExportingHandlers.toggle();
+  };
 
   return (
     <form
@@ -309,7 +323,7 @@ const RunRequestFormInner = ({
           </Fieldset>
         )}
 
-        {!isPreviewing && runRequestMutation.isError && (
+        {!isExporting && runRequestMutation.isError && (
           <RequestFileRunError error={runRequestMutation.error} />
         )}
 
@@ -317,17 +331,36 @@ const RunRequestFormInner = ({
           <Button
             type="submit"
             loading={runRequestMutation.isPending}
-            variant={isPreviewing ? "light" : "primary"}
+            variant={isExporting ? "light" : "primary"}
           >
-            {isPreviewing ? "Preview Request" : "Run Request"}
+            {isExporting ? "Export" : "Run"}
           </Button>
 
-          <Switch
-            label="Preview"
-            checked={isPreviewing}
-            onChange={handlePreviewToggle}
-            radius="sm"
-          />
+          <Group>
+            {isExporting && (
+              <form.Field
+                name="exportRequestFormat"
+                children={(field) => (
+                  <Select
+                    placeholder="Export Format"
+                    value={field.state.value}
+                    onChange={(e) => field.handleChange(e ?? "http")}
+                    data={["http", "curl"]}
+                    comboboxProps={{
+                      withinPortal: false,
+                    }}
+                  />
+                )}
+              />
+            )}
+
+            <Switch
+              label="Export Request"
+              checked={isExporting}
+              onChange={handleExportingToggle}
+              radius="sm"
+            />
+          </Group>
         </Group>
 
         <Space h="xs" />
@@ -338,15 +371,32 @@ const RunRequestFormInner = ({
   );
 };
 
-function getFormDefaultValues(
+export function getFormDefaultValues(
   parseResult: ParseResult,
 ): Record<string, string> {
+  const env = [
+    "env",
+    parseResult.envs.length === 1 ? parseResult.envs.at(0) : undefined,
+  ] as const;
+
+  const secrets = parseResult.secrets.map(
+    (secret) => [`secret-${secret}`, ""] as const,
+  );
+
+  const prompts = parseResult.prompts.map(
+    (prompt) =>
+      [
+        `prompt-${prompt}`,
+        parseResult.default_prompt_values[prompt] ?? "",
+      ] as const,
+  );
+
+  const exportRequestFormat = ["exportRequestFormat", "http"] as const;
+
   return Object.fromEntries([
-    ["env", parseResult.envs.length === 1 ? parseResult.envs.at(0) : undefined],
-    ...parseResult.secrets.map((secret) => [`secret-${secret}`, ""]),
-    ...parseResult.prompts.map((prompt) => [
-      `prompt-${prompt}`,
-      parseResult.default_prompt_values[prompt] ?? "",
-    ]),
-  ]) as Record<string, string>;
+    env,
+    ...secrets,
+    ...prompts,
+    exportRequestFormat,
+  ] as const) as Record<string, string>;
 }

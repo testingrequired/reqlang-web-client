@@ -3,7 +3,7 @@ use std::{collections::HashMap, env::current_dir, fs, path::PathBuf, sync::Arc};
 use axum::{
     Json, Router,
     extract::{
-        Path, Request, State,
+        Path, Query, Request, State,
         ws::{Message, WebSocket, WebSocketUpgrade},
     },
     http::StatusCode,
@@ -446,9 +446,15 @@ async fn update_file(
     }
 }
 
+#[derive(Deserialize)]
+struct ExportQueryParams {
+    format: Option<String>,
+}
+
 #[axum::debug_handler]
 async fn export_request(
     Host(hostname): Host,
+    Query(query_params): Query<ExportQueryParams>,
     Json(from_client_params): Json<RequestParamsFromClient>,
 ) -> (StatusCode, Result<String, String>) {
     let mut provider_values: HashMap<String, String> = HashMap::new();
@@ -469,7 +475,13 @@ async fn export_request(
         &provider_values,
     )
     .unwrap();
-    let r = reqlang::export::export(&result.request, RequestFormat::HttpMessage);
+
+    let export_format = query_params
+        .format
+        .map(|f| f.parse::<RequestFormat>().unwrap())
+        .unwrap_or(RequestFormat::HttpMessage);
+
+    let r = reqlang::export::export(&result.request, export_format);
 
     (StatusCode::OK, Ok(r))
 }

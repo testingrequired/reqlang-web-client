@@ -73,7 +73,7 @@ export class HomeView extends PageObject {
 
   async docLinkUrls(): Promise<string[]> {
     return await Promise.all(
-      (await this.doclinks.all()).map((link) => link.getAttribute("href"))
+      (await this.doclinks.all()).map((link) => link.getAttribute("href")),
     );
   }
 
@@ -179,46 +179,73 @@ export class ActiveRequestFile extends PageObject {
 }
 
 export class RunRequestForm extends PageObject {
-  readonly previewRequestToggle: Locator;
+  readonly exportRequestToggle: Locator;
   readonly runRequestButton: Locator;
-  readonly requestBodyPreview: Locator;
+  readonly exportRequestButton: Locator;
+  readonly exportFormatSelect: Locator;
+  readonly exportFormatOptions: Locator;
+  readonly requestBodyExport: Locator;
   readonly requestBody: Locator;
   readonly responseBody: Locator;
 
   constructor(page: Page) {
     super(page, page.getByTestId("run-request-form"));
 
-    this.previewRequestToggle = this.root.getByText("Preview Request");
+    this.exportRequestToggle = this.root.getByText("Export Request");
 
     this.runRequestButton = this.root.getByRole("button", {
-      name: /^(Run)(?: \(Preview\))?$/,
+      name: "Run",
     });
 
-    this.requestBodyPreview = this.root.getByTestId("request-body-preview");
+    this.exportRequestButton = this.root.getByRole("button", {
+      name: "Export",
+    });
+
+    this.exportFormatSelect = this.root.getByRole("textbox", {
+      name: "Export Format",
+    });
+
+    this.exportFormatOptions = this.root.getByRole("option");
+
+    this.requestBodyExport = this.root.getByTestId("request-body-exported");
     this.requestBody = this.root.getByTestId("request-body");
     this.responseBody = this.root.getByTestId("response-body");
   }
 
-  async enablePreviewRequest() {
-    await this.previewRequestToggle.click({
+  async enableExportRequest() {
+    await this.exportRequestToggle.click({
       timeout: 5000,
     });
   }
 
-  async disablePreviewRequest() {
-    await this.previewRequestToggle.setChecked(false);
+  async disableExportRequest() {
+    await this.exportRequestToggle.setChecked(false);
+  }
+
+  async selectExportFormat(format: string) {
+    await this.exportFormatSelect.click();
+
+    await this.root
+      .getByRole("option", {
+        name: format,
+      })
+      .click();
   }
 
   async submitForm() {
     await this.runRequestButton.click();
   }
 
-  async expectRequestBodyPreview(expected: string) {
-    await expect(this.requestBodyPreview).toHaveText(expected);
+  async submitExportRequestForm() {
+    await this.exportRequestButton.click();
   }
 
-  async expectNoRequestBodyPreview() {
-    await expect(this.requestBodyPreview).toBeHidden();
+  async expectRequestBodyExport(expected: string) {
+    await expect(this.requestBodyExport).toHaveText(expected);
+  }
+
+  async expectNoRequestBodyExport() {
+    await expect(this.requestBodyExport).toBeHidden();
   }
 
   async expectHasRequestBody(expected: string) {
@@ -235,6 +262,14 @@ export class RunRequestForm extends PageObject {
 
   async expectNoResponseBody() {
     await expect(this.responseBody).toBeHidden();
+  }
+
+  async expectToHaveExportFormatSelected(expectedOption: string) {
+    await expect(this.exportFormatSelect).toHaveValue(expectedOption);
+  }
+
+  async expectToHaveExportFormatOptions(expectedOptions: string[]) {
+    await expect(this.exportFormatOptions).toHaveText(expectedOptions);
   }
 }
 
@@ -266,7 +301,7 @@ export class OpenRequestFilesTabs extends PageObject {
   async expectIsFileTabActive(requestFile: string) {
     await expect(this.getTabByName(requestFile)).toHaveAttribute(
       "data-active",
-      "true"
+      "true",
     );
   }
 

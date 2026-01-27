@@ -52,6 +52,8 @@ describe("Home", () => {
       "testingrequired/reqlang": "https://github.com/testingrequired/reqlang",
       "testingrequired/reqlang-expr":
         "https://github.com/testingrequired/reqlang-expr",
+      "testingrequired/reqlang-web-client":
+        "https://github.com/testingrequired/reqlang-web-client",
       "HTTP messages - MDN":
         "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Messages",
     });

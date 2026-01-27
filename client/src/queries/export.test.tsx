@@ -88,7 +88,9 @@ describe("useExportRequestQuery", () => {
         queryClient.getQueryData(EXPORT_KEYS.export("", expectedParams)),
       ).toBeUndefined();
 
-      result.current.mutate(expectedParams);
+      result.current.mutate({
+        params: expectedParams,
+      });
 
       await waitFor(() => expect(result.current.isError).toBe(true));
 
@@ -110,7 +112,9 @@ describe("useExportRequestQuery", () => {
         renderHookOptions,
       );
 
-      result.current.mutate(expectedParams);
+      result.current.mutate({
+        params: expectedParams,
+      });
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
 

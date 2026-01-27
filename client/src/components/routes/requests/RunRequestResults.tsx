@@ -6,11 +6,11 @@ import { useEffect, useState } from "react";
 
 type RunRequestResultsProps =
   | {
-      isPreview: true;
+      isExporting: true;
       exportedRequest: string;
     }
   | {
-      isPreview: false;
+      isExporting: false;
       exportedRequest: string;
       expectedResponse?: string;
       exportedResponse: string;
@@ -18,19 +18,19 @@ type RunRequestResultsProps =
     };
 
 export const RunRequestResults = (props: RunRequestResultsProps) => {
-  const { isPreview, exportedRequest } = props;
+  const { isExporting, exportedRequest } = props;
   const [currentTab, setCurrentTab] = useState<string | null>(null);
 
   useEffect(() => {
-    setCurrentTab(isPreview ? "request" : "response");
-  }, [isPreview]);
+    setCurrentTab(isExporting ? "request" : "response");
+  }, [isExporting]);
 
-  const isNotPreview = !isPreview;
+  const isNotExporting = !isExporting;
 
   return (
     <Tabs value={currentTab} onChange={setCurrentTab}>
       <Tabs.List>
-        {isNotPreview && (
+        {isNotExporting && (
           <>
             <Tabs.Tab value="response">Response</Tabs.Tab>
             {props.expectedResponse && (
@@ -58,7 +58,7 @@ export const RunRequestResults = (props: RunRequestResultsProps) => {
         <Tabs.Tab value="request">Request</Tabs.Tab>
       </Tabs.List>
 
-      {isNotPreview && (
+      {isNotExporting && (
         <>
           <Tabs.Panel value="response" aria-level={3}>
             <>
@@ -90,7 +90,7 @@ export const RunRequestResults = (props: RunRequestResultsProps) => {
         <CopyCodeCard
           text={exportedRequest}
           data-testid={
-            props.isPreview ? "request-body-preview" : "request-body"
+            props.isExporting ? "request-body-exported" : "request-body"
           }
         />
       </Tabs.Panel>

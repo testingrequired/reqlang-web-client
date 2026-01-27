@@ -69,7 +69,7 @@ describe("Requests", () => {
 
         beforeEach(async () => {
           await requests.openRequestFilesForm.selectRequestFile(
-            expectedRequestFile
+            expectedRequestFile,
           );
 
           await requests.openRequestFilesForm.blur();
@@ -93,7 +93,7 @@ describe("Requests", () => {
 
         test("displays the expected request file tab as active", async () => {
           await requests.openFileTabs.expectIsFileTabActive(
-            expectedRequestFile
+            expectedRequestFile,
           );
         });
 
@@ -103,24 +103,65 @@ describe("Requests", () => {
 
         test("displays the expected request file's HTTP request", async () => {
           await requests.openFileTabs.activeRequestFile.expectToHaveRequestBodyTemplate(
-            "GET {{@clientUrl}}/api/debug HTTP/1.1"
+            "GET {{@clientUrl}}/api/debug HTTP/1.1",
           );
         });
 
-        describe("when previewing the request", () => {
+        describe("when exporting the request", () => {
           beforeEach(async () => {
-            await requests.openFileTabs.activeRequestFile.runRequestForm.enablePreviewRequest();
-            await requests.openFileTabs.activeRequestFile.runRequestForm.submitForm();
+            await requests.openFileTabs.activeRequestFile.runRequestForm.enableExportRequest();
+            await requests.openFileTabs.activeRequestFile.runRequestForm.submitExportRequestForm();
           });
 
-          test("has the request body preview", async () => {
-            await requests.openFileTabs.activeRequestFile.runRequestForm.expectRequestBodyPreview(
-              "GET http://[::1]:3123/api/debug HTTP/1.1"
+          test("has export format selected", async () => {
+            await requests.openFileTabs.activeRequestFile.runRequestForm.expectToHaveExportFormatSelected(
+              "http",
+            );
+          });
+
+          test("has the request body export", async () => {
+            await requests.openFileTabs.activeRequestFile.runRequestForm.expectRequestBodyExport(
+              "GET http://[::1]:3123/api/debug HTTP/1.1",
             );
           });
 
           test("does not have the request body", async () => {
             await requests.openFileTabs.activeRequestFile.runRequestForm.expectNoRequestBody();
+          });
+
+          describe("when selecting curl format", () => {
+            beforeEach(async () => {
+              await requests.openFileTabs.activeRequestFile.runRequestForm.selectExportFormat(
+                "curl",
+              );
+
+              await requests.openFileTabs.activeRequestFile.runRequestForm.submitExportRequestForm();
+            });
+
+            test("has curl export format selected", async () => {
+              await requests.openFileTabs.activeRequestFile.runRequestForm.expectToHaveExportFormatSelected(
+                "curl",
+              );
+            });
+
+            test("has the request body export", async () => {
+              await requests.openFileTabs.activeRequestFile.runRequestForm.expectRequestBodyExport(
+                "curl http://[::1]:3123/api/debug --http1.1 -v",
+              );
+            });
+
+            describe("when disable exporting then reenabling exporting", () => {
+              beforeEach(async () => {
+                await requests.openFileTabs.activeRequestFile.runRequestForm.disableExportRequest();
+                await requests.openFileTabs.activeRequestFile.runRequestForm.enableExportRequest();
+              });
+
+              test("has http export format selected", async () => {
+                await requests.openFileTabs.activeRequestFile.runRequestForm.expectToHaveExportFormatSelected(
+                  "http",
+                );
+              });
+            });
           });
         });
 
@@ -129,19 +170,19 @@ describe("Requests", () => {
             await requests.openFileTabs.activeRequestFile.runRequestForm.submitForm();
           });
 
-          test("does not have the request body preview", async () => {
-            await requests.openFileTabs.activeRequestFile.runRequestForm.expectNoRequestBodyPreview();
+          test("does not have the request body export", async () => {
+            await requests.openFileTabs.activeRequestFile.runRequestForm.expectNoRequestBodyExport();
           });
 
           test("has the request body", async () => {
             await requests.openFileTabs.activeRequestFile.runRequestForm.expectHasRequestBody(
-              "GET http://[::1]:3123/api/debug HTTP/1.1"
+              "GET http://[::1]:3123/api/debug HTTP/1.1",
             );
           });
 
           test("has the response body", async () => {
             await requests.openFileTabs.activeRequestFile.runRequestForm.expectHasResponseBody(
-              "HTTP/1.1 200 OK\ncontent-type: application/json\nvary: accept-encoding\ncontent-length: 165"
+              "HTTP/1.1 200 OK\ncontent-type: application/json\nvary: accept-encoding\ncontent-length: 165",
             );
           });
         });

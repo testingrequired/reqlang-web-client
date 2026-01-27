@@ -6,16 +6,24 @@ export const EXPORT_KEYS = {
     ["export", requestFilePath, params] as const,
 } as const;
 
+type ExportRequestArgs = {
+  params: RequestParamsFromClient;
+  format?: string;
+};
+
 export const useExportRequestMutation = () => {
   return useMutation({
-    mutationFn: async (params: RequestParamsFromClient) => {
-      const response = await fetch(`/api/export_request`, {
-        method: "POST",
-        body: JSON.stringify(params),
-        headers: {
-          "content-type": "application/json",
+    mutationFn: async (args: ExportRequestArgs) => {
+      const response = await fetch(
+        `/api/export_request?format=${args.format ?? "http"}`,
+        {
+          method: "POST",
+          body: JSON.stringify(args.params),
+          headers: {
+            "content-type": "application/json",
+          },
         },
-      });
+      );
 
       const body = await response.text();
 
