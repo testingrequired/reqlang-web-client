@@ -3449,6 +3449,7 @@ dependencies = [
  "hyper",
  "hyper-util",
  "include_dir",
+ "libsqlite3-sys",
  "pretty_assertions",
  "reqlang",
  "serde",

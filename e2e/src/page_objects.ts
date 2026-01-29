@@ -37,6 +37,32 @@ export class RootView extends PageObject {
 
     return new RequestsView(this.page);
   }
+
+  public async gotoDebug(): Promise<DebugView> {
+    await this.debugLink.click();
+
+    return new DebugView(this.page);
+  }
+}
+
+export class DebugView extends PageObject {
+  readonly dbIsEncryptedRow: Locator;
+  readonly dbIsEncryptedHeader: Locator;
+  readonly dbIsEncryptedValue: Locator;
+
+  constructor(page: Page) {
+    super(page, page.getByTestId("debug-view"));
+
+    this.dbIsEncryptedRow = this.root.getByTestId("database-is-encrypted");
+    this.dbIsEncryptedHeader = this.dbIsEncryptedRow.locator("th");
+    this.dbIsEncryptedValue = this.dbIsEncryptedRow.locator("td");
+  }
+
+  public async expectDbEncryptionIs(isEncrypted: boolean) {
+    await expect(this.dbIsEncryptedValue).toHaveText(
+      isEncrypted ? "Yes" : "No",
+    );
+  }
 }
 
 export class HomeView extends PageObject {

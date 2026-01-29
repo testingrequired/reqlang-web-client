@@ -4,7 +4,7 @@ use std::sync::{
 };
 
 use clap::Parser;
-use server::{Args, init_server};
+use server::{Args, DbEncryption, DbOptions, InitServerOptions, init_server};
 use tao::{
     event::{Event, StartCause, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
@@ -19,10 +19,21 @@ async fn main() -> wry::Result<()> {
 
     let server_port = args.port;
     let db_path = args.db;
+    let db_encryption = args
+        .db_encryption_key
+        .map(DbEncryption::Encrypted)
+        .unwrap_or(DbEncryption::Unencrypted);
 
-    let server = init_server(server_port, db_path, false)
-        .await
-        .expect("should have initialized app server");
+    let server = init_server(InitServerOptions {
+        port: server_port,
+        open_browser: false,
+        db_options: DbOptions {
+            path: db_path,
+            encryption: db_encryption,
+        },
+    })
+    .await
+    .expect("should have initialized app server");
 
     let is_waiting_for_server = Arc::new(AtomicBool::new(true));
     let url = server.url();

@@ -101,6 +101,7 @@ impl IntoResponse for Error {
 pub struct AppState {
     pub home_dir: PathBuf,
     pub db: Option<Pool<Sqlite>>,
+    pub db_is_encrypted: bool,
     pub tx: Option<Arc<Mutex<UnboundedSender<String>>>>,
 }
 
@@ -123,6 +124,9 @@ pub struct Args {
     /// Path to sqlite3 database file
     #[arg(long)]
     pub db: Option<String>,
+    /// Encrypt the database file (default: true)
+    #[arg(long = "db_encryption_key", env = "REQLANG_DB_ENCRYPTION_KEY")]
+    pub db_encryption_key: Option<String>,
 }
 
 pub struct AppServer(TcpListener, Router);
@@ -173,11 +177,23 @@ impl AppServer {
     }
 }
 
-pub async fn init_server(
-    port: Option<u16>,
-    db: Option<String>,
-    open: bool,
-) -> Result<AppServer, Error> {
+pub struct InitServerOptions {
+    pub port: Option<u16>,
+    pub open_browser: bool,
+    pub db_options: DbOptions,
+}
+
+pub struct DbOptions {
+    pub path: Option<String>,
+    pub encryption: DbEncryption,
+}
+
+pub enum DbEncryption {
+    Unencrypted,
+    Encrypted(String),
+}
+
+pub async fn init_server(options: InitServerOptions) -> Result<AppServer, Error> {
     tracing_subscriber::registry()
         .with(
             tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| {
@@ -194,7 +210,7 @@ pub async fn init_server(
         .init();
 
     // Get port or default to a random port
-    let port = port.unwrap_or(0);
+    let port = options.port.unwrap_or(0);
 
     // Dynamically serve the static directory for development
     #[cfg(feature = "development_mode")]
@@ -221,7 +237,6 @@ pub async fn init_server(
     #[cfg(feature = "development_mode")]
     let reqlang_project_dir = {
         let reqlang_project_dir = reqlang_project_dir.parent().unwrap().to_path_buf();
-        dbg!(&reqlang_project_dir);
 
         reqlang_project_dir
     };
@@ -242,11 +257,14 @@ pub async fn init_server(
         )
     };
 
-    let db_pool = connect_to_db(db.unwrap_or(default_db_path)).await;
+    let db_is_encrypted = matches!(options.db_options.encryption, DbEncryption::Encrypted(_));
+
+    let db_pool = connect_to_db(options.db_options, default_db_path).await;
 
     let state = AppState {
         home_dir: reqlang_project_dir,
         db: Some(db_pool),
+        db_is_encrypted,
         tx: None,
     };
 
@@ -258,7 +276,7 @@ pub async fn init_server(
 
     tracing::info!("listening on {}", url);
 
-    if open && webbrowser::Browser::is_available() {
+    if options.open_browser && webbrowser::Browser::is_available() {
         webbrowser::open(&url).map_err(crate::Error::from)?;
     }
 
@@ -556,20 +574,24 @@ async fn diff_response(
     (StatusCode::OK, diff)
 }
 
-async fn connect_to_db(db_path: String) -> Pool<Sqlite> {
-    {
-        let pool_options = SqliteConnectOptions::new()
-            .filename(db_path)
-            .create_if_missing(true);
+async fn connect_to_db(db_options: DbOptions, default_db_path: String) -> Pool<Sqlite> {
+    let mut pool_options = SqliteConnectOptions::new()
+        .filename(db_options.path.unwrap_or(default_db_path))
+        .create_if_missing(true);
 
-        let pool = SqlitePool::connect_with(pool_options)
-            .await
-            .expect("should connect to db");
+    if let DbEncryption::Encrypted(encryption_key) = db_options.encryption {
+        let encryption_key = format!("'{}'", encryption_key.replace("'", "''"));
 
-        let _ = MIGRATOR.run(&pool).await;
-
-        pool
+        pool_options = pool_options.pragma("key", encryption_key);
     }
+
+    let pool = SqlitePool::connect_with(pool_options)
+        .await
+        .expect("should connect to db");
+
+    let _ = MIGRATOR.run(&pool).await;
+
+    pool
 }
 
 #[instrument(skip(state))]
@@ -613,11 +635,18 @@ pub async fn get_debug_info(
             .to_string()
     };
 
+    let db_is_encrypted = {
+        let state = state.lock().await;
+
+        state.db_is_encrypted
+    };
+
     let commit = env!("GIT_HASH").to_string();
 
     let debug_info = DebugInfo {
         cwd: reqlang_project_dir,
         db,
+        db_is_encrypted,
         commit,
     };
 
