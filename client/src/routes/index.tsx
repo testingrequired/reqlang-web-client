@@ -14,6 +14,7 @@ import {
 } from "@mantine/core";
 import {
   IconBrandGithubFilled,
+  IconExclamationCircleFilled,
   IconFolderRoot,
   IconWorldWww,
 } from "@tabler/icons-react";
@@ -41,8 +42,20 @@ function RouteComponent() {
 
   const lastRuns = runHistory.data.slice(0, 5);
 
+  const isNotDbEncrypted = !debugInfoQuery.data.db_is_encrypted;
+
   return (
     <Stack gap="xs" data-testid="home-view">
+      {isNotDbEncrypted && (
+        <Alert
+          color="orange"
+          title="Database Is Not Encrypted"
+          icon={<IconExclamationCircleFilled />}
+        >
+          Secrets will be stored in plain text!
+        </Alert>
+      )}
+
       <Title order={2}>Project</Title>
       <Card>
         <Group>

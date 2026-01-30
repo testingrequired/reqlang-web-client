@@ -66,6 +66,8 @@ export class DebugView extends PageObject {
 }
 
 export class HomeView extends PageObject {
+  readonly dbIsNotEncryptedAlert: Locator;
+
   readonly projectHeader: Locator;
 
   /**
@@ -82,6 +84,11 @@ export class HomeView extends PageObject {
 
   constructor(page: Page) {
     super(page, page.getByTestId("home-view"));
+
+    this.dbIsNotEncryptedAlert = this.root.getByRole("alert", {
+      name: "Database Is Not Encrypted",
+    });
+
     this.projectHeader = this.root.getByRole("heading", {
       name: "Project",
     });
@@ -101,6 +108,10 @@ export class HomeView extends PageObject {
     return await Promise.all(
       (await this.doclinks.all()).map((link) => link.getAttribute("href")),
     );
+  }
+
+  async expectHasDbNotEncryptedAlert() {
+    await expect(this.dbIsNotEncryptedAlert).toBeVisible();
   }
 
   async expectHasLatestRunsAlert() {
