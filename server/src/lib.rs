@@ -129,10 +129,10 @@ pub struct Args {
     /// Path to sqlite3 database file
     #[arg(long)]
     pub db: Option<String>,
-    /// Encrypt the database file (optional)
+    /// Key used to encrypt the database
     #[arg(long = "db_encryption_key", env = "RQL_DB_KEY")]
-    pub db_encryption_key: Option<String>,
-    /// Encrypt the database file with a new key (optional)
+    pub db_encryption_key: String,
+    /// Key used as database's new encryption key
     #[arg(long = "db_encryption_rekey", env = "RQL_DB_REKEY")]
     pub db_encryption_rekey: Option<String>,
 }

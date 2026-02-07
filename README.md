@@ -16,31 +16,31 @@ A single binary webview executable REST client for [reqlang](https://github.com/
 
 1. [Download](https://github.com/testingrequired/reqlang-web-client/actions/workflows/build-artifacts.yml)
 2. Unzip the `reqlang-web` in a directory on the `PATH`
-3. Optional/Recommended: Set environment variable `RQL_DB_KEY`. This encrypts application's sqlite database
-4. Run `reqlang-web` from a terminal in a project directory containing request files
+3. `cd` in to your project's root directory
+4. Create a `.env` file in the project's root directory and [define an encryption key](#define-the-encryption-key).
+5. Run `reqlang-web` from a terminal in a project directory containing request files
 
 ## Database Encryption
 
-It's recommended to use an encrypted database to protect sensitive data such as secrets used in requests. Encrypting an existing database isn't supported yet so this must be done before first starting the app.
+An encryption key must be defined before starting the app. This will be used to encrypt the app's database. Requests that references secrets will have secret values in the run history. Encryption helps ensure those values stay safe.
 
-### Setting An Encryption Key
+### Define The Encryption Key
 
-Add a `.env` file to your project's root before starting the app.
+Create a `.env` file at the root of your project directory, where `reqlang-web` will be ran, then define the `RQL_DB_KEY` environment variable.
 
 ```shell
-# The database's encryption key will be set to this key on first start up
 RQL_DB_KEY=strongPassword1!
 ```
 
+Be sure to also add `.env` to your source control ignore list (e.g. `.gitignore`). You don't want to commit this file.
+
 ### Changing The Encryption Key
 
-Update the `.env` file
+The `RQL_DB_REKEY` environment variable is used when you'd like to change the database's encryption key. The `RQL_DB_KEY` environment variable is still required.
 
 ```shell
-# The database's existing encryption key
 RQL_DB_KEY=strongPassword1!
 
-# The database's encryption key will be changed to this key on start up
 RQL_DB_REKEY=strongPassword2@
 ```
 
