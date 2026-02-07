@@ -60,7 +60,6 @@ use tower_serve_static::ServeDir as StaticServeDir;
 
 use crate::services::{
     achievements_service,
-    db_service::is_database_encrypted,
     request_service::{self, run_request_from_params},
 };
 
@@ -268,14 +267,6 @@ pub async fn init_server(options: InitServerOptions) -> Result<AppServer, Error>
     };
 
     let db_is_encrypted = matches!(options.db_options.encryption, DbEncryption::Encrypted(_, _));
-
-    if !db_is_encrypted
-        && is_database_encrypted(&PathBuf::from(&default_db_path))
-            .await
-            .unwrap()
-    {
-        return Err(Error::DbEncryptionKeyRequiredButNotProvided);
-    }
 
     let db_pool = connect_to_db(options.db_options, default_db_path).await;
 

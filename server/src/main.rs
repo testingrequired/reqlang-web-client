@@ -3,7 +3,7 @@ use server::{Args, DbEncryption, DbOptions, Error, InitServerOptions, init_serve
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
-    dotenv::dotenv().ok();
+    dotenv::dotenv().expect("should load dotenv");
 
     let args = Args::parse();
 
