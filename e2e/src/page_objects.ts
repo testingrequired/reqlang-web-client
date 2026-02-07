@@ -110,8 +110,8 @@ export class HomeView extends PageObject {
     );
   }
 
-  async expectHasDbNotEncryptedAlert() {
-    await expect(this.dbIsNotEncryptedAlert).toBeVisible();
+  async expectDoesNotHaveDbNotEncryptedAlert() {
+    await expect(this.dbIsNotEncryptedAlert).not.toBeVisible();
   }
 
   async expectHasLatestRunsAlert() {

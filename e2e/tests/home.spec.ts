@@ -23,8 +23,8 @@ describe("Home", () => {
     await expect(page).toHaveTitle("reqlang-web");
   });
 
-  test("has alert that db is not encrypted", async () => {
-    await home.expectHasDbNotEncryptedAlert();
+  test("does not have alert that db is unencrypted", async () => {
+    await home.expectDoesNotHaveDbNotEncryptedAlert();
   });
 
   test("has project cwd", async () => {

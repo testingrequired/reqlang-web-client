@@ -182,7 +182,7 @@ describe("Requests", () => {
 
           test("has the response body", async () => {
             await requests.openFileTabs.activeRequestFile.runRequestForm.expectHasResponseBody(
-              "HTTP/1.1 200 OK\ncontent-type: application/json\nvary: accept-encoding\ncontent-length: 189",
+              "HTTP/1.1 200 OK\ncontent-type: application/json\nvary: accept-encoding\ncontent-length: 151",
             );
           });
         });

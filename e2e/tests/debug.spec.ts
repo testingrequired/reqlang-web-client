@@ -23,6 +23,6 @@ describe("Debug", () => {
   });
 
   test("has db encryption", async ({ page }) => {
-    await debug.expectDbEncryptionIs(false);
+    await debug.expectDbEncryptionIs(true);
   });
 });
