@@ -11,6 +11,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 clap = { version = "4.5.32", features = ["derive", "env"] }
 tao = "0.34.5"
 wry = "0.52.1"
+dotenv = "0.15.0"
 
 [[bin]]
 name = "reqlang-web"

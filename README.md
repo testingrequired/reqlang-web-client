@@ -25,22 +25,23 @@ It's recommended to use an encrypted database to protect sensitive data such as 
 
 ### Setting An Encryption Key
 
-Set the environement variable `RQL_DB_KEY` with a strong encryption key. This will encrypt your sqlite database and protect it from unauthorized access.
+Add a `.env` file to your project's root before starting the app.
 
 ```shell
-RQL_DB_KEY=strongPassword1! reqlang-web
+# The database's encryption key will be set to this key on first start up
+RQL_DB_KEY=strongPassword1!
 ```
 
 ### Changing The Encryption Key
 
-Setting the environment variable `RQL_DB_REKEY` (in addition to `RQL_DB_KEY`) with another strong encryption key.
+Update the `.env` file
 
 ```shell
-# Change the database encryption key and run the app
-RQL_DB_KEY=strongPassword1! RQL_DB_REKEY=strongPassword2@ reqlang-web
+# The database's existing encryption key
+RQL_DB_KEY=strongPassword1!
 
-# Test it
-RQL_DB_KEY=strongPassword2@ reqlang-web
+# The database's encryption key will be changed to this key on start up
+RQL_DB_REKEY=strongPassword2@
 ```
 
 ## Development

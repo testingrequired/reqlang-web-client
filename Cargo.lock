@@ -117,6 +117,7 @@ name = "app"
 version = "0.1.0"
 dependencies = [
  "clap",
+ "dotenv",
  "server",
  "tao",
  "tokio",
@@ -873,6 +874,12 @@ dependencies = [
  "quote",
  "syn 2.0.100",
 ]
+
+[[package]]
+name = "dotenv"
+version = "0.15.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "77c90badedccf4105eca100756a0b1289e191f6fcbdadd3cee1d2f614f97da8f"
 
 [[package]]
 name = "dotenvy"
@@ -2839,7 +2846,7 @@ dependencies = [
  "quinn-udp",
  "rustc-hash",
  "rustls",
- "socket2 0.5.8",
+ "socket2 0.6.1",
  "thiserror 2.0.12",
  "tokio",
  "tracing",
@@ -2877,9 +2884,9 @@ dependencies = [
  "cfg_aliases",
  "libc",
  "once_cell",
- "socket2 0.5.8",
+ "socket2 0.6.1",
  "tracing",
- "windows-sys 0.59.0",
+ "windows-sys 0.60.2",
 ]
 
 [[package]]
@@ -3443,6 +3450,7 @@ dependencies = [
  "axum-extra",
  "chrono",
  "clap",
+ "dotenv",
  "futures-util",
  "glob",
  "http-body-util",

@@ -59,6 +59,8 @@ async fn main() -> wry::Result<()> {
 }
 
 fn app_event_loop(url: &str) {
+    dotenv::dotenv().ok();
+
     let event_loop = EventLoop::new();
     let window = WindowBuilder::new()
         .with_maximized(true)

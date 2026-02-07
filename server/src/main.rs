@@ -3,6 +3,8 @@ use server::{Args, DbEncryption, DbOptions, Error, InitServerOptions, init_serve
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
+    dotenv::dotenv().ok();
+
     let args = Args::parse();
 
     let server_port = args.port;
