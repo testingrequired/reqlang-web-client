@@ -50,7 +50,7 @@ describe("useGetDebugInfoQuery", () => {
 
       const { result } = renderHook(
         () => useGetDebugInfoQuery(),
-        renderHookOptions
+        renderHookOptions,
       );
 
       expect(queryClient.getQueryData(DEBUG_KEYS.all)).toBeUndefined();
@@ -58,7 +58,7 @@ describe("useGetDebugInfoQuery", () => {
       await waitFor(() => expect(result.current.isError).toBe(true));
 
       expect(result.current.error).toStrictEqual(
-        new Error(`Failed to get debug information: ${expectedError}`)
+        new Error(`Failed to get debug information: ${expectedError}`),
       );
     });
   });
@@ -68,14 +68,15 @@ describe("useGetDebugInfoQuery", () => {
       handler.mockReturnValue(
         HttpResponse.json({
           db: "expectedDb",
+          db_is_encrypted: true,
           cwd: "expectedCwd",
           commit: "expectedCommit",
-        } as DebugInfo)
+        } as DebugInfo),
       );
 
       const { result } = renderHook(
         () => useGetDebugInfoQuery(),
-        renderHookOptions
+        renderHookOptions,
       );
 
       expect(queryClient.getQueryData(DEBUG_KEYS.all)).toBeUndefined();
@@ -84,12 +85,14 @@ describe("useGetDebugInfoQuery", () => {
 
       expect(result.current.data).toStrictEqual({
         db: "expectedDb",
+        db_is_encrypted: true,
         cwd: "expectedCwd",
         commit: "expectedCommit",
       });
 
       expect(queryClient.getQueryData(DEBUG_KEYS.all)).toStrictEqual({
         db: "expectedDb",
+        db_is_encrypted: true,
         cwd: "expectedCwd",
         commit: "expectedCommit",
       });

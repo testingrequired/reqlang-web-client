@@ -13,6 +13,7 @@ pub mod utils;
 #[ts(export)]
 pub struct DebugInfo {
     pub db: String,
+    pub db_is_encrypted: bool,
     pub cwd: String,
     pub commit: String,
 }

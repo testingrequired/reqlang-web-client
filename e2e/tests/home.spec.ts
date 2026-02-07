@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { REQLANG_PROJECT_DIR } from "@/test";
+import { RQL_PROJECT_DIR } from "@/test";
 import { HomeView, RootView } from "@/test/page_objects";
 
 const { beforeEach, describe } = test;
@@ -23,8 +23,12 @@ describe("Home", () => {
     await expect(page).toHaveTitle("reqlang-web");
   });
 
+  test("does not have alert that db is unencrypted", async () => {
+    await home.expectDoesNotHaveDbNotEncryptedAlert();
+  });
+
   test("has project cwd", async () => {
-    await expect.soft(home.projectCwdText()).resolves.toBe(REQLANG_PROJECT_DIR);
+    await expect.soft(home.projectCwdText()).resolves.toBe(RQL_PROJECT_DIR);
     await expect
       .soft(home.projectCwdText())
       .resolves.not.toBe("{{join(cache_directory(), uuid())}}");

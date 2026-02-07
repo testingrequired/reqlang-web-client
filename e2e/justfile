@@ -18,12 +18,21 @@ build-release:
 
 # Run the release server for the e2e test to use
 run-server:
-    cd ../target/release && ./reqlang-web-browser --db 'sqlite::memory:' --port=3123 --open false
+    cp ../target/release/reqlang-web-browser {{ join(cache_directory(), "reqlang-web-e2e") }}
+    cd {{ join(cache_directory(), "reqlang-web-e2e") }} && RQL_PROJECT_DIR={{ join(cache_directory(), "reqlang-web-e2e") }} ./reqlang-web-browser --db 'sqlite::memory:' --port=3123 --open false
+
+clean-test-cache-dir:
+    rm -rf {{ join(cache_directory(), "reqlang-web-e2e") }}
+
+create-dotenv-file:
+    mkdir -p {{ join(cache_directory(), "reqlang-web-e2e") }}
+    touch {{ join(cache_directory(), "reqlang-web-e2e") }}/.env
+    echo 'RQL_DB_KEY=e2e' > {{ join(cache_directory(), "reqlang-web-e2e") }}/.env
 
 # Run all tests
-test:
-    REQLANG_PROJECT_DIR={{join(cache_directory(), "reqlang-web-e2e", uuid())}} npm run test
+test: clean-test-cache-dir create-dotenv-file
+    RQL_PROJECT_DIR={{ join(cache_directory(), "reqlang-web-e2e") }} npm run test
 
 # Run all tests using Playwright's UI mode
-test-ui-mode:
-    REQLANG_PROJECT_DIR={{join(cache_directory(), "reqlang-web-e2e", uuid())}} npm run test-ui-mode
+test-ui-mode: clean-test-cache-dir create-dotenv-file
+    RQL_PROJECT_DIR={{ join(cache_directory(), "reqlang-web-e2e") }} npm run test-ui-mode

@@ -37,9 +37,37 @@ export class RootView extends PageObject {
 
     return new RequestsView(this.page);
   }
+
+  public async gotoDebug(): Promise<DebugView> {
+    await this.debugLink.click();
+
+    return new DebugView(this.page);
+  }
+}
+
+export class DebugView extends PageObject {
+  readonly dbIsEncryptedRow: Locator;
+  readonly dbIsEncryptedHeader: Locator;
+  readonly dbIsEncryptedValue: Locator;
+
+  constructor(page: Page) {
+    super(page, page.getByTestId("debug-view"));
+
+    this.dbIsEncryptedRow = this.root.getByTestId("database-is-encrypted");
+    this.dbIsEncryptedHeader = this.dbIsEncryptedRow.locator("th");
+    this.dbIsEncryptedValue = this.dbIsEncryptedRow.locator("td");
+  }
+
+  public async expectDbEncryptionIs(isEncrypted: boolean) {
+    await expect(this.dbIsEncryptedValue).toHaveText(
+      isEncrypted ? "Yes" : "No",
+    );
+  }
 }
 
 export class HomeView extends PageObject {
+  readonly dbIsNotEncryptedAlert: Locator;
+
   readonly projectHeader: Locator;
 
   /**
@@ -56,6 +84,11 @@ export class HomeView extends PageObject {
 
   constructor(page: Page) {
     super(page, page.getByTestId("home-view"));
+
+    this.dbIsNotEncryptedAlert = this.root.getByRole("alert", {
+      name: "Database Is Not Encrypted",
+    });
+
     this.projectHeader = this.root.getByRole("heading", {
       name: "Project",
     });
@@ -75,6 +108,10 @@ export class HomeView extends PageObject {
     return await Promise.all(
       (await this.doclinks.all()).map((link) => link.getAttribute("href")),
     );
+  }
+
+  async expectDoesNotHaveDbNotEncryptedAlert() {
+    await expect(this.dbIsNotEncryptedAlert).not.toBeVisible();
   }
 
   async expectHasLatestRunsAlert() {

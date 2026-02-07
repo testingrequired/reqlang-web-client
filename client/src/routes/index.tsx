@@ -5,16 +5,17 @@ import {
   Alert,
   Anchor,
   Card,
+  Code,
   Group,
   List,
   Loader,
   Stack,
-  Text,
   Title,
 } from "@mantine/core";
 import {
   IconBrandGithubFilled,
-  IconFolderRoot,
+  IconDatabaseExclamation,
+  IconFolder,
   IconWorldWww,
 } from "@tabler/icons-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -41,15 +42,33 @@ function RouteComponent() {
 
   const lastRuns = runHistory.data.slice(0, 5);
 
+  const isNotDbEncrypted = !debugInfoQuery.data.db_is_encrypted;
+
   return (
     <Stack gap="xs" data-testid="home-view">
-      <Title order={2}>Project</Title>
+      {isNotDbEncrypted && (
+        <Alert
+          color="orange"
+          title="Database Is Not Encrypted"
+          icon={<IconDatabaseExclamation />}
+          mb="lg"
+        >
+          Secrets will be stored in plain text!
+        </Alert>
+      )}
+
       <Card>
         <Group>
-          <IconFolderRoot />
-          <Text m={0} data-testid="project-cwd">
+          <IconFolder />
+          <Code
+            m={0}
+            data-testid="project-cwd"
+            style={{
+              cursor: "default",
+            }}
+          >
             {debugInfoQuery.data.cwd}
-          </Text>
+          </Code>
         </Group>
       </Card>
 

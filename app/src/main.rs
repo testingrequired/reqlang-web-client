@@ -4,7 +4,7 @@ use std::sync::{
 };
 
 use clap::Parser;
-use server::{Args, init_server};
+use server::{Args, DbEncryption, DbOptions, InitServerOptions, init_server};
 use tao::{
     event::{Event, StartCause, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
@@ -15,14 +15,25 @@ use wry::WebViewBuilder;
 
 #[tokio::main]
 async fn main() -> wry::Result<()> {
+    dotenv::dotenv().expect("should load dotenv");
+
     let args = Args::parse();
 
     let server_port = args.port;
     let db_path = args.db;
+    let db_rekey = args.db_encryption_rekey;
+    let db_encryption = DbEncryption::Encrypted(args.db_encryption_key, db_rekey);
 
-    let server = init_server(server_port, db_path, false)
-        .await
-        .expect("should have initialized app server");
+    let server = init_server(InitServerOptions {
+        port: server_port,
+        open_browser: false,
+        db_options: DbOptions {
+            path: db_path,
+            encryption: db_encryption,
+        },
+    })
+    .await
+    .expect("should have initialized app server");
 
     let is_waiting_for_server = Arc::new(AtomicBool::new(true));
     let url = server.url();
@@ -47,6 +58,8 @@ async fn main() -> wry::Result<()> {
 }
 
 fn app_event_loop(url: &str) {
+    dotenv::dotenv().ok();
+
     let event_loop = EventLoop::new();
     let window = WindowBuilder::new()
         .with_maximized(true)

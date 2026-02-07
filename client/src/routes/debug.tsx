@@ -53,18 +53,19 @@ function RouteComponent() {
 
   const networkStatus = network.online ? "Online" : "Offline";
   const networkStatusColor = network.online ? "green" : "red";
+  const dbIsEncrypted = debugInfoQuery.data.db_is_encrypted ? "Yes" : "No";
 
   const copyDiagnosticInfo = () =>
     clipboard.copy(
       JSON.stringify(
         { os, network, connectionStatus, ...debugInfoQuery.data },
         null,
-        2
-      )
+        2,
+      ),
     );
 
   return (
-    <Stack>
+    <Stack data-testid="debug-view">
       <Title order={2}>Diagnostics</Title>
       <Table variant="vertical">
         <Table.Tbody>
@@ -78,6 +79,12 @@ function RouteComponent() {
             <Table.Th>Database</Table.Th>
             <Table.Td>
               <pre>{debugInfoQuery.data.db}</pre>
+            </Table.Td>
+          </Table.Tr>
+          <Table.Tr data-testid="database-is-encrypted">
+            <Table.Th>Database Is Encrypted</Table.Th>
+            <Table.Td>
+              <pre>{dbIsEncrypted}</pre>
             </Table.Td>
           </Table.Tr>
           <Table.Tr>

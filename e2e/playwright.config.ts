@@ -71,7 +71,7 @@ export default defineConfig({
     url: "http://[::1]:3123",
     reuseExistingServer: true,
     env: {
-      REQLANG_PROJECT_DIR: process.env.REQLANG_PROJECT_DIR,
+      RQL_PROJECT_DIR: process.env.RQL_PROJECT_DIR,
     },
   },
 });
