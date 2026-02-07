@@ -15,6 +15,8 @@ use wry::WebViewBuilder;
 
 #[tokio::main]
 async fn main() -> wry::Result<()> {
+    dotenv::dotenv().expect("should load dotenv");
+
     let args = Args::parse();
 
     let server_port = args.port;
