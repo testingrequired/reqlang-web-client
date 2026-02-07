@@ -339,3 +339,45 @@ pub mod request_service {
         }
     }
 }
+
+pub mod db_service {
+    use std::{path::PathBuf, str::FromStr};
+
+    use sqlx::{
+        SqlitePool,
+        sqlite::{SqliteConnectOptions, SqlitePoolOptions},
+    };
+
+    pub async fn verify_database_connection(pool: &SqlitePool) -> Result<(), String> {
+        sqlx::query("SELECT count(*) FROM sqlite_master")
+            .fetch_one(pool)
+            .await
+            .map(|_| ())
+            .map_err(|err| err.to_string())
+    }
+
+    pub async fn is_database_encrypted(db_path: &PathBuf) -> Result<bool, String> {
+        let db_uri = db_path.to_str().expect("db path should parse");
+
+        let options = SqliteConnectOptions::from_str(db_uri)
+            .expect("...")
+            .create_if_missing(false);
+
+        let pool_result = SqlitePoolOptions::new()
+            .max_connections(1)
+            .connect_with(options)
+            .await;
+
+        match pool_result {
+            Ok(pool) => {
+                let query_result = verify_database_connection(&pool).await;
+
+                match query_result {
+                    Ok(_) => Ok(false),
+                    Err(_) => Ok(true),
+                }
+            }
+            Err(_) => Ok(true),
+        }
+    }
+}

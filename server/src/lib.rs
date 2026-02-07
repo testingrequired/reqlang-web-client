@@ -60,6 +60,7 @@ use tower_serve_static::ServeDir as StaticServeDir;
 
 use crate::services::{
     achievements_service,
+    db_service::is_database_encrypted,
     request_service::{self, run_request_from_params},
 };
 
@@ -73,13 +74,17 @@ const DEFAULT_DB_FILENAME: &str = "reqlang.sqlite3";
 #[derive(Debug)]
 pub enum Error {
     Io(String),
+    DbEncryptionKeyRequiredButNotProvided,
 }
 
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        let Error::Io(printable) = self;
-
-        write!(f, "{}", printable)
+        match self {
+            Error::Io(printable) => write!(f, "{}", printable),
+            Error::DbEncryptionKeyRequiredButNotProvided => {
+                write!(f, "Db encryption key required but not provided")
+            }
+        }
     }
 }
 
@@ -91,7 +96,8 @@ impl From<std::io::Error> for Error {
 
 impl IntoResponse for Error {
     fn into_response(self) -> Response {
-        let Error::Io(body) = self;
+        let body = self.to_string();
+
         error!(body);
         (StatusCode::INTERNAL_SERVER_ERROR, body).into_response()
     }
@@ -258,6 +264,14 @@ pub async fn init_server(options: InitServerOptions) -> Result<AppServer, Error>
     };
 
     let db_is_encrypted = matches!(options.db_options.encryption, DbEncryption::Encrypted(_));
+
+    if !db_is_encrypted
+        && is_database_encrypted(&PathBuf::from(&default_db_path))
+            .await
+            .unwrap()
+    {
+        return Err(Error::DbEncryptionKeyRequiredButNotProvided);
+    }
 
     let db_pool = connect_to_db(options.db_options, default_db_path).await;
 

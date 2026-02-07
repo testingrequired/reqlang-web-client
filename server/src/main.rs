@@ -21,7 +21,12 @@ async fn main() -> Result<(), Error> {
             encryption: db_encryption,
         },
     })
-    .await?;
+    .await;
 
-    server.start(&|| {}).await
+    match server {
+        Ok(server) => server.start(&|| {}).await,
+        Err(err) => {
+            panic!("Failed to start server: {err}");
+        }
+    }
 }
