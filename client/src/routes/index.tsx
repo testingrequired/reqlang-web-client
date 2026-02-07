@@ -5,17 +5,17 @@ import {
   Alert,
   Anchor,
   Card,
+  Code,
   Group,
   List,
   Loader,
   Stack,
-  Text,
   Title,
 } from "@mantine/core";
 import {
   IconBrandGithubFilled,
-  IconExclamationCircleFilled,
-  IconFolderRoot,
+  IconDatabaseExclamation,
+  IconFolder,
   IconWorldWww,
 } from "@tabler/icons-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -50,19 +50,25 @@ function RouteComponent() {
         <Alert
           color="orange"
           title="Database Is Not Encrypted"
-          icon={<IconExclamationCircleFilled />}
+          icon={<IconDatabaseExclamation />}
+          mb="lg"
         >
           Secrets will be stored in plain text!
         </Alert>
       )}
 
-      <Title order={2}>Project</Title>
       <Card>
         <Group>
-          <IconFolderRoot />
-          <Text m={0} data-testid="project-cwd">
+          <IconFolder />
+          <Code
+            m={0}
+            data-testid="project-cwd"
+            style={{
+              cursor: "default",
+            }}
+          >
             {debugInfoQuery.data.cwd}
-          </Text>
+          </Code>
         </Group>
       </Card>
 
