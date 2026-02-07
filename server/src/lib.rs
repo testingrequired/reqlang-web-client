@@ -131,7 +131,7 @@ pub struct Args {
     #[arg(long)]
     pub db: Option<String>,
     /// Encrypt the database file (default: true)
-    #[arg(long = "db_encryption_key", env = "REQLANG_DB_ENCRYPTION_KEY")]
+    #[arg(long = "db_encryption_key", env = "RQL_DB_KEY")]
     pub db_encryption_key: Option<String>,
 }
 
@@ -235,7 +235,7 @@ pub async fn init_server(options: InitServerOptions) -> Result<AppServer, Error>
         StaticServeDir::new(&ASSETS_DIR)
     };
 
-    let reqlang_project_dir = match std::env::var("REQLANG_PROJECT_DIR") {
+    let reqlang_project_dir = match std::env::var("RQL_PROJECT_DIR") {
         Ok(reqlang_project_dir) => PathBuf::from(&reqlang_project_dir),
         Err(_) => current_dir().expect("should have current directory"),
     };

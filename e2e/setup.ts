@@ -6,7 +6,7 @@ export default function () {
 }
 
 function copy_test_requests_to_temp_directory() {
-  const reqlangProjectDir = process.env.REQLANG_PROJECT_DIR;
+  const reqlangProjectDir = process.env.RQL_PROJECT_DIR;
   const e2eDir = process.cwd();
   const requestsDir = path.join(e2eDir, "..", "requests");
 
@@ -24,10 +24,10 @@ function copy_test_requests_to_temp_directory() {
       (err: unknown) => {
         if (err) {
           console.error(
-            `Unable to copy ${requestsDir} to ${reqlangProjectDir}: ${err}`
+            `Unable to copy ${requestsDir} to ${reqlangProjectDir}: ${err}`,
           );
         }
-      }
+      },
     );
   });
 }

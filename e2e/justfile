@@ -22,8 +22,8 @@ run-server:
 
 # Run all tests
 test:
-    REQLANG_PROJECT_DIR={{join(cache_directory(), "reqlang-web-e2e", uuid())}} npm run test
+    RQL_PROJECT_DIR={{ join(cache_directory(), "reqlang-web-e2e", uuid()) }} npm run test
 
 # Run all tests using Playwright's UI mode
 test-ui-mode:
-    REQLANG_PROJECT_DIR={{join(cache_directory(), "reqlang-web-e2e", uuid())}} npm run test-ui-mode
+    RQL_PROJECT_DIR={{ join(cache_directory(), "reqlang-web-e2e", uuid()) }} npm run test-ui-mode
