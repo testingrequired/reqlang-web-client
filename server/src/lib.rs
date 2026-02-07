@@ -130,9 +130,12 @@ pub struct Args {
     /// Path to sqlite3 database file
     #[arg(long)]
     pub db: Option<String>,
-    /// Encrypt the database file (default: true)
+    /// Encrypt the database file (optional)
     #[arg(long = "db_encryption_key", env = "RQL_DB_KEY")]
     pub db_encryption_key: Option<String>,
+    /// Encrypt the database file with a new key (optional)
+    #[arg(long = "db_encryption_rekey", env = "RQL_DB_REKEY")]
+    pub db_encryption_rekey: Option<String>,
 }
 
 pub struct AppServer(TcpListener, Router);
@@ -194,9 +197,10 @@ pub struct DbOptions {
     pub encryption: DbEncryption,
 }
 
+#[derive(Debug)]
 pub enum DbEncryption {
     Unencrypted,
-    Encrypted(String),
+    Encrypted(String, Option<String>),
 }
 
 pub async fn init_server(options: InitServerOptions) -> Result<AppServer, Error> {
@@ -263,7 +267,7 @@ pub async fn init_server(options: InitServerOptions) -> Result<AppServer, Error>
         )
     };
 
-    let db_is_encrypted = matches!(options.db_options.encryption, DbEncryption::Encrypted(_));
+    let db_is_encrypted = matches!(options.db_options.encryption, DbEncryption::Encrypted(_, _));
 
     if !db_is_encrypted
         && is_database_encrypted(&PathBuf::from(&default_db_path))
@@ -593,10 +597,16 @@ async fn connect_to_db(db_options: DbOptions, default_db_path: String) -> Pool<S
         .filename(db_options.path.unwrap_or(default_db_path))
         .create_if_missing(true);
 
-    if let DbEncryption::Encrypted(encryption_key) = db_options.encryption {
+    if let DbEncryption::Encrypted(encryption_key, _) = &db_options.encryption {
         let encryption_key = format!("'{}'", encryption_key.replace("'", "''"));
 
         pool_options = pool_options.pragma("key", encryption_key);
+    }
+
+    if let DbEncryption::Encrypted(_, Some(encryption_rekey)) = &db_options.encryption {
+        let encryption_rekey = format!("'{}'", encryption_rekey.replace("'", "''"));
+
+        pool_options = pool_options.pragma("rekey", encryption_rekey);
     }
 
     let pool = SqlitePool::connect_with(pool_options)

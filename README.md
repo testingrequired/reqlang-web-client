@@ -19,6 +19,30 @@ A single binary webview executable REST client for [reqlang](https://github.com/
 3. Optional/Recommended: Set environment variable `RQL_DB_KEY`. This encrypts application's sqlite database
 4. Run `reqlang-web` from a terminal in a project directory containing request files
 
+## Database Encryption
+
+It's recommended to use an encrypted database to protect sensitive data such as secrets used in requests. Encrypting an existing database isn't supported yet so this must be done before first starting the app.
+
+### Setting An Encryption Key
+
+Set the environement variable `RQL_DB_KEY` with a strong encryption key. This will encrypt your sqlite database and protect it from unauthorized access.
+
+```shell
+RQL_DB_KEY=strongPassword1! reqlang-web
+```
+
+### Changing The Encryption Key
+
+Setting the environment variable `RQL_DB_REKEY` (in addition to `RQL_DB_KEY`) with another strong encryption key.
+
+```shell
+# Change the database encryption key and run the app
+RQL_DB_KEY=strongPassword1! RQL_DB_REKEY=strongPassword2@ reqlang-web
+
+# Test it
+RQL_DB_KEY=strongPassword2@ reqlang-web
+```
+
 ## Development
 
 See [DEVELOPMENT.md](./DEVELOPMENT.md) for details.

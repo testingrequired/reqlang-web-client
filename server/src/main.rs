@@ -7,10 +7,14 @@ async fn main() -> Result<(), Error> {
 
     let server_port = args.port;
     let db_path = args.db;
+    let db_rekey = args.db_encryption_rekey;
     let db_encryption = args
         .db_encryption_key
-        .map(DbEncryption::Encrypted)
+        .map(|key| DbEncryption::Encrypted(key, db_rekey))
         .unwrap_or(DbEncryption::Unencrypted);
+
+    dbg!(&db_encryption);
+
     let open_browser_on_start = args.open.unwrap_or(true);
 
     let server = init_server(InitServerOptions {

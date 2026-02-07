@@ -19,9 +19,10 @@ async fn main() -> wry::Result<()> {
 
     let server_port = args.port;
     let db_path = args.db;
+    let db_rekey = args.db_encryption_rekey;
     let db_encryption = args
         .db_encryption_key
-        .map(DbEncryption::Encrypted)
+        .map(|key| DbEncryption::Encrypted(key, db_rekey))
         .unwrap_or(DbEncryption::Unencrypted);
 
     let server = init_server(InitServerOptions {
