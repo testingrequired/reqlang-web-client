@@ -330,6 +330,7 @@ const RunRequestFormInner = ({
         <Group justify="space-between" mt="sm">
           <Button
             type="submit"
+            autoFocus
             loading={runRequestMutation.isPending}
             variant={isExporting ? "light" : "primary"}
           >

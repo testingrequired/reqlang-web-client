@@ -8,6 +8,7 @@ import {
 } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { useStore } from "zustand";
+import { useHotkeys } from "@mantine/hooks";
 
 /**
  * A two button form to select/deselect which request files are "open"
@@ -16,6 +17,8 @@ export const RequestFilesForm = () => {
   const openRequestFilesStore = useStore(useRequestFilesStore);
   const [showMultiFileSelect, setShowMultiFileSelect] = useState(false);
   const [newSelectedFiles, setNewSelectedFiles] = useState<string[]>([]);
+
+  useHotkeys([["mod+O", () => setShowMultiFileSelect(true)]]);
 
   useEffect(() => {
     setNewSelectedFiles(openRequestFilesStore.openedFiles);

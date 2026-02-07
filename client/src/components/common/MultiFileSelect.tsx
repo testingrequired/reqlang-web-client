@@ -1,5 +1,6 @@
 import { useGetFilesQuery } from "@/queries/files";
 import { ActionIcon, Alert, Loader, MultiSelect, Tooltip } from "@mantine/core";
+import { getHotkeyHandler } from "@mantine/hooks";
 import { IconRefresh } from "@tabler/icons-react";
 
 type Prop = {
@@ -54,6 +55,7 @@ export const MultiFilesSelect = ({
       onChange={onChange}
       value={value}
       leftSection={icon}
+      hidePickedOptions
       searchable
       clearable={clearable}
       disabled={disabled}
@@ -62,6 +64,10 @@ export const MultiFilesSelect = ({
       comboboxProps={{
         withinPortal: false,
       }}
+      onKeyDown={getHotkeyHandler([
+        ["Escape", onBlur],
+        ["mod+Enter", onBlur],
+      ])}
     />
   );
 };

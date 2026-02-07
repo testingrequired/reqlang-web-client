@@ -32,7 +32,9 @@ export const RunRequestResults = (props: RunRequestResultsProps) => {
       <Tabs.List>
         {isNotExporting && (
           <>
-            <Tabs.Tab value="response">Response</Tabs.Tab>
+            <Tabs.Tab value="response" autoFocus>
+              Response
+            </Tabs.Tab>
             {props.expectedResponse && (
               <Indicator
                 disabled={currentTab === "test"}
