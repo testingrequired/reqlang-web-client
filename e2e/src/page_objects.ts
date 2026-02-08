@@ -143,7 +143,7 @@ export class OpenedRequestFilesForm extends PageObject {
       name: "Close All Request Files",
     });
     this.selectTextbox = this.root.getByRole("textbox", {
-      name: "Select a request file",
+      name: "Search for a request file",
     });
     this.selectOptions = this.root.getByRole("option");
   }

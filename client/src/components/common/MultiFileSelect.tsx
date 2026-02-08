@@ -1,11 +1,19 @@
 import { useGetFilesQuery } from "@/queries/files";
-import { ActionIcon, Alert, Loader, MultiSelect, Tooltip } from "@mantine/core";
+import {
+  ActionIcon,
+  Alert,
+  Kbd,
+  Loader,
+  MultiSelect,
+  Tooltip,
+} from "@mantine/core";
 import { getHotkeyHandler } from "@mantine/hooks";
 import { IconRefresh } from "@tabler/icons-react";
 
 type Prop = {
   onChange: (value: string[]) => void;
   onBlur: () => void;
+  onCancel: () => void;
   value: string[];
   clearable?: boolean;
   disabled?: boolean;
@@ -15,6 +23,7 @@ type Prop = {
 export const MultiFilesSelect = ({
   onChange,
   onBlur,
+  onCancel,
   value,
   clearable = false,
   disabled = false,
@@ -50,11 +59,16 @@ export const MultiFilesSelect = ({
   return (
     <MultiSelect
       name="multifile-select"
-      placeholder="Select a request file"
+      placeholder={
+        value.length === 0
+          ? "Search for a request file"
+          : "Search for a request file or press tab to confirm"
+      }
       data={filesQuery.data}
       onChange={onChange}
       value={value}
       leftSection={icon}
+      rightSection={value.length > 0 ? <Kbd size="sm">Tab</Kbd> : null}
       hidePickedOptions
       searchable
       clearable={clearable}
@@ -65,7 +79,7 @@ export const MultiFilesSelect = ({
         withinPortal: false,
       }}
       onKeyDown={getHotkeyHandler([
-        ["Escape", onBlur],
+        ["Escape", onCancel],
         ["mod+Enter", onBlur],
       ])}
     />

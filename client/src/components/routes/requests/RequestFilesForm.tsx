@@ -29,6 +29,11 @@ export const RequestFilesForm = () => {
     setShowMultiFileSelect(false);
   };
 
+  const cancel = () => {
+    setNewSelectedFiles(openRequestFilesStore.openedFiles);
+    setShowMultiFileSelect(false);
+  };
+
   const clear = () => {
     openRequestFilesStore.openFiles([]);
   };
@@ -37,6 +42,7 @@ export const RequestFilesForm = () => {
     return (
       <MultiFilesSelect
         onChange={setNewSelectedFiles}
+        onCancel={cancel}
         value={newSelectedFiles}
         clearable
         autoFocus
