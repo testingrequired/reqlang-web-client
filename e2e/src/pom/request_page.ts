@@ -111,7 +111,7 @@ export class ActiveDraftFile extends PageObject {
 
   constructor(page: Page) {
     super(page, page.getByTestId("active-draft-file"));
-    this.requestBodyTemplate = this.root.getByTestId("request-body-template");
+    this.requestBodyTemplate = this.root.getByTestId("draft-body-template");
     this.tabs = new ActiveDraftFileTabs(page);
   }
 

@@ -110,11 +110,8 @@ describe("Requests", () => {
             await requests.openFileTabs.activeDraftFile.tabs.editTab.textarea.inputValue();
 
           await requests.openFileTabs.activeDraftFile.tabs.editTab.textarea.click();
-          await requests.openFileTabs.activeDraftFile.tabs.editTab.textarea.press(
-            "End",
-          );
-          await requests.openFileTabs.activeDraftFile.tabs.editTab.textarea.press(
-            "Enter",
+          await requests.openFileTabs.activeDraftFile.tabs.editTab.textarea.fill(
+            "```%request\nGET https://example.com?test=modified HTTP/1.1\n```",
           );
         });
 
@@ -164,6 +161,12 @@ describe("Requests", () => {
             test("displays the run request form", async () => {
               await requests.openFileTabs.activeDraftFile.tabs.runTab.expectToBeVisible();
               await requests.openFileTabs.activeDraftFile.tabs.runTab.runRequestForm.expectToBeVisible();
+            });
+
+            test("displays the modified draft request", async () => {
+              await expect(
+                requests.openFileTabs.activeDraftFile.requestBodyTemplate,
+              ).toHaveText("GET https://example.com?test=modified HTTP/1.1");
             });
           });
         });
