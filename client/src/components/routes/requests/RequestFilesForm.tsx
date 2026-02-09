@@ -7,9 +7,9 @@ import {
   TooltipFloating,
 } from "@mantine/core";
 import {
+  IconClearAll,
   IconFileText,
   IconFileTextFilled,
-  IconFileXFilled,
   IconPlus,
 } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
@@ -69,7 +69,7 @@ export const RequestFilesForm = () => {
         color="dark"
       >
         <ActionIcon
-          size="input-sm"
+          size="input-lg"
           variant="subtle"
           color="gray"
           onClick={() => {
@@ -92,9 +92,9 @@ export const RequestFilesForm = () => {
           >
             {newSelectedFiles.length === 0 &&
             openRequestFilesStore.draftFiles.length === 0 ? (
-              <IconFileText stroke={1.25} />
+              <IconFileText stroke={1.5} />
             ) : (
-              <IconFileTextFilled stroke={1.25} />
+              <IconFileTextFilled stroke={1} />
             )}
           </Indicator>
         </ActionIcon>
@@ -108,22 +108,23 @@ export const RequestFilesForm = () => {
           color="dark"
         >
           <ActionIcon
-            size="input-sm"
-            variant="light"
-            color="red"
+            size="input-lg"
+            variant="subtle"
+            color="gray"
             onClick={clear}
             aria-label="Close All Request Files"
             radius="xs"
           >
-            <IconFileXFilled stroke={1.25} />
+            <IconClearAll stroke={2} />
           </ActionIcon>
         </TooltipFloating>
       )}
 
       <TooltipFloating label="Create New File" position="bottom" color="dark">
         <ActionIcon
-          size="input-sm"
-          variant="light"
+          color="gray"
+          size="input-lg"
+          variant="subtle"
           onClick={newDraftFile}
           aria-label="Create New File"
           radius="xs"
