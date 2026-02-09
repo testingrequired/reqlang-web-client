@@ -18,7 +18,11 @@ import { CopyCode } from "@/components/common/CopyCode";
 import { getRequestFromRequestFile } from "@/services/requestFile";
 import { ParseResult } from "reqlang-types";
 import { useCounter } from "@mantine/hooks";
-import { IconCheck } from "@tabler/icons-react";
+import {
+  IconArrowBackUp,
+  IconCheck,
+  IconDeviceFloppy,
+} from "@tabler/icons-react";
 
 type Props = {
   path: string;
@@ -75,16 +79,19 @@ export const ActiveDraftFile = (props: Props) => {
     <Stack data-testid="active-draft-file">
       <ButtonGroup>
         <Button
+          leftSection={<IconDeviceFloppy stroke={1} />}
+          color="blue"
           size="compact-sm"
-          variant="light"
+          variant="subtle"
           onClick={handleSave}
           disabled={editContent === draftFileContent}
         >
           Save Draft
         </Button>
         <Button
+          leftSection={<IconArrowBackUp stroke={1} />}
           color="red"
-          variant="light"
+          variant="subtle"
           size="compact-sm"
           onClick={handleRevert}
           disabled={editContent === draftFileContent}

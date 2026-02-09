@@ -1,11 +1,16 @@
 import { MultiFilesSelect } from "@/components/common/MultiFileSelect";
 import { useRequestFilesStore } from "@/stores/requestFiles";
-import { ActionIcon, ButtonGroup, TooltipFloating } from "@mantine/core";
 import {
-  IconCirclePlusFilled,
+  ActionIcon,
+  ButtonGroup,
+  Indicator,
+  TooltipFloating,
+} from "@mantine/core";
+import {
   IconFileText,
   IconFileTextFilled,
   IconFileXFilled,
+  IconPlus,
 } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { useStore } from "zustand";
@@ -65,18 +70,33 @@ export const RequestFilesForm = () => {
       >
         <ActionIcon
           size="input-sm"
-          variant="light"
+          variant="subtle"
+          color="gray"
           onClick={() => {
             setShowMultiFileSelect(true);
           }}
           aria-label="Open/Close Request Files"
+          radius="xs"
         >
-          {newSelectedFiles.length === 0 &&
-          openRequestFilesStore.draftFiles.length === 0 ? (
-            <IconFileText stroke={1.25} />
-          ) : (
-            <IconFileTextFilled stroke={1.25} />
-          )}
+          <Indicator
+            offset={5}
+            radius="xl"
+            position="bottom-end"
+            label={
+              newSelectedFiles.length + openRequestFilesStore.draftFiles.length
+            }
+            disabled={
+              newSelectedFiles.length === 0 &&
+              openRequestFilesStore.draftFiles.length === 0
+            }
+          >
+            {newSelectedFiles.length === 0 &&
+            openRequestFilesStore.draftFiles.length === 0 ? (
+              <IconFileText stroke={1.25} />
+            ) : (
+              <IconFileTextFilled stroke={1.25} />
+            )}
+          </Indicator>
         </ActionIcon>
       </TooltipFloating>
 
@@ -93,6 +113,7 @@ export const RequestFilesForm = () => {
             color="red"
             onClick={clear}
             aria-label="Close All Request Files"
+            radius="xs"
           >
             <IconFileXFilled stroke={1.25} />
           </ActionIcon>
@@ -102,12 +123,12 @@ export const RequestFilesForm = () => {
       <TooltipFloating label="Create New File" position="bottom" color="dark">
         <ActionIcon
           size="input-sm"
-          color="green"
-          variant="subtle"
+          variant="light"
           onClick={newDraftFile}
           aria-label="Create New File"
+          radius="xs"
         >
-          <IconCirclePlusFilled stroke={1.25} />
+          <IconPlus stroke={3} />
         </ActionIcon>
       </TooltipFloating>
     </ButtonGroup>
