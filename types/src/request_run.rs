@@ -9,6 +9,7 @@ pub struct RequestRun {
     pub uuid: String,
 
     pub request_file_path: String,
+    pub request_file_content: String,
     pub request_file_hash: String,
 
     pub params_from_client_json: String,
@@ -26,6 +27,7 @@ pub struct RequestRun {
 #[ts(export)]
 pub struct NewRequestRun {
     pub request_file_path: String,
+    pub request_file_content: String,
     pub request_file_hash: String,
 
     pub params_from_client_json: String,

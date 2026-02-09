@@ -1,5 +1,4 @@
-import { useGetFileQuery } from "@/queries/files";
-import { useParsedRequestFileQuery } from "@/queries/parse";
+import { useParsedDraftFileQuery } from "@/queries/parse";
 import { Code, Loader, Stack, Table, Text } from "@mantine/core";
 import { RequestParamsFromClient } from "reqlang-types";
 import { RequestRun } from "server-types";
@@ -13,10 +12,10 @@ type Props = {
 };
 
 export const RequestRunHistoryItem = ({ requestRun }: Props) => {
-  const parseRequestFileMutation = useParsedRequestFileQuery(
+  const parseRequestFileMutation = useParsedDraftFileQuery(
     requestRun.request_file_path,
+    requestRun.request_file_content,
   );
-  const fileQuery = useGetFileQuery(requestRun.request_file_path);
   const params: RequestParamsFromClient = JSON.parse(
     requestRun.params_from_client_json,
   );
@@ -30,7 +29,6 @@ export const RequestRunHistoryItem = ({ requestRun }: Props) => {
 
   if (
     parseRequestFileMutation.isPending ||
-    fileQuery.isLoading ||
     typeof parseRequestFileMutation.data === "undefined" ||
     exportRequestMutation.isPending
   ) {

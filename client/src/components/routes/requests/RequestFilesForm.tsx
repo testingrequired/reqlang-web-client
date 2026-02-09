@@ -2,6 +2,7 @@ import { MultiFilesSelect } from "@/components/common/MultiFileSelect";
 import { useRequestFilesStore } from "@/stores/requestFiles";
 import { ActionIcon, ButtonGroup, TooltipFloating } from "@mantine/core";
 import {
+  IconCirclePlusFilled,
   IconFileText,
   IconFileTextFilled,
   IconFileXFilled,
@@ -34,8 +35,12 @@ export const RequestFilesForm = () => {
     setShowMultiFileSelect(false);
   };
 
+  const newDraftFile = () => {
+    openRequestFilesStore.newDraftFile();
+  };
+
   const clear = () => {
-    openRequestFilesStore.openFiles([]);
+    openRequestFilesStore.closeAllFiles();
   };
 
   if (showMultiFileSelect) {
@@ -66,7 +71,8 @@ export const RequestFilesForm = () => {
           }}
           aria-label="Open/Close Request Files"
         >
-          {newSelectedFiles.length === 0 ? (
+          {newSelectedFiles.length === 0 &&
+          openRequestFilesStore.draftFiles.length === 0 ? (
             <IconFileText stroke={1.25} />
           ) : (
             <IconFileTextFilled stroke={1.25} />
@@ -74,7 +80,8 @@ export const RequestFilesForm = () => {
         </ActionIcon>
       </TooltipFloating>
 
-      {newSelectedFiles.length > 0 && (
+      {(openRequestFilesStore.openedFiles.length > 0 ||
+        openRequestFilesStore.draftFiles.length > 0) && (
         <TooltipFloating
           label="Close All Request Files"
           position="bottom"
@@ -91,6 +98,18 @@ export const RequestFilesForm = () => {
           </ActionIcon>
         </TooltipFloating>
       )}
+
+      <TooltipFloating label="Create New File" position="bottom" color="dark">
+        <ActionIcon
+          size="input-sm"
+          color="green"
+          variant="subtle"
+          onClick={newDraftFile}
+          aria-label="Create New File"
+        >
+          <IconCirclePlusFilled stroke={1.25} />
+        </ActionIcon>
+      </TooltipFloating>
     </ButtonGroup>
   );
 };

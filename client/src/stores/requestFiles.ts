@@ -1,9 +1,16 @@
 import { createStore } from "zustand";
 import { persist } from "zustand/middleware";
+import { v4 as uuid } from "uuid";
+
+export type DraftFile = {
+  path: string;
+  content: string;
+};
 
 export type Data = {
   openedFiles: string[];
   activeFile: string | null;
+  draftFiles: DraftFile[];
 };
 
 export type Action = {
@@ -11,6 +18,9 @@ export type Action = {
   setActiveFile(value: string | null): void;
   closeFile(fileToClose: string): void;
   closeAllFiles(): void;
+  newDraftFile(): void;
+  saveDraftFile(path: string, content: string): void;
+  getDraftFileContent(path: string): string;
 };
 
 export type Store = Data & Action;
@@ -20,8 +30,9 @@ export type Store = Data & Action;
  */
 export const useRequestFilesStore = createStore<Store>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       openedFiles: [],
+      draftFiles: [],
       activeFile: null,
       openFiles: (requestFilePathsToOpen: string[]) =>
         set({
@@ -36,7 +47,10 @@ export const useRequestFilesStore = createStore<Store>()(
       closeFile: (requestFilePath: string) =>
         set((prev) => ({
           openedFiles: prev.openedFiles.filter(
-            (item) => item !== requestFilePath
+            (item) => item !== requestFilePath,
+          ),
+          draftFiles: prev.draftFiles.filter(
+            (item) => item.path !== requestFilePath,
           ),
           activeFile:
             prev.activeFile === requestFilePath ? null : prev.activeFile,
@@ -44,9 +58,48 @@ export const useRequestFilesStore = createStore<Store>()(
       closeAllFiles: () =>
         set({
           openedFiles: [],
+          draftFiles: [],
           activeFile: null,
         }),
+      newDraftFile: () =>
+        set((prev) => {
+          const newPath = `draft-${uuid().slice(0, 5)}`;
+          return {
+            draftFiles: [
+              ...prev.draftFiles,
+              {
+                path: newPath,
+                content: "```%request\nGET https://example.com HTTP/1.1\n\n```",
+              },
+            ],
+            activeFile: newPath,
+          };
+        }),
+      saveDraftFile: (path: string, content: string) =>
+        set((prev) => {
+          const index = prev.draftFiles.findIndex(
+            (draftFile) => draftFile.path === path,
+          );
+          const draftFileToEdit = prev.draftFiles[index];
+
+          draftFileToEdit.content = content;
+
+          const newDraftFiles = [...prev.draftFiles];
+
+          newDraftFiles[index] = draftFileToEdit;
+
+          return {
+            ...prev,
+            draftFiles: newDraftFiles,
+          };
+        }),
+      getDraftFileContent(path) {
+        return (
+          get().draftFiles.find((draftFile) => draftFile.path === path)
+            ?.content ?? ""
+        );
+      },
     }),
-    { name: "reqlang-request-files" }
-  )
+    { name: "reqlang-request-files" },
+  ),
 );

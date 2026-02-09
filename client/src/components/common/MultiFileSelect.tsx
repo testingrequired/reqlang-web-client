@@ -1,4 +1,5 @@
 import { useGetFilesQuery } from "@/queries/files";
+import { useRequestFilesStore } from "@/stores/requestFiles";
 import {
   ActionIcon,
   Alert,
@@ -9,6 +10,7 @@ import {
 } from "@mantine/core";
 import { getHotkeyHandler } from "@mantine/hooks";
 import { IconRefresh } from "@tabler/icons-react";
+import { useStore } from "zustand";
 
 type Prop = {
   onChange: (value: string[]) => void;
@@ -29,6 +31,7 @@ export const MultiFilesSelect = ({
   disabled = false,
   autoFocus = false,
 }: Prop) => {
+  const openRequestFilesStore = useStore(useRequestFilesStore);
   const filesQuery = useGetFilesQuery();
 
   function refresh() {
@@ -56,6 +59,11 @@ export const MultiFilesSelect = ({
     </Tooltip>
   );
 
+  const data = [
+    ...openRequestFilesStore.draftFiles.map((x) => x.path),
+    ...filesQuery.data,
+  ];
+
   return (
     <MultiSelect
       name="multifile-select"
@@ -64,7 +72,7 @@ export const MultiFilesSelect = ({
           ? "Search for a request file"
           : "Search for a request file or press tab to confirm"
       }
-      data={filesQuery.data}
+      data={data}
       onChange={onChange}
       value={value}
       leftSection={icon}

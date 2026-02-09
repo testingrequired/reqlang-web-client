@@ -4,6 +4,7 @@ CREATE TABLE RequestRunHistory (
 
     -- REQUEST FILE
     request_file_path TEXT NOT NULL,
+    request_file_content TEXT NOT NULL,
     request_file_hash TEXT NOT NULL,
 
     -- PARAMS

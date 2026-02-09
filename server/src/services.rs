@@ -166,7 +166,7 @@ pub mod request_service {
         let state = state.lock().await;
         let conn = state.db.as_ref().unwrap();
 
-        let mut rows = sqlx::query("SELECT id, uuid, request_file_path, request_file_hash, params_from_client_json, response, pass, diff, request_at, response_at FROM RequestRunHistory").fetch(conn);
+        let mut rows = sqlx::query("SELECT id, uuid, request_file_path, request_file_content, request_file_hash, params_from_client_json, response, pass, diff, request_at, response_at FROM RequestRunHistory").fetch(conn);
 
         let mut request_runs: Vec<RequestRun> = vec![];
 
@@ -175,6 +175,7 @@ pub mod request_service {
                 id: row.try_get("id").unwrap(),
                 uuid: row.try_get("uuid").unwrap(),
                 request_file_path: row.try_get("request_file_path").unwrap(),
+                request_file_content: row.try_get("request_file_content").unwrap(),
                 request_file_hash: row.try_get("request_file_hash").unwrap(),
                 params_from_client_json: row.try_get("params_from_client_json").unwrap(),
                 response: row.try_get("response").unwrap(),
@@ -211,6 +212,7 @@ pub mod request_service {
         INSERT INTO RequestRunHistory (
             uuid,
             request_file_path,
+            request_file_content,
             request_file_hash,
             params_from_client_json,
             response,
@@ -227,12 +229,14 @@ pub mod request_service {
             $6,
             $7,
             $8,
-            $9
+            $9,
+            $10
         );
         "#,
         )
         .bind(&new_uuid)
         .bind(&run.request_file_path)
+        .bind(&run.request_file_content)
         .bind(&run.request_file_hash)
         .bind(&run.params_from_client_json)
         .bind(&run.response)
@@ -250,6 +254,7 @@ pub mod request_service {
             id,
             uuid: new_uuid,
             request_file_path: run.request_file_path.clone(),
+            request_file_content: run.request_file_content.clone(),
             request_file_hash: run.request_file_hash.clone(),
             params_from_client_json: run.params_from_client_json.clone(),
             response: run.response.clone(),
@@ -311,6 +316,7 @@ pub mod request_service {
 
                 let run: NewRequestRun = NewRequestRun {
                     request_file_path: String::from(&run_request_from_client.request_file_path),
+                    request_file_content: String::from(&from_client_params.reqfile),
                     request_file_hash: String::from("value"),
                     params_from_client_json: serde_json::to_string_pretty(&from_client_params)
                         .expect("unable to serialize from_client_params to json"),

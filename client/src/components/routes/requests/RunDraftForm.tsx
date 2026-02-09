@@ -19,28 +19,22 @@ import { ReactNode, useEffect, useState } from "react";
 import { useRunRequestMutation } from "@/queries/runRequest";
 import { useExportRequestMutation } from "@/queries/export";
 import { useDisclosure } from "@mantine/hooks";
-import { useGetFileQuery } from "@/queries/files";
-import { useParsedRequestFileQuery } from "@/queries/parse";
-import { RequestFileLoadError } from "@/components/routes/requests/RequestFileLoadError";
+import { useParsedDraftFileQuery } from "@/queries/parse";
 import { RequestFileRunError } from "@/components/routes/requests/RequestFileRunError";
 import { RunRequestResults } from "@/components/routes/requests/RunRequestResults";
 import { RequestFileExportError } from "@/components/routes/requests/RequestFileExportError";
 import { RequestFilParseError } from "./RequestFileParseError";
 
 type Props = {
-  requestFilePath: string;
+  path: string;
+  content: string;
 };
 
-export const RunRequestForm: React.FC<Props> = ({ requestFilePath }) => {
-  const getFileQuery = useGetFileQuery(requestFilePath);
-  const parseFileMutation = useParsedRequestFileQuery(requestFilePath);
+export const RunDraftForm: React.FC<Props> = ({ path, content }) => {
+  const parseFileMutation = useParsedDraftFileQuery(path, content);
 
-  if (getFileQuery.isPending || parseFileMutation.isPending) {
+  if (parseFileMutation.isPending) {
     return <Loader />;
-  }
-
-  if (getFileQuery.isError) {
-    return <RequestFileLoadError error={getFileQuery.error} />;
   }
 
   if (parseFileMutation.isError) {
@@ -49,9 +43,9 @@ export const RunRequestForm: React.FC<Props> = ({ requestFilePath }) => {
 
   return (
     <RunRequestFormInner
-      requestFilePath={requestFilePath}
+      requestFilePath={path}
       parseResult={parseFileMutation.data}
-      requestFileText={getFileQuery.data!}
+      requestFileText={content}
     />
   );
 };

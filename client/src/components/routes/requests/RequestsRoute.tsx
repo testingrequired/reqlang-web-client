@@ -10,7 +10,9 @@ export const RequestsRoute = () => {
   const openRequestFilesStore = useStore(useRequestFilesStore);
   const os = useOs();
 
-  const noFilesOpen = openRequestFilesStore.openedFiles.length === 0;
+  const noFilesOpen =
+    openRequestFilesStore.openedFiles.length === 0 &&
+    openRequestFilesStore.draftFiles.length === 0;
 
   const modifier = os === "macos" ? "⌘" : "Ctrl";
 
@@ -22,7 +24,7 @@ export const RequestsRoute = () => {
           <Alert
             p="xs"
             title="No files are open"
-            variant="light"
+            variant="transparent"
             color="gray"
             icon={
               <ThemeIcon size="sm" variant="transparent" color="gray">
@@ -31,8 +33,8 @@ export const RequestsRoute = () => {
             }
           >
             <Text size="sm">
-              Click this button or use <Kbd>{modifier}</Kbd> + <Kbd>O</Kbd> to
-              to open files.
+              Click this button or press <Kbd>{modifier}</Kbd> + <Kbd>O</Kbd> to
+              open files.
             </Text>
           </Alert>
         </>

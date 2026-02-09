@@ -31,6 +31,93 @@ describe("Requests", () => {
       await requests.openRequestFilesForm.expectNotToHaveCloseAllButton();
     });
 
+    test("has  new draft file button", async () => {
+      await requests.openRequestFilesForm.expectToHaveNewDraftFileButton();
+    });
+
+    describe("when click to add new draft file", () => {
+      beforeEach(async () => {
+        await requests.openRequestFilesForm.addNewDraftFile();
+      });
+
+      test("has open files button", async () => {
+        await requests.openRequestFilesForm.expectHasOpenFileSelectorButton();
+      });
+
+      test("has close all files button", async () => {
+        await requests.openRequestFilesForm.expectHasCloseAllButton();
+      });
+
+      test("has new draft file button", async () => {
+        await requests.openRequestFilesForm.expectToHaveNewDraftFileButton();
+      });
+
+      test("displays the open request file tabs", async () => {
+        await requests.openFileTabs.expectToBeVisible();
+      });
+
+      test("displays the expected request file tab", async () => {
+        await requests.openFileTabs.expectHasFileTabOpen("draft-");
+      });
+
+      test("displays the expected request file tab as active", async () => {
+        await requests.openFileTabs.expectIsFileTabActive("draft-");
+      });
+
+      test("displays the open draft file tab panel", async () => {
+        await requests.openFileTabs.expectToHaveActiveTabPanel();
+        await requests.openFileTabs.expectToHaveActiveDraftFile();
+        await requests.openFileTabs.activeDraftFile.expectToBeVisible();
+      });
+
+      test("displays the open draft file tabs", async () => {
+        await requests.openFileTabs.activeDraftFile.tabs.expectToBeVisible();
+      });
+
+      test("displays the 'Edit' tab by default", async () => {
+        await requests.openFileTabs.activeDraftFile.tabs.expectIsFileTabActive(
+          "Edit",
+        );
+
+        await requests.openFileTabs.activeDraftFile.tabs.editTab.expectToBeVisible();
+      });
+
+      describe("when click on run tab", () => {
+        beforeEach(async () => {
+          await requests.openFileTabs.activeDraftFile.tabs
+            .getTabByName("Run")
+            .click();
+        });
+
+        test("displays the run request form", async () => {
+          await requests.openFileTabs.activeDraftFile.tabs.runTab.expectToBeVisible();
+          await requests.openFileTabs.activeDraftFile.tabs.runTab.runRequestForm.expectToBeVisible();
+        });
+
+        describe("when running the request", () => {
+          beforeEach(async () => {
+            await requests.openFileTabs.activeDraftFile.tabs.runTab.runRequestForm.submitForm();
+          });
+
+          test("does not have the request body export", async () => {
+            await requests.openFileTabs.activeDraftFile.tabs.runTab.runRequestForm.expectNoRequestBodyExport();
+          });
+
+          test("has the request body", async () => {
+            await requests.openFileTabs.activeDraftFile.tabs.runTab.runRequestForm.expectHasRequestBody(
+              "GET https://example.com HTTP/1.1",
+            );
+          });
+
+          test("has the response body", async () => {
+            await requests.openFileTabs.activeDraftFile.tabs.runTab.runRequestForm.expectHasResponseBody(
+              "HTTP/1.1 200 OK\n",
+            );
+          });
+        });
+      });
+    });
+
     describe("when click to open request file selector", () => {
       beforeEach(async () => {
         await requests.openRequestFilesForm.openFileSelector();
@@ -40,8 +127,12 @@ describe("Requests", () => {
         await requests.openRequestFilesForm.expectNotToHaveOpenFileSelectorButton();
       });
 
-      test("does not have  close all files button", async () => {
+      test("does not have close all files button", async () => {
         await requests.openRequestFilesForm.expectNotToHaveCloseAllButton();
+      });
+
+      test("does not have new draft file button", async () => {
+        await requests.openRequestFilesForm.expectToNotHaveNewDraftFileButton();
       });
 
       test("has request file selector textbox", async () => {
@@ -83,6 +174,10 @@ describe("Requests", () => {
           await requests.openRequestFilesForm.expectHasCloseAllButton();
         });
 
+        test("has new draft file button", async () => {
+          await requests.openRequestFilesForm.expectToHaveNewDraftFileButton();
+        });
+
         test("displays the open request file tabs", async () => {
           await requests.openFileTabs.expectToBeVisible();
         });
@@ -98,7 +193,8 @@ describe("Requests", () => {
         });
 
         test("displays the open request file tab panel", async () => {
-          await requests.openFileTabs.expectHasActiveRequestTabContents();
+          await requests.openFileTabs.expectToHaveActiveTabPanel();
+          await requests.openFileTabs.expectToHaveActiveRequestFile();
         });
 
         test("displays the expected request file's HTTP request", async () => {

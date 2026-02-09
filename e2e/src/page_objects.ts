@@ -130,6 +130,7 @@ export class HomeView extends PageObject {
 export class OpenedRequestFilesForm extends PageObject {
   readonly openFileSelectorButton: Locator;
   readonly closeAllButton: Locator;
+  readonly newDraftFileButton: Locator;
   readonly selectTextbox: Locator;
   readonly selectOptions: Locator;
 
@@ -142,6 +143,9 @@ export class OpenedRequestFilesForm extends PageObject {
     this.closeAllButton = this.root.getByRole("button", {
       name: "Close All Request Files",
     });
+    this.newDraftFileButton = this.root.getByRole("button", {
+      name: "Create New File",
+    });
     this.selectTextbox = this.root.getByRole("textbox", {
       name: "Search for a request file",
     });
@@ -150,6 +154,10 @@ export class OpenedRequestFilesForm extends PageObject {
 
   async openFileSelector() {
     await this.openFileSelectorButton.click();
+  }
+
+  async addNewDraftFile() {
+    await this.newDraftFileButton.click();
   }
 
   async selectRequestFile(requestFile: string) {
@@ -174,6 +182,14 @@ export class OpenedRequestFilesForm extends PageObject {
 
   async expectHasCloseAllButton() {
     await expect(this.closeAllButton).toBeVisible();
+  }
+
+  async expectToHaveNewDraftFileButton() {
+    await expect(this.newDraftFileButton).toBeVisible();
+  }
+
+  async expectToNotHaveNewDraftFileButton() {
+    await expect(this.newDraftFileButton).not.toBeVisible();
   }
 
   async expectNotToHaveCloseAllButton() {
@@ -212,6 +228,89 @@ export class ActiveRequestFile extends PageObject {
 
   async expectToHaveRequestBodyTemplate(expected: string) {
     await expect(this.requestBodyTemplate).toHaveText(expected);
+  }
+}
+
+export class ActiveDraftFile extends PageObject {
+  readonly requestBodyTemplate: Locator;
+  readonly tabs: ActiveDraftFileTabs;
+
+  constructor(page: Page) {
+    super(page, page.getByTestId("active-draft-file"));
+    this.requestBodyTemplate = this.root.getByTestId("request-body-template");
+    this.tabs = new ActiveDraftFileTabs(page);
+  }
+
+  async expectToHaveRequestBodyTemplate(expected: string) {
+    await expect(this.requestBodyTemplate).toHaveText(expected);
+  }
+}
+
+export class ActiveDraftFileTabs extends PageObject {
+  readonly tabList: Locator;
+  readonly tabs: Locator;
+  readonly tabPanel: Locator;
+  readonly editTab: ActiveDraftFileEditTab;
+  readonly runTab: ActiveDraftFileRunTab;
+
+  constructor(page: Page) {
+    super(page, page.getByTestId("active-draft-file-tabs"));
+
+    this.tabList = this.root.getByRole("tablist");
+    this.tabs = this.tabList.getByRole("tab");
+    this.tabPanel = this.root.getByTestId("active-tab-panel");
+
+    this.editTab = new ActiveDraftFileEditTab(page);
+    this.runTab = new ActiveDraftFileRunTab(page);
+  }
+
+  getTabByName(requestFile: string): Locator {
+    return this.tabList.getByRole("tab", {
+      name: requestFile,
+    });
+  }
+
+  async expectHasFileTabOpen(requestFile: string) {
+    await expect(this.getTabByName(requestFile)).toBeVisible();
+  }
+
+  async expectIsFileTabActive(requestFile: string) {
+    await expect(this.getTabByName(requestFile)).toHaveAttribute(
+      "data-active",
+      "true",
+    );
+  }
+
+  async expectNotHaveTab(requestFile: string) {
+    await expect(this.getTabByName(requestFile)).toBeHidden();
+  }
+
+  async expectToHaveActiveTabPanel() {
+    await expect.soft(this.tabPanel).toBeVisible();
+  }
+
+  async expectNotToHaveActiveTabPanel() {
+    await expect.soft(this.tabPanel).toBeHidden();
+  }
+}
+
+export class ActiveDraftFileEditTab extends PageObject {
+  readonly textarea: Locator;
+
+  constructor(page: Page) {
+    super(page, page.getByTestId("active-draft-file-edit-tab"));
+
+    this.textarea = this.root.getByRole("textbox");
+  }
+}
+
+export class ActiveDraftFileRunTab extends PageObject {
+  readonly runRequestForm: RunRequestForm;
+
+  constructor(page: Page) {
+    super(page, page.getByTestId("active-draft-file-run-tab"));
+
+    this.runRequestForm = new RunRequestForm(page);
   }
 }
 
@@ -315,14 +414,16 @@ export class OpenRequestFilesTabs extends PageObject {
   readonly tabs: Locator;
   readonly tabPanel: Locator;
   readonly activeRequestFile: ActiveRequestFile;
+  readonly activeDraftFile: ActiveDraftFile;
 
   constructor(page: Page) {
     super(page, page.getByTestId("open-request-file-tabs"));
 
     this.tabList = this.root.getByRole("tablist");
     this.tabs = this.tabList.getByRole("tab");
-    this.tabPanel = this.root.getByTestId("active-request-file-tab-panel");
+    this.tabPanel = this.root.getByTestId("active-tab-panel");
     this.activeRequestFile = new ActiveRequestFile(page);
+    this.activeDraftFile = new ActiveDraftFile(page);
   }
 
   getTabByName(requestFile: string): Locator {
@@ -346,14 +447,28 @@ export class OpenRequestFilesTabs extends PageObject {
     await expect(this.getTabByName(requestFile)).toBeHidden();
   }
 
-  async expectHasActiveRequestTabContents() {
+  async expectToHaveActiveTabPanel() {
     await expect.soft(this.tabPanel).toBeVisible();
+  }
+
+  async expectNotToHaveActiveTabPanel() {
+    await expect.soft(this.tabPanel).toBeHidden();
+  }
+
+  async expectToHaveActiveRequestFile() {
     await expect.soft(this.activeRequestFile.getLocator()).toBeVisible();
   }
 
-  async expectNotHaveActiveRequestTabContents() {
-    await expect.soft(this.tabPanel).toBeHidden();
+  async expectNotToHaveActiveRequestFile() {
     await expect.soft(this.activeRequestFile.getLocator()).toBeHidden();
+  }
+
+  async expectToHaveActiveDraftFile() {
+    await expect.soft(this.activeDraftFile.getLocator()).toBeVisible();
+  }
+
+  async expectNotToHaveActiveDraftFile() {
+    await expect.soft(this.activeDraftFile.getLocator()).toBeHidden();
   }
 
   closeTab(requestFile: string): Locator {

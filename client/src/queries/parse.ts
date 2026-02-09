@@ -4,6 +4,8 @@ import { useGetFileQuery } from "./files";
 
 export const PARSE_KEYS = {
   parse: (input: string | null) => ["parse", input] as const,
+  parse_draft: (path: string | null, content: string) =>
+    ["parse-draft", path, content] as const,
 } as const;
 
 export const useParsedRequestFileQuery = (requestFilePath: string) => {
@@ -19,6 +21,41 @@ export const useParsedRequestFileQuery = (requestFilePath: string) => {
         method: "POST",
         body: JSON.stringify({
           payload: requestFileContent,
+        }),
+        headers: {
+          "content-type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 400) {
+          const errs = (await response.json()) as [
+            ReqlangError,
+            { start: number; end: number },
+          ][];
+
+          throw new Error("Unable to parse request file", {
+            cause: errs,
+          });
+        }
+      }
+
+      const data = (await response.json()) as ParseResult;
+
+      return data;
+    },
+  });
+};
+
+export const useParsedDraftFileQuery = (path: string, content: string) => {
+  return useQuery({
+    enabled: !!content,
+    queryKey: PARSE_KEYS.parse_draft(path, content),
+    queryFn: async () => {
+      const response = await fetch(`/api/parse`, {
+        method: "POST",
+        body: JSON.stringify({
+          payload: content,
         }),
         headers: {
           "content-type": "application/json",
