@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
-import { RequestsView, RootView } from "@/test/page_objects";
+import { RootView } from "@/test/page_objects";
+import { RequestsView } from "../src/pom/request_page";
 
 const { beforeEach, describe } = test;
 
@@ -80,6 +81,118 @@ describe("Requests", () => {
         );
 
         await requests.openFileTabs.activeDraftFile.tabs.editTab.expectToBeVisible();
+      });
+
+      test("the 'Safe Draft' button on the Edit tab is disabled", async () => {
+        await expect(
+          requests.openFileTabs.activeDraftFile.tabs.editTab.saveDraftButton,
+        ).toBeDisabled();
+      });
+
+      test("the 'Revert Changes' button on the Edit tab is disabled", async () => {
+        await expect(
+          requests.openFileTabs.activeDraftFile.tabs.editTab
+            .revertChangesButton,
+        ).toBeDisabled();
+      });
+
+      test("the run tab is enabled", async () => {
+        await expect(
+          requests.openFileTabs.activeDraftFile.tabs.getTabByName("Run"),
+        ).toBeEnabled();
+      });
+
+      describe("when draft content is modified but not saved", () => {
+        let originalValue: string;
+
+        beforeEach(async () => {
+          originalValue =
+            await requests.openFileTabs.activeDraftFile.tabs.editTab.textarea.inputValue();
+
+          await requests.openFileTabs.activeDraftFile.tabs.editTab.textarea.click();
+          await requests.openFileTabs.activeDraftFile.tabs.editTab.textarea.press(
+            "End",
+          );
+          await requests.openFileTabs.activeDraftFile.tabs.editTab.textarea.press(
+            "Enter",
+          );
+        });
+
+        test("the draft has been modified", async () => {
+          await expect(
+            requests.openFileTabs.activeDraftFile.tabs.editTab.textarea.inputValue(),
+          ).not.toBe(originalValue);
+        });
+
+        test("the 'Safe Draft' button on the Edit tab is enabled", async () => {
+          await expect(
+            requests.openFileTabs.activeDraftFile.tabs.editTab.saveDraftButton,
+          ).toBeEnabled();
+        });
+
+        test("the 'Revert Changes' button on the Edit tab is enabled", async () => {
+          await expect(
+            requests.openFileTabs.activeDraftFile.tabs.editTab
+              .revertChangesButton,
+          ).toBeEnabled();
+        });
+
+        test("the run tab is disabled", async () => {
+          await expect(
+            requests.openFileTabs.activeDraftFile.tabs.getTabByName("Run"),
+          ).toBeDisabled();
+        });
+
+        describe("when the save button is clicked", () => {
+          beforeEach(async () => {
+            await requests.openFileTabs.activeDraftFile.tabs.editTab.saveDraft();
+          });
+
+          test("the run tab is enabled", async () => {
+            await expect(
+              requests.openFileTabs.activeDraftFile.tabs.getTabByName("Run"),
+            ).toBeEnabled();
+          });
+
+          describe("click on run tab", () => {
+            beforeEach(async () => {
+              await requests.openFileTabs.activeDraftFile.tabs
+                .getTabByName("Run")
+                .click();
+            });
+
+            test("displays the run request form", async () => {
+              await requests.openFileTabs.activeDraftFile.tabs.runTab.expectToBeVisible();
+              await requests.openFileTabs.activeDraftFile.tabs.runTab.runRequestForm.expectToBeVisible();
+            });
+          });
+        });
+
+        describe("when the revert button is clicked", () => {
+          beforeEach(async () => {
+            await requests.openFileTabs.activeDraftFile.tabs.editTab.revertChanges();
+          });
+
+          test("the draft has not been modified", async () => {
+            await expect(
+              requests.openFileTabs.activeDraftFile.tabs.editTab.textarea,
+            ).toHaveValue(originalValue);
+          });
+
+          test("the 'Safe Draft' button on the Edit tab is disabled", async () => {
+            await expect(
+              requests.openFileTabs.activeDraftFile.tabs.editTab
+                .saveDraftButton,
+            ).toBeDisabled();
+          });
+
+          test("the 'Revert Changes' button on the Edit tab is disabled", async () => {
+            await expect(
+              requests.openFileTabs.activeDraftFile.tabs.editTab
+                .revertChangesButton,
+            ).toBeDisabled();
+          });
+        });
       });
 
       describe("when click on run tab", () => {
