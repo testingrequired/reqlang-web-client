@@ -38,3 +38,10 @@ pub struct RequestRunResponseTestResult {
 pub struct UpdateRequestFileBody {
     pub updated_http_request: Option<String>,
 }
+
+#[derive(TS, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[ts(export)]
+pub struct SaveToRequestFileBody {
+    pub file_path: String,
+    pub file_content: String,
+}

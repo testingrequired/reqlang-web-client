@@ -168,10 +168,34 @@ export class ActiveDraftFileTabs extends PageObject {
   }
 }
 
+class SaveToFileModal extends PageObject {
+  readonly filenameInput: Locator;
+  readonly saveButton: Locator;
+
+  constructor(page: Page) {
+    super(
+      page,
+      page.getByRole("dialog", {
+        name: "Save To File",
+      }),
+    );
+
+    this.filenameInput = this.root.getByPlaceholder(
+      "path/to/save/request.reqlang",
+    );
+
+    this.saveButton = this.root.getByRole("button", {
+      name: "Save",
+    });
+  }
+}
+
 export class ActiveDraftFileEditTab extends PageObject {
   readonly saveDraftButton: Locator;
   readonly revertChangesButton: Locator;
+  readonly saveToFileButton: Locator;
   readonly textarea: Locator;
+  readonly saveToFileModal: SaveToFileModal;
 
   constructor(page: Page) {
     super(page, page.getByTestId("active-draft-file-edit-tab"));
@@ -184,7 +208,13 @@ export class ActiveDraftFileEditTab extends PageObject {
       name: "Revert",
     });
 
+    this.saveToFileButton = this.page.getByRole("button", {
+      name: "Save To File",
+    });
+
     this.textarea = this.root.getByRole("textbox");
+
+    this.saveToFileModal = new SaveToFileModal(page);
   }
 
   public async saveDraft() {
@@ -193,6 +223,13 @@ export class ActiveDraftFileEditTab extends PageObject {
 
   public async revertChanges() {
     await this.revertChangesButton.click();
+  }
+
+  public async saveToFile(filePathToSaveAs: string) {
+    await this.saveToFileButton.click();
+    await this.saveToFileModal.expectToBeVisible();
+    await this.saveToFileModal.filenameInput.fill(filePathToSaveAs);
+    await this.saveToFileModal.saveButton.click();
   }
 }
 
@@ -326,6 +363,10 @@ export class OpenRequestFilesTabs extends PageObject {
 
   async expectHasFileTabOpen(requestFile: string) {
     await expect(this.getTabByName(requestFile)).toBeVisible();
+  }
+
+  async expectNotToHaveFileTabOpen(requestFile: string) {
+    await expect(this.getTabByName(requestFile)).not.toBeVisible();
   }
 
   async expectIsFileTabActive(requestFile: string) {

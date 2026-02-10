@@ -42,7 +42,7 @@ use tower_http::{compression::CompressionLayer, trace::TraceLayer};
 use tracing::{error, info, info_span, instrument};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use types::{
-    DebugInfo, RequestRunResponse, UpdateRequestFileBody,
+    DebugInfo, RequestRunResponse, SaveToRequestFileBody, UpdateRequestFileBody,
     achievement::{AchievementDto, AchievementId},
     request_run::RequestRun,
     run_request::RunRequest,
@@ -295,7 +295,7 @@ pub async fn init_server(options: InitServerOptions) -> Result<AppServer, Error>
     let app = Router::new()
         .route("/api/parse", post(parse_request_file))
         .route("/api/run", post(run_request))
-        .route("/api/files", get(list_files))
+        .route("/api/files", get(list_files).post(save_to_file))
         .route("/api/files/{*file}", get(get_file).patch(update_file))
         .route(
             "/api/history",
@@ -469,6 +469,40 @@ async fn update_file(
             }
             None => (StatusCode::OK, Ok(())),
         },
+        Err(err) => (StatusCode::INTERNAL_SERVER_ERROR, Err(err.to_string())),
+    }
+}
+
+#[axum::debug_handler]
+async fn save_to_file(
+    State(state): State<Arc<Mutex<AppState>>>,
+    Path(file): Path<String>,
+    Json(body): Json<SaveToRequestFileBody>,
+) -> (StatusCode, Result<(), String>) {
+    let cwd = {
+        let state = state.lock().await;
+
+        state.home_dir.clone()
+    };
+
+    let file_path = cwd.join(file);
+
+    if fs::exists(&file_path).expect("unable to tell if file exists") {
+        return (StatusCode::CONFLICT, Err("file already exists".to_string()));
+    }
+
+    let ast = Ast::from(&body.file_content);
+    let parsed = parse(&ast);
+
+    if let Err(err) = &parsed {
+        return (
+            StatusCode::BAD_REQUEST,
+            Err(serde_json::to_string_pretty(err).unwrap()),
+        );
+    }
+
+    match fs::write(&file_path, body.file_content) {
+        Ok(()) => (StatusCode::OK, Ok(())),
         Err(err) => (StatusCode::INTERNAL_SERVER_ERROR, Err(err.to_string())),
     }
 }

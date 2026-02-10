@@ -15,6 +15,7 @@ export type Data = {
 
 export type Action = {
   openFiles(value: string[]): void;
+  openFile(value: string): void;
   setActiveFile(value: string | null): void;
   closeFile(fileToClose: string): void;
   closeAllFiles(): void;
@@ -42,6 +43,11 @@ export const useRequestFilesStore = createStore<Store>()(
               ? null
               : requestFilePathsToOpen[0],
         }),
+      openFile: (requestFilePathToOpen: string) =>
+        set((prev) => ({
+          openedFiles: [...prev.openedFiles, requestFilePathToOpen],
+          activeFile: requestFilePathToOpen,
+        })),
       setActiveFile: (requestFilePath: string | null) =>
         set({ activeFile: requestFilePath }),
       closeFile: (requestFilePath: string) =>

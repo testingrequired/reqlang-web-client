@@ -102,6 +102,29 @@ describe("Requests", () => {
         ).toBeEnabled();
       });
 
+      describe("when saving to file", () => {
+        beforeEach(async () => {
+          await requests.openFileTabs.activeDraftFile.tabs.editTab.saveToFile(
+            "temp/test.reqlang",
+          );
+        });
+
+        test("should have closed draft file", async () => {
+          await requests.openFileTabs.expectNotHaveTab("draft-");
+          await requests.openFileTabs.expectHasFileTabOpen("temp/test.reqlang");
+        });
+
+        test("should have opened newly created request file", async () => {
+          await requests.openFileTabs.expectHasFileTabOpen("temp/test.reqlang");
+        });
+
+        test("should have make newly created request file active tab", async () => {
+          await requests.openFileTabs.expectIsFileTabActive(
+            "temp/test.reqlang",
+          );
+        });
+      });
+
       describe("when draft content is modified but not saved", () => {
         let originalValue: string;
 

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ReqlangError } from "reqlang-types";
-import { UpdateRequestFileBody } from "server-types";
+import { UpdateRequestFileBody, SaveToRequestFileBody } from "server-types";
 
 export const FILES_KEYS = {
   all: ["files"] as const,
@@ -90,6 +90,41 @@ export const useUpdateFileMutation = (path: string | null) => {
       queryClient.invalidateQueries({
         queryKey: FILES_KEYS.detail(path),
       });
+    },
+  });
+};
+
+export const useSaveToFileMutation = () => {
+  return useMutation({
+    mutationFn: async (body: SaveToRequestFileBody) => {
+      const response = await fetch(`/api/files/${body.file_path}`, {
+        method: "POST",
+        body: JSON.stringify({
+          file_content: body.file_content,
+        }),
+        headers: {
+          "content-type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 400) {
+          const errorsText = await response.text();
+
+          const errs = JSON.parse(errorsText) as [
+            ReqlangError,
+            { start: number; end: number },
+          ][];
+
+          throw new Error("Unable to save to request file", {
+            cause: errs,
+          });
+        }
+      }
+
+      const data = await response.text();
+
+      return data;
     },
   });
 };

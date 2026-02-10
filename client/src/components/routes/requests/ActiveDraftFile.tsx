@@ -6,6 +6,7 @@ import {
   Stack,
   Tabs,
   Textarea,
+  TextInput,
 } from "@mantine/core";
 import { FC, useState } from "react";
 import { useParsedDraftFileQuery } from "@/queries/parse";
@@ -22,7 +23,11 @@ import {
   IconArrowBackUp,
   IconCheck,
   IconDeviceFloppy,
+  IconFileDownload,
 } from "@tabler/icons-react";
+import { modals } from "@mantine/modals";
+import { FILES_KEYS, useSaveToFileMutation } from "@/queries/files";
+import { useQueryClient } from "@tanstack/react-query";
 
 type Props = {
   path: string;
@@ -75,14 +80,26 @@ export const ActiveDraftFile = (props: Props) => {
     });
   };
 
+  const handleSaveToFile = () => {
+    modals.open({
+      title: "Save To File",
+      children: (
+        <SaveToFileModal
+          draftFileName={props.path}
+          fileContentToSave={draftFileContent}
+        />
+      ),
+    });
+  };
+
   return (
     <Stack data-testid="active-draft-file">
       <ButtonGroup>
         <Button
           leftSection={<IconDeviceFloppy stroke={1} />}
-          color="blue"
+          color="gray"
+          variant="filled"
           size="compact-sm"
-          variant="subtle"
           onClick={handleSave}
           disabled={editContent === draftFileContent}
         >
@@ -90,13 +107,23 @@ export const ActiveDraftFile = (props: Props) => {
         </Button>
         <Button
           leftSection={<IconArrowBackUp stroke={1} />}
-          color="red"
-          variant="subtle"
+          color="gray"
+          variant="filled"
           size="compact-sm"
           onClick={handleRevert}
           disabled={editContent === draftFileContent}
         >
           Revert
+        </Button>
+        <Button
+          leftSection={<IconFileDownload stroke={1} />}
+          color="gray"
+          variant="filled"
+          size="compact-sm"
+          onClick={handleSaveToFile}
+          disabled={editContent !== draftFileContent}
+        >
+          Save To File
         </Button>
       </ButtonGroup>
 
@@ -125,7 +152,7 @@ export const ActiveDraftFile = (props: Props) => {
             styles={{
               input: {
                 fontFamily: "var(--mantine-font-family-monospace)",
-                fontSize: "var(--mantine-font-size-xs)",
+                fontSize: "var(--mantine-font-size-sm)",
                 padding: "var(--mantine-spacing-xs)",
               },
             }}
@@ -176,5 +203,63 @@ const RunPanel: FC<RunPanelProps> = ({ path, content }) => {
       </Card>
       <RunDraftForm path={path} content={content} />
     </Stack>
+  );
+};
+
+type SaveToFileModalProps = {
+  draftFileName: string;
+  fileContentToSave: string;
+};
+
+const SaveToFileModal: FC<SaveToFileModalProps> = ({
+  draftFileName,
+  fileContentToSave,
+}) => {
+  const [fileName, setFileName] = useState<string>("");
+  const mutation = useSaveToFileMutation();
+  const openRequestFilesStore = useStore(useRequestFilesStore);
+  const queryClient = useQueryClient();
+
+  const handleSave = () => {
+    mutation.mutate(
+      {
+        file_content: fileContentToSave,
+        file_path: fileName,
+      },
+      {
+        onSuccess() {
+          openRequestFilesStore.openFile(fileName);
+          openRequestFilesStore.closeFile(draftFileName);
+
+          queryClient.invalidateQueries({
+            queryKey: FILES_KEYS.all,
+          });
+
+          notifications.show({
+            color: "green",
+            icon: <IconCheck />,
+            title: "Draft Saved To File",
+            message: `Saved as "${fileName}"`,
+          });
+
+          modals.closeAll();
+        },
+      },
+    );
+  };
+
+  return (
+    <>
+      <TextInput
+        label="Path to save to"
+        placeholder="path/to/save/request.reqlang"
+        data-autofocus
+        value={fileName}
+        onChange={(e) => setFileName(e.target.value)}
+      />
+      <Button fullWidth onClick={handleSave} mt="md">
+        Save
+      </Button>
+    </>
   );
 };
