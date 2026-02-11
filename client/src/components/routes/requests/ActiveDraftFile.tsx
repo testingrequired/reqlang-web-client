@@ -33,6 +33,7 @@ import { FILES_KEYS, useSaveToFileMutation } from "@/queries/files";
 import { useQueryClient } from "@tanstack/react-query";
 import { EditHttpRequestForm } from "./EditHttpRequestForm";
 import { EditHttpResponseForm } from "./EditHttpResponseForm";
+import { EditConfigForm } from "./EditConfigForm";
 
 type Props = {
   path: string;
@@ -50,6 +51,8 @@ export const ActiveDraftFile = (props: Props) => {
   const [draftRequest, setDraftRequest] = useState<HttpRequest>(
     draftFileContent?.request ?? DFAULT_REQUEST,
   );
+
+  const [draftConfig, setDraftConfig] = useState<string>("");
 
   const [draftResponse, setDraftResponse] =
     useState<HttpResponse>(DFAULT_RESPONSE);
@@ -105,9 +108,12 @@ export const ActiveDraftFile = (props: Props) => {
 
     const responseBlock = `${responseBlockStart}\n${responseFirstLine}\n${responseHeadersAndBody}\n${blockEnd}`;
 
-    //
+    const configBlockStart = "```%config";
+    const configBlock = `${configBlockStart}\n${draftConfig}\n${blockEnd}\n`;
 
-    setEditContent(requestBlock + "\n\n" + responseBlock);
+    setEditContent(
+      requestBlock + "\n\n" + responseBlock + "\n\n" + configBlock,
+    );
   }, [draftRequest, draftResponse]);
 
   const hasPendingChanges =
@@ -217,9 +223,15 @@ export const ActiveDraftFile = (props: Props) => {
 
             <EditHttpResponseForm
               value={draftResponse}
-              onChange={(r) => {
-                debugger;
-                setDraftResponse(r);
+              onChange={setDraftResponse}
+            />
+
+            <EditConfigForm
+              value={{
+                config: draftConfig,
+              }}
+              onChange={(v) => {
+                setDraftConfig(v.config);
               }}
             />
           </Stack>
