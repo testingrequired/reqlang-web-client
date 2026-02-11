@@ -3,6 +3,7 @@ import { CloseButton, Group, Space, Tabs, Text } from "@mantine/core";
 import { useStore } from "zustand";
 import { ActiveRequestFile } from "@/components/routes/requests/ActiveRequestFile";
 import { ActiveDraftFile } from "./ActiveDraftFile";
+import { modals } from "@mantine/modals";
 
 /**
  * A tabs component where each open request file is a table
@@ -45,7 +46,20 @@ export const OpenRequestFiles = () => {
                 <CloseButton
                   size="sm"
                   onClick={() => {
-                    openRequestFilesStore.closeFile(draftFile.path);
+                    modals.openConfirmModal({
+                      children:
+                        "Are you sure you want to close this draft? It will be lost.",
+                      onConfirm() {
+                        openRequestFilesStore.closeFile(draftFile.path);
+                      },
+                      labels: {
+                        confirm: "Discard Draft",
+                        cancel: "Keep Draft",
+                      },
+                      confirmProps: {
+                        color: "red",
+                      },
+                    });
                   }}
                   aria-label={`Close ${draftFile.path}`}
                 />
