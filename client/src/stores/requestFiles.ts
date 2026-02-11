@@ -1,10 +1,28 @@
 import { createStore } from "zustand";
 import { persist } from "zustand/middleware";
 import { v4 as uuid } from "uuid";
+import { HttpRequest, HttpResponse } from "reqlang-types";
+
+export const DFAULT_REQUEST = {
+  verb: "GET",
+  target: "https://example.com",
+  http_version: "1.1",
+  headers: [],
+  body: null,
+};
+
+export const DFAULT_RESPONSE: HttpResponse = {
+  http_version: "1.1",
+  status_code: 200,
+  status_text: "OK",
+  headers: [],
+  body: null,
+};
 
 export type DraftFile = {
   path: string;
-  content: string;
+  request: HttpRequest;
+  response: HttpResponse;
 };
 
 export type Data = {
@@ -20,8 +38,8 @@ export type Action = {
   closeFile(fileToClose: string): void;
   closeAllFiles(): void;
   newDraftFile(): void;
-  saveDraftFile(path: string, content: string): void;
-  getDraftFileContent(path: string): string;
+  saveDraftFile(path: string, content: DraftFile): void;
+  getDraftFileContent(path: string): DraftFile | null;
 };
 
 export type Store = Data & Action;
@@ -75,34 +93,26 @@ export const useRequestFilesStore = createStore<Store>()(
               ...prev.draftFiles,
               {
                 path: newPath,
-                content: "```%request\nGET https://example.com HTTP/1.1\n\n```",
+                request: DFAULT_REQUEST,
+                response: DFAULT_RESPONSE,
               },
             ],
             activeFile: newPath,
           };
         }),
-      saveDraftFile: (path: string, content: string) =>
+      saveDraftFile: (path: string, content: DraftFile) =>
         set((prev) => {
           const index = prev.draftFiles.findIndex(
             (draftFile) => draftFile.path === path,
           );
-          const draftFileToEdit = prev.draftFiles[index];
 
-          draftFileToEdit.content = content;
+          prev.draftFiles[index] = content;
 
-          const newDraftFiles = [...prev.draftFiles];
-
-          newDraftFiles[index] = draftFileToEdit;
-
-          return {
-            ...prev,
-            draftFiles: newDraftFiles,
-          };
+          return prev;
         }),
       getDraftFileContent(path) {
         return (
-          get().draftFiles.find((draftFile) => draftFile.path === path)
-            ?.content ?? ""
+          get().draftFiles.find((draftFile) => draftFile.path === path) ?? null
         );
       },
     }),

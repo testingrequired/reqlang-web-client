@@ -97,11 +97,12 @@ export const useUpdateFileMutation = (path: string | null) => {
 export const useSaveToFileMutation = () => {
   return useMutation({
     mutationFn: async (body: SaveToRequestFileBody) => {
-      const response = await fetch(`/api/files/${body.file_path}`, {
+      const response = await fetch(`/api/files`, {
         method: "POST",
         body: JSON.stringify({
+          file_path: body.file_path,
           file_content: body.file_content,
-        }),
+        } as SaveToRequestFileBody),
         headers: {
           "content-type": "application/json",
         },

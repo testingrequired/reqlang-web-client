@@ -476,7 +476,6 @@ async fn update_file(
 #[axum::debug_handler]
 async fn save_to_file(
     State(state): State<Arc<Mutex<AppState>>>,
-    Path(file): Path<String>,
     Json(body): Json<SaveToRequestFileBody>,
 ) -> (StatusCode, Result<(), String>) {
     let cwd = {
@@ -485,7 +484,7 @@ async fn save_to_file(
         state.home_dir.clone()
     };
 
-    let file_path = cwd.join(file);
+    let file_path = cwd.join(body.file_path);
 
     if fs::exists(&file_path).expect("unable to tell if file exists") {
         return (StatusCode::CONFLICT, Err("file already exists".to_string()));

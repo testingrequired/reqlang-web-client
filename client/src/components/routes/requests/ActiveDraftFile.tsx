@@ -5,19 +5,22 @@ import {
   Loader,
   Stack,
   Tabs,
-  Textarea,
   TextInput,
 } from "@mantine/core";
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { useParsedDraftFileQuery } from "@/queries/parse";
 import { RequestFilParseError } from "./RequestFileParseError";
 import { useStore } from "zustand";
-import { useRequestFilesStore } from "@/stores/requestFiles";
+import {
+  DFAULT_REQUEST,
+  DFAULT_RESPONSE,
+  useRequestFilesStore,
+} from "@/stores/requestFiles";
 import { RunDraftForm } from "./RunDraftForm";
 import { notifications } from "@mantine/notifications";
 import { CopyCode } from "@/components/common/CopyCode";
 import { getRequestFromRequestFile } from "@/services/requestFile";
-import { ParseResult } from "reqlang-types";
+import { HttpRequest, HttpResponse, ParseResult } from "reqlang-types";
 import { useCounter } from "@mantine/hooks";
 import {
   IconArrowBackUp,
@@ -28,6 +31,8 @@ import {
 import { modals } from "@mantine/modals";
 import { FILES_KEYS, useSaveToFileMutation } from "@/queries/files";
 import { useQueryClient } from "@tanstack/react-query";
+import { EditHttpRequestForm } from "./EditHttpRequestForm";
+import { EditHttpResponseForm } from "./EditHttpResponseForm";
 
 type Props = {
   path: string;
@@ -36,30 +41,87 @@ type Props = {
 export const ActiveDraftFile = (props: Props) => {
   const [runTabKey, runTabKeyHandlers] = useCounter(0);
   const openRequestFilesStore = useStore(useRequestFilesStore);
+  const [editContent, setEditContent] = useState<string>("");
 
   const draftFileContent = openRequestFilesStore.getDraftFileContent(
     props.path,
   );
 
-  const [editContent, setEditContent] = useState<string>(draftFileContent);
-
-  const parsedRequestFileQuery = useParsedDraftFileQuery(
-    props.path,
-    draftFileContent,
+  const [draftRequest, setDraftRequest] = useState<HttpRequest>(
+    draftFileContent?.request ?? DFAULT_REQUEST,
   );
 
-  if (parsedRequestFileQuery.isPending) {
-    return <Loader />;
-  }
+  const [draftResponse, setDraftResponse] =
+    useState<HttpResponse>(DFAULT_RESPONSE);
 
-  const handleChangeEditContent = (
-    e: React.ChangeEvent<HTMLTextAreaElement>,
-  ) => {
-    setEditContent(e.target.value);
-  };
+  useEffect(() => {
+    const blockEnd = "```";
+
+    const requestBlockStart = "```%request";
+
+    const requestFirstLine = `${draftRequest.verb} ${draftRequest.target} HTTP/${draftRequest.http_version}`;
+    const requestHeaderLines = draftRequest.headers.length
+      ? draftRequest.headers
+          .map(([key, value]) => `${key}: ${value}`)
+          .join("\n") + "\n"
+      : "";
+    const requestBody = draftRequest.body?.length
+      ? "\n" + draftRequest.body
+      : "";
+
+    const requestHeadersAndBody =
+      requestHeaderLines && requestBody
+        ? requestHeaderLines + requestBody
+        : "\n";
+
+    const requestBlock = `${requestBlockStart}\n${requestFirstLine}\n${requestHeadersAndBody}\n${blockEnd}`;
+
+    //
+    const responseBlockStart = "```%response";
+
+    const responseFirstLine = `HTTP/${draftResponse.http_version} ${draftResponse.status_code} ${draftResponse.status_text}`;
+    const responseHeaderLines = draftResponse.headers.length
+      ? draftResponse.headers
+          .map(([key, value]) => `${key}: ${value}`)
+          .join("\n") + "\n"
+      : "";
+    const responseBody = draftResponse.body?.length
+      ? "\n" + draftResponse.body
+      : "";
+
+    let responseHeadersAndBody: string;
+
+    if (responseHeaderLines.length) {
+      if (responseBody.length) {
+        responseHeadersAndBody = responseHeaderLines + responseBody;
+      } else {
+        responseHeadersAndBody = responseHeaderLines + "\n";
+      }
+    } else if (responseBody.length) {
+      responseHeadersAndBody = responseBody + "\n";
+    } else {
+      responseHeadersAndBody = "\n";
+    }
+
+    const responseBlock = `${responseBlockStart}\n${responseFirstLine}\n${responseHeadersAndBody}\n${blockEnd}`;
+
+    //
+
+    setEditContent(requestBlock + "\n\n" + responseBlock);
+  }, [draftRequest, draftResponse]);
+
+  const hasPendingChanges =
+    JSON.stringify(draftRequest) !==
+      JSON.stringify(draftFileContent?.request) ||
+    JSON.stringify(draftResponse) !==
+      JSON.stringify(draftFileContent?.response);
 
   const handleSave = () => {
-    openRequestFilesStore.saveDraftFile(props.path, editContent);
+    openRequestFilesStore.saveDraftFile(props.path, {
+      path: props.path,
+      request: draftRequest,
+      response: draftResponse,
+    });
 
     runTabKeyHandlers.increment();
 
@@ -72,7 +134,8 @@ export const ActiveDraftFile = (props: Props) => {
   };
 
   const handleRevert = () => {
-    setEditContent(draftFileContent);
+    setDraftRequest(draftFileContent?.request ?? DFAULT_REQUEST);
+    setDraftResponse(draftFileContent?.response ?? DFAULT_RESPONSE);
 
     notifications.show({
       title: "Changes Reverted",
@@ -86,7 +149,7 @@ export const ActiveDraftFile = (props: Props) => {
       children: (
         <SaveToFileModal
           draftFileName={props.path}
-          fileContentToSave={draftFileContent}
+          fileContentToSave={editContent}
         />
       ),
     });
@@ -101,7 +164,7 @@ export const ActiveDraftFile = (props: Props) => {
           variant="filled"
           size="compact-sm"
           onClick={handleSave}
-          disabled={editContent === draftFileContent}
+          disabled={!hasPendingChanges}
         >
           Save Draft
         </Button>
@@ -111,7 +174,7 @@ export const ActiveDraftFile = (props: Props) => {
           variant="filled"
           size="compact-sm"
           onClick={handleRevert}
-          disabled={editContent === draftFileContent}
+          disabled={!hasPendingChanges}
         >
           Revert
         </Button>
@@ -121,7 +184,7 @@ export const ActiveDraftFile = (props: Props) => {
           variant="filled"
           size="compact-sm"
           onClick={handleSaveToFile}
-          disabled={editContent !== draftFileContent}
+          disabled={hasPendingChanges}
         >
           Save To File
         </Button>
@@ -133,34 +196,33 @@ export const ActiveDraftFile = (props: Props) => {
             value="edit"
             style={{
               fontStyle:
-                editContent !== draftFileContent ? "italic" : "inherit",
+                draftRequest !== draftFileContent?.request
+                  ? "italic"
+                  : "inherit",
             }}
           >
             Edit
           </Tabs.Tab>
-          <Tabs.Tab value="run" disabled={editContent !== draftFileContent}>
+          <Tabs.Tab value="run" disabled={hasPendingChanges}>
             Run
           </Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="edit" data-testid="active-draft-file-edit-tab">
-          <Textarea
-            value={editContent}
-            onChange={handleChangeEditContent}
-            autosize
-            autoFocus
-            styles={{
-              input: {
-                fontFamily: "var(--mantine-font-family-monospace)",
-                fontSize: "var(--mantine-font-size-sm)",
-                padding: "var(--mantine-spacing-xs)",
-              },
-            }}
-          />
+          <Stack gap="lg">
+            <EditHttpRequestForm
+              value={draftRequest}
+              onChange={setDraftRequest}
+            />
 
-          {parsedRequestFileQuery.isError && (
-            <RequestFilParseError error={parsedRequestFileQuery.error} />
-          )}
+            <EditHttpResponseForm
+              value={draftResponse}
+              onChange={(r) => {
+                debugger;
+                setDraftResponse(r);
+              }}
+            />
+          </Stack>
         </Tabs.Panel>
 
         <Tabs.Panel
