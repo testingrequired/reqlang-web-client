@@ -22,7 +22,8 @@ export const DFAULT_RESPONSE: HttpResponse = {
 export type DraftFile = {
   path: string;
   request: HttpRequest;
-  response: HttpResponse;
+  response: HttpResponse | null;
+  config: string;
 };
 
 export type Data = {
@@ -94,7 +95,8 @@ export const useRequestFilesStore = createStore<Store>()(
               {
                 path: newPath,
                 request: DFAULT_REQUEST,
-                response: DFAULT_RESPONSE,
+                response: null,
+                config: "",
               },
             ],
             activeFile: newPath,

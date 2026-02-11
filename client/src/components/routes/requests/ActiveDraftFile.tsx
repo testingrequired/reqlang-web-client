@@ -1,10 +1,13 @@
 import {
+  Alert,
   Button,
   ButtonGroup,
   Card,
   Loader,
   Stack,
+  Switch,
   Tabs,
+  Text,
   TextInput,
 } from "@mantine/core";
 import { FC, useEffect, useState } from "react";
@@ -54,21 +57,32 @@ export const ActiveDraftFile = (props: Props) => {
 
   const [draftConfig, setDraftConfig] = useState<string>("");
 
-  const [draftResponse, setDraftResponse] =
-    useState<HttpResponse>(DFAULT_RESPONSE);
+  const [draftResponse, setDraftResponse] = useState<HttpResponse | null>(
+    DFAULT_RESPONSE,
+  );
+
+  const [usingResponse, setUsingResponse] = useState(false);
+
+  useEffect(() => {
+    if (!usingResponse) {
+      setDraftResponse(null);
+    } else {
+      setDraftResponse(DFAULT_RESPONSE);
+    }
+  }, [usingResponse]);
 
   useEffect(() => {
     const blockEnd = "```";
 
     const requestBlockStart = "```%request";
 
-    const requestFirstLine = `${draftRequest.verb} ${draftRequest.target} HTTP/${draftRequest.http_version}`;
-    const requestHeaderLines = draftRequest.headers.length
-      ? draftRequest.headers
+    const requestFirstLine = `${draftRequest?.verb} ${draftRequest?.target} HTTP/${draftRequest?.http_version}`;
+    const requestHeaderLines = draftRequest?.headers.length
+      ? draftRequest?.headers
           .map(([key, value]) => `${key}: ${value}`)
           .join("\n") + "\n"
       : "";
-    const requestBody = draftRequest.body?.length
+    const requestBody = draftRequest?.body?.length
       ? "\n" + draftRequest.body
       : "";
 
@@ -82,13 +96,13 @@ export const ActiveDraftFile = (props: Props) => {
     //
     const responseBlockStart = "```%response";
 
-    const responseFirstLine = `HTTP/${draftResponse.http_version} ${draftResponse.status_code} ${draftResponse.status_text}`;
-    const responseHeaderLines = draftResponse.headers.length
+    const responseFirstLine = `HTTP/${draftResponse?.http_version} ${draftResponse?.status_code} ${draftResponse?.status_text}`;
+    const responseHeaderLines = draftResponse?.headers.length
       ? draftResponse.headers
           .map(([key, value]) => `${key}: ${value}`)
           .join("\n") + "\n"
       : "";
-    const responseBody = draftResponse.body?.length
+    const responseBody = draftResponse?.body?.length
       ? "\n" + draftResponse.body
       : "";
 
@@ -120,13 +134,15 @@ export const ActiveDraftFile = (props: Props) => {
     JSON.stringify(draftRequest) !==
       JSON.stringify(draftFileContent?.request) ||
     JSON.stringify(draftResponse) !==
-      JSON.stringify(draftFileContent?.response);
+      JSON.stringify(draftFileContent?.response) ||
+    JSON.stringify(draftConfig) !== JSON.stringify(draftFileContent?.config);
 
   const handleSave = () => {
     openRequestFilesStore.saveDraftFile(props.path, {
       path: props.path,
       request: draftRequest,
       response: draftResponse,
+      config: draftConfig,
     });
 
     runTabKeyHandlers.increment();
@@ -142,6 +158,8 @@ export const ActiveDraftFile = (props: Props) => {
   const handleRevert = () => {
     setDraftRequest(draftFileContent?.request ?? DFAULT_REQUEST);
     setDraftResponse(draftFileContent?.response ?? DFAULT_RESPONSE);
+    setDraftConfig(draftFileContent?.config ?? "");
+    setUsingResponse(!!draftFileContent?.response);
 
     notifications.show({
       title: "Changes Reverted",
@@ -221,11 +239,6 @@ export const ActiveDraftFile = (props: Props) => {
               onChange={setDraftRequest}
             />
 
-            <EditHttpResponseForm
-              value={draftResponse}
-              onChange={setDraftResponse}
-            />
-
             <EditConfigForm
               value={{
                 config: draftConfig,
@@ -234,6 +247,30 @@ export const ActiveDraftFile = (props: Props) => {
                 setDraftConfig(v.config);
               }}
             />
+
+            {usingResponse && draftResponse ? (
+              <>
+                <Switch
+                  label="Enable Response Assertion"
+                  checked={usingResponse}
+                  onChange={(event) => setUsingResponse(event.target.checked)}
+                />
+                <EditHttpResponseForm
+                  value={draftResponse}
+                  onChange={setDraftResponse}
+                />
+              </>
+            ) : (
+              <Alert title="Response Assertion">
+                <Text size="sm">You can define an expected HTTP Response.</Text>
+
+                <Switch
+                  label="Enable Response Assertion"
+                  checked={usingResponse}
+                  onChange={(event) => setUsingResponse(event.target.checked)}
+                />
+              </Alert>
+            )}
           </Stack>
         </Tabs.Panel>
 
