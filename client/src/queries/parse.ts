@@ -69,9 +69,11 @@ export const useParsedDraftFileQuery = (path: string, content: string) => {
             { start: number; end: number },
           ][];
 
-          throw new Error("Unable to parse request file", {
+          throw new Error("Unable to parse request file: bad request", {
             cause: errs,
           });
+        } else {
+          throw new Error("Unable to parse request file");
         }
       }
 
