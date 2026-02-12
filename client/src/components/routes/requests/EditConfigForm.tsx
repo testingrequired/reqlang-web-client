@@ -10,12 +10,14 @@ import {
   Group,
   Alert,
   ThemeIcon,
+  Tooltip,
 } from "@mantine/core";
 import { useEffect } from "react";
 import { ParsedConfig } from "reqlang-types";
 import {
   IconExclamationCircle,
   IconPlus,
+  IconQuestionMark,
   IconTrash,
 } from "@tabler/icons-react";
 
@@ -57,9 +59,26 @@ export function EditConfigForm({ onChange, value }: Props) {
         <Stack gap="md">
           <Card withBorder>
             <Stack gap="lg">
-              <Text fw="bold" size="md" mb={0}>
-                Environments
-              </Text>
+              <Group>
+                <Text fw="bold" size="md" mb={0}>
+                  Environments
+                </Text>
+                <Tooltip
+                  label="Environments help manage environmental values using variables"
+                  position="right"
+                  color="dark"
+                >
+                  <ThemeIcon
+                    size="xs"
+                    autoContrast
+                    style={{
+                      cursor: "help",
+                    }}
+                  >
+                    <IconQuestionMark stroke={2} />
+                  </ThemeIcon>
+                </Tooltip>
+              </Group>
               <form.Field
                 name="envs"
                 children={(field) => (
@@ -171,9 +190,26 @@ export function EditConfigForm({ onChange, value }: Props) {
 
           <Card withBorder>
             <Stack>
-              <Text fw="bold" mb={0} size="md">
-                Variables
-              </Text>
+              <Group>
+                <Text fw="bold" mb={0} size="md">
+                  Variables
+                </Text>
+                <Tooltip
+                  label="Variables can define a value for each environments"
+                  position="right"
+                  color="dark"
+                >
+                  <ThemeIcon
+                    size="xs"
+                    autoContrast
+                    style={{
+                      cursor: "help",
+                    }}
+                  >
+                    <IconQuestionMark stroke={2} />
+                  </ThemeIcon>
+                </Tooltip>
+              </Group>
 
               <form.Field name="vars">
                 {(field) => (
@@ -301,102 +337,140 @@ export function EditConfigForm({ onChange, value }: Props) {
           </Card>
 
           <Card withBorder>
-            <Text fw="bold" mb="md" size="md">
-              Prompts
-            </Text>
+            <Stack>
+              <Group>
+                <Text fw="bold" mb={0} size="md">
+                  Prompts
+                </Text>
+                <Tooltip
+                  label="Define values prompted from the user at request time"
+                  position="right"
+                  color="dark"
+                >
+                  <ThemeIcon
+                    size="xs"
+                    autoContrast
+                    style={{
+                      cursor: "help",
+                    }}
+                  >
+                    <IconQuestionMark stroke={2} />
+                  </ThemeIcon>
+                </Tooltip>
+              </Group>
 
-            <form.Field name="prompts">
-              {(field) => (
-                <Stack gap="xs">
-                  {field.state.value?.map((_, index) => {
-                    return (
-                      <Group key={index} align="end" wrap="nowrap">
-                        <TextInput
-                          label={index === 0 ? "Prompt" : undefined}
-                          placeholder=""
-                          required
-                          value={field.state.value?.[index].name}
-                          onChange={(e) => {
-                            let next = [...(field.state.value ?? [])];
+              <form.Field name="prompts">
+                {(field) => (
+                  <Stack gap="xs">
+                    {field.state.value?.map((_, index) => {
+                      return (
+                        <Group key={index} align="end" wrap="nowrap">
+                          <TextInput
+                            label={index === 0 ? "Prompt" : undefined}
+                            placeholder=""
+                            required
+                            value={field.state.value?.[index].name}
+                            onChange={(e) => {
+                              let next = [...(field.state.value ?? [])];
 
-                            next[index].name = e.target.value;
+                              next[index].name = e.target.value;
 
-                            field.handleChange(next);
-                          }}
-                          style={{ flex: 1 }}
-                        />
+                              field.handleChange(next);
+                            }}
+                            style={{ flex: 1 }}
+                          />
 
-                        <TextInput
-                          label={index === 0 ? "Default Value" : undefined}
-                          placeholder=""
-                          value={field.state.value?.[index].default ?? ""}
-                          onChange={(e) => {
-                            let next = [...(field.state.value ?? [])];
+                          <TextInput
+                            label={index === 0 ? "Default Value" : undefined}
+                            placeholder=""
+                            value={field.state.value?.[index].default ?? ""}
+                            onChange={(e) => {
+                              let next = [...(field.state.value ?? [])];
 
-                            next[index].default = e.target.value;
+                              next[index].default = e.target.value;
 
-                            field.handleChange(next);
-                          }}
-                          style={{ flex: 2 }}
-                        />
+                              field.handleChange(next);
+                            }}
+                            style={{ flex: 2 }}
+                          />
 
-                        <ActionIcon
-                          color="red"
-                          variant="subtle"
-                          onClick={() => {
-                            const next = field.state.value?.filter(
-                              (_, i) => i !== index,
-                            );
-                            field.handleChange(next?.length ? next : []);
-                          }}
-                        >
-                          <IconTrash size={16} />
-                        </ActionIcon>
-                      </Group>
-                    );
-                  })}
+                          <ActionIcon
+                            color="red"
+                            variant="subtle"
+                            onClick={() => {
+                              const next = field.state.value?.filter(
+                                (_, i) => i !== index,
+                              );
+                              field.handleChange(next?.length ? next : []);
+                            }}
+                          >
+                            <IconTrash size={16} />
+                          </ActionIcon>
+                        </Group>
+                      );
+                    })}
 
-                  <Button.Group>
-                    <Button
-                      variant="light"
-                      color="gray"
-                      leftSection={<IconPlus size={16} />}
-                      onClick={() =>
-                        field.handleChange([
-                          ...(field.state.value ?? []),
-                          { name: "", default: "", description: null },
-                        ])
-                      }
-                    >
-                      Add prompt
-                    </Button>
-                  </Button.Group>
-                </Stack>
-              )}
-            </form.Field>
+                    <Button.Group>
+                      <Button
+                        variant="light"
+                        color="gray"
+                        leftSection={<IconPlus size={16} />}
+                        onClick={() =>
+                          field.handleChange([
+                            ...(field.state.value ?? []),
+                            { name: "", default: "", description: null },
+                          ])
+                        }
+                      >
+                        Add prompt
+                      </Button>
+                    </Button.Group>
+                  </Stack>
+                )}
+              </form.Field>
+            </Stack>
           </Card>
 
           <Card withBorder>
-            <Text fw="bold" mb="md" size="md">
-              Secrets
-            </Text>
+            <Stack>
+              <Group>
+                <Text fw="bold" mb={0} size="md">
+                  Secrets
+                </Text>
+                <Tooltip
+                  label="Secret values retreived at request time"
+                  position="right"
+                  color="dark"
+                >
+                  <ThemeIcon
+                    size="xs"
+                    autoContrast
+                    style={{
+                      cursor: "help",
+                    }}
+                  >
+                    <IconQuestionMark stroke={2} />
+                  </ThemeIcon>
+                </Tooltip>
+              </Group>
 
-            <form.Field
-              name="secrets"
-              children={(field) => (
-                <TagsInput
-                  label="Secrets"
-                  placeholder="alot, of, secret, values"
-                  value={field.state.value ?? []}
-                  onChange={(value) => field.handleChange(value)}
-                  labelProps={{
-                    style: {
-                      display: "none",
-                    },
-                  }}
-                />
-              )}
-            />
+              <form.Field
+                name="secrets"
+                children={(field) => (
+                  <TagsInput
+                    label="Secrets"
+                    placeholder="alot, of, secret, values"
+                    value={field.state.value ?? []}
+                    onChange={(value) => field.handleChange(value)}
+                    labelProps={{
+                      style: {
+                        display: "none",
+                      },
+                    }}
+                  />
+                )}
+              />
+            </Stack>
           </Card>
         </Stack>
       </form>
