@@ -3,11 +3,14 @@ import {
   Button,
   ButtonGroup,
   Card,
+  HoverCard,
   Loader,
   Stack,
   Tabs,
   Text,
   TextInput,
+  ThemeIcon,
+  Tooltip,
 } from "@mantine/core";
 import { FC, useEffect, useState } from "react";
 import { useParsedDraftFileQuery } from "@/queries/parse";
@@ -30,12 +33,13 @@ import {
   ParsedConfig,
   ParseResult,
 } from "reqlang-types";
-import { useCounter } from "@mantine/hooks";
+import { useCounter, useDebouncedState } from "@mantine/hooks";
 import {
   IconAlertCircleFilled,
   IconArrowBackUp,
   IconCheck,
   IconDeviceFloppy,
+  IconExclamationCircle,
   IconFileDownload,
 } from "@tabler/icons-react";
 import { modals } from "@mantine/modals";
@@ -49,10 +53,16 @@ type Props = {
   path: string;
 };
 
+const RUN_PARSE_DEBOUNCE = 1000;
+
 export const ActiveDraftFile = (props: Props) => {
   const [runTabKey, runTabKeyHandlers] = useCounter(0);
   const openRequestFilesStore = useStore(useRequestFilesStore);
-  const [editContent, setEditContent] = useState<string>("");
+  const [editContent, setEditContent] = useDebouncedState<string>(
+    "",
+    RUN_PARSE_DEBOUNCE,
+  );
+  const parseFileQuery = useParsedDraftFileQuery(props.path, editContent);
 
   const draftFileFromStore = openRequestFilesStore.getDraftFileContent(
     props.path,
@@ -172,6 +182,36 @@ export const ActiveDraftFile = (props: Props) => {
         <Tabs.List>
           <Tabs.Tab
             value="edit"
+            rightSection={
+              parseFileQuery.isSuccess || parseFileQuery.isError ? (
+                <HoverCard closeDelay={1000}>
+                  <HoverCard.Target>
+                    {parseFileQuery.isError ? (
+                      <ThemeIcon color="red" variant="subtle" size="xs">
+                        <IconExclamationCircle />
+                      </ThemeIcon>
+                    ) : (
+                      <Tooltip
+                        label="Draft was parsed successfully"
+                        color="dark"
+                        position="bottom"
+                      >
+                        <ThemeIcon color="green" variant="subtle" size="xs">
+                          <IconCheck />
+                        </ThemeIcon>
+                      </Tooltip>
+                    )}
+                  </HoverCard.Target>
+                  {parseFileQuery.isError && (
+                    <HoverCard.Dropdown>
+                      <RequestFilParseError error={parseFileQuery.error} />
+                    </HoverCard.Dropdown>
+                  )}
+                </HoverCard>
+              ) : (
+                <Loader size="xs" />
+              )
+            }
             style={{
               fontStyle:
                 draftRequest !== draftRequestFromStore ? "italic" : "inherit",
@@ -387,8 +427,6 @@ const useStringifyDraftEffect = (
             })
             .join("\n\n");
     const configBlock = `${configBlockStart}\n${secrets}${prompts}\n${vars}\n\n${envs}\n${blockEnd}\n`;
-
-    // console.log(configBlock);
 
     setResult(configBlock + "\n" + requestBlock + "\n" + responseBlock + "\n");
   }, [draftRequest, draftResponse, draftConfig]);

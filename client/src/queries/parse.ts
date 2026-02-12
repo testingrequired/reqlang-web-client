@@ -51,6 +51,7 @@ export const useParsedDraftFileQuery = (path: string, content: string) => {
   return useQuery({
     enabled: !!content,
     queryKey: PARSE_KEYS.parse_draft(path, content),
+    retry: false,
     queryFn: async () => {
       const response = await fetch(`/api/parse`, {
         method: "POST",
