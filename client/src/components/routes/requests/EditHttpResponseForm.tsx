@@ -143,15 +143,17 @@ export function EditHttpResponseForm({ value, onChange }: Props) {
                   </Group>
                 ))}
 
-                <Button
-                  variant="light"
-                  leftSection={<IconPlus size={16} />}
-                  onClick={() =>
-                    field.handleChange([...field.state.value, ["", ""]])
-                  }
-                >
-                  Add header
-                </Button>
+                <Button.Group>
+                  <Button
+                    variant="light"
+                    leftSection={<IconPlus size={16} />}
+                    onClick={() =>
+                      field.handleChange([...field.state.value, ["", ""]])
+                    }
+                  >
+                    Add header
+                  </Button>
+                </Button.Group>
               </Stack>
             )}
           </form.Field>
