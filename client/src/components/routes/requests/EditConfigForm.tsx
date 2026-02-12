@@ -34,6 +34,9 @@ export function EditConfigForm({ onChange, value }: Props) {
     defaultValues: value,
     listeners: {
       async onChange(form) {
+        if (Object.keys(form.formApi.state.values.envs ?? {}).length === 0) {
+          form.formApi.setFieldValue("vars", []);
+        }
         onChange?.(form.formApi.state.values);
       },
     },
