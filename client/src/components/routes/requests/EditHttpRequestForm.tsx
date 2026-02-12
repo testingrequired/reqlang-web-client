@@ -29,7 +29,10 @@ export function EditHttpRequestForm({ onChange, value }: Props) {
     defaultValues: value,
     listeners: {
       async onChange(form) {
-        if (hasNoRequestBody(form.formApi.state.values.verb)) {
+        if (
+          hasNoRequestBody(form.formApi.state.values.verb) ||
+          form.formApi.state.values.body?.length === 0
+        ) {
           form.formApi.setFieldValue("body", null);
         }
 

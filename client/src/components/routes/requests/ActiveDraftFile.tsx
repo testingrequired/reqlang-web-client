@@ -15,17 +15,25 @@ import { useParsedDraftFileQuery } from "@/queries/parse";
 import { RequestFilParseError } from "./RequestFileParseError";
 import { useStore } from "zustand";
 import {
+  DEFAULT_CONFIG,
   DFAULT_REQUEST,
   DFAULT_RESPONSE,
+  DraftFile,
   useRequestFilesStore,
 } from "@/stores/requestFiles";
 import { RunDraftForm } from "./RunDraftForm";
 import { notifications } from "@mantine/notifications";
 import { CopyCode } from "@/components/common/CopyCode";
 import { getRequestFromRequestFile } from "@/services/requestFile";
-import { HttpRequest, HttpResponse, ParseResult } from "reqlang-types";
+import {
+  HttpRequest,
+  HttpResponse,
+  ParsedConfig,
+  ParseResult,
+} from "reqlang-types";
 import { useCounter } from "@mantine/hooks";
 import {
+  IconAlertCircleFilled,
   IconArrowBackUp,
   IconCheck,
   IconDeviceFloppy,
@@ -47,95 +55,43 @@ export const ActiveDraftFile = (props: Props) => {
   const openRequestFilesStore = useStore(useRequestFilesStore);
   const [editContent, setEditContent] = useState<string>("");
 
-  const draftFileContent = openRequestFilesStore.getDraftFileContent(
+  const draftFileFromStore = openRequestFilesStore.getDraftFileContent(
     props.path,
   );
 
+  const draftRequestFromStore = draftFileFromStore?.request;
+  const draftResponseFromStore = draftFileFromStore?.response;
+  const draftConfigFromStore = draftFileFromStore?.config;
+
   const [draftRequest, setDraftRequest] = useState<HttpRequest>(
-    draftFileContent?.request ?? DFAULT_REQUEST,
+    draftRequestFromStore ?? DFAULT_REQUEST,
   );
 
-  const [draftConfig, setDraftConfig] = useState<string>("");
+  const [draftConfig, setDraftConfig] = useState<ParsedConfig>(
+    draftConfigFromStore ?? DEFAULT_CONFIG,
+  );
 
   const [draftResponse, setDraftResponse] = useState<HttpResponse | null>(
-    DFAULT_RESPONSE,
+    draftResponseFromStore ?? null,
   );
 
-  const [usingResponse, setUsingResponse] = useState(false);
+  const usingResponse = draftResponse !== null;
 
-  useEffect(() => {
-    if (!usingResponse) {
-      setDraftResponse(null);
-    } else {
-      setDraftResponse(DFAULT_RESPONSE);
-    }
-  }, [usingResponse]);
-
-  useEffect(() => {
-    const blockEnd = "```";
-
-    const requestBlockStart = "```%request";
-
-    const requestFirstLine = `${draftRequest?.verb} ${draftRequest?.target} HTTP/${draftRequest?.http_version}`;
-    const requestHeaderLines = draftRequest?.headers.length
-      ? draftRequest?.headers
-          .map(([key, value]) => `${key}: ${value}`)
-          .join("\n") + "\n"
-      : "";
-    const requestBody = draftRequest?.body?.length
-      ? "\n" + draftRequest.body
-      : "";
-
-    const requestHeadersAndBody =
-      requestHeaderLines && requestBody
-        ? requestHeaderLines + requestBody
-        : "\n";
-
-    const requestBlock = `${requestBlockStart}\n${requestFirstLine}\n${requestHeadersAndBody}\n${blockEnd}`;
-
-    //
-    const responseBlockStart = "```%response";
-
-    const responseFirstLine = `HTTP/${draftResponse?.http_version} ${draftResponse?.status_code} ${draftResponse?.status_text}`;
-    const responseHeaderLines = draftResponse?.headers.length
-      ? draftResponse.headers
-          .map(([key, value]) => `${key}: ${value}`)
-          .join("\n") + "\n"
-      : "";
-    const responseBody = draftResponse?.body?.length
-      ? "\n" + draftResponse.body
-      : "";
-
-    let responseHeadersAndBody: string;
-
-    if (responseHeaderLines.length) {
-      if (responseBody.length) {
-        responseHeadersAndBody = responseHeaderLines + responseBody;
-      } else {
-        responseHeadersAndBody = responseHeaderLines + "\n";
-      }
-    } else if (responseBody.length) {
-      responseHeadersAndBody = responseBody + "\n";
-    } else {
-      responseHeadersAndBody = "\n";
-    }
-
-    const responseBlock = `${responseBlockStart}\n${responseFirstLine}\n${responseHeadersAndBody}\n${blockEnd}`;
-
-    const configBlockStart = "```%config";
-    const configBlock = `${configBlockStart}\n${draftConfig}\n${blockEnd}\n`;
-
-    setEditContent(
-      requestBlock + "\n\n" + responseBlock + "\n\n" + configBlock,
-    );
-  }, [draftRequest, draftResponse]);
+  useStringifyDraftEffect(
+    {
+      path: props.path,
+      request: draftRequest,
+      response: draftResponse,
+      config: draftConfig,
+    },
+    setEditContent,
+  );
 
   const hasPendingChanges =
-    JSON.stringify(draftRequest) !==
-      JSON.stringify(draftFileContent?.request) ||
+    JSON.stringify(draftRequest) !== JSON.stringify(draftRequestFromStore) ||
     JSON.stringify(draftResponse) !==
-      JSON.stringify(draftFileContent?.response) ||
-    JSON.stringify(draftConfig) !== JSON.stringify(draftFileContent?.config);
+      JSON.stringify(draftResponseFromStore ?? null) ||
+    JSON.stringify(draftConfig) !== JSON.stringify(draftConfigFromStore);
 
   const handleSave = () => {
     openRequestFilesStore.saveDraftFile(props.path, {
@@ -156,10 +112,9 @@ export const ActiveDraftFile = (props: Props) => {
   };
 
   const handleRevert = () => {
-    setDraftRequest(draftFileContent?.request ?? DFAULT_REQUEST);
-    setDraftResponse(draftFileContent?.response ?? DFAULT_RESPONSE);
-    setDraftConfig(draftFileContent?.config ?? "");
-    setUsingResponse(!!draftFileContent?.response);
+    setDraftRequest(draftRequestFromStore ?? DFAULT_REQUEST);
+    setDraftResponse(draftResponseFromStore ?? null);
+    setDraftConfig(draftConfigFromStore ?? DEFAULT_CONFIG);
 
     notifications.show({
       title: "Changes Reverted",
@@ -220,9 +175,7 @@ export const ActiveDraftFile = (props: Props) => {
             value="edit"
             style={{
               fontStyle:
-                draftRequest !== draftFileContent?.request
-                  ? "italic"
-                  : "inherit",
+                draftRequest !== draftRequestFromStore ? "italic" : "inherit",
             }}
           >
             Edit
@@ -239,21 +192,24 @@ export const ActiveDraftFile = (props: Props) => {
               onChange={setDraftRequest}
             />
 
-            <EditConfigForm
-              value={{
-                config: draftConfig,
-              }}
-              onChange={(v) => {
-                setDraftConfig(v.config);
-              }}
-            />
+            <EditConfigForm value={draftConfig} onChange={setDraftConfig} />
 
-            {usingResponse && draftResponse ? (
+            {usingResponse ? (
               <>
                 <Switch
                   label="Enable Response Assertion"
                   checked={usingResponse}
-                  onChange={(event) => setUsingResponse(event.target.checked)}
+                  onChange={(event) => {
+                    if (event.target.checked) {
+                      if (draftResponseFromStore) {
+                        setDraftResponse(draftResponseFromStore);
+                      } else {
+                        setDraftResponse(DFAULT_RESPONSE);
+                      }
+                    } else {
+                      setDraftResponse(null);
+                    }
+                  }}
                 />
                 <EditHttpResponseForm
                   value={draftResponse}
@@ -267,7 +223,17 @@ export const ActiveDraftFile = (props: Props) => {
                 <Switch
                   label="Enable Response Assertion"
                   checked={usingResponse}
-                  onChange={(event) => setUsingResponse(event.target.checked)}
+                  onChange={(event) => {
+                    if (event.target.checked) {
+                      if (draftResponseFromStore) {
+                        setDraftResponse(draftResponseFromStore);
+                      } else {
+                        setDraftResponse(DFAULT_RESPONSE);
+                      }
+                    } else {
+                      setDraftResponse(null);
+                    }
+                  }}
                 />
               </Alert>
             )}
@@ -317,6 +283,115 @@ const RunPanel: FC<RunPanelProps> = ({ path, content }) => {
   );
 };
 
+const useStringifyDraftEffect = (
+  draftFile: DraftFile,
+  setResult: (result: string) => void,
+) => {
+  const {
+    request: draftRequest,
+    response: draftResponse,
+    config: draftConfig,
+  } = draftFile;
+  return useEffect(() => {
+    const blockEnd = "```";
+
+    const requestBlockStart = "```%request";
+
+    const requestFirstLine = `${draftRequest?.verb} ${draftRequest?.target} HTTP/${draftRequest?.http_version}`;
+    const requestHeaderLines = draftRequest?.headers.length
+      ? draftRequest?.headers
+          .map(([key, value]) => `${key}: ${value}`)
+          .join("\n") + "\n"
+      : "";
+
+    const requestBody = draftRequest?.body?.length
+      ? "\n" + draftRequest.body
+      : "";
+
+    let requestHeadersAndBody: string = "\n";
+
+    if (requestHeaderLines && requestBody) {
+      requestHeadersAndBody = `${requestHeaderLines}${requestBody}`;
+    } else if (requestHeaderLines) {
+      requestHeadersAndBody = requestHeaderLines;
+    } else if (requestBody) {
+      requestHeadersAndBody = requestBody;
+    }
+
+    const requestBlock = `${requestBlockStart}\n${requestFirstLine}\n${requestHeadersAndBody}\n${blockEnd}`;
+
+    //
+    const responseBlockStart = "```%response";
+    let responseBlock: string = "";
+
+    if (draftResponse) {
+      const responseFirstLine = `HTTP/${draftResponse?.http_version} ${draftResponse?.status_code} ${draftResponse?.status_text}`;
+      const responseHeaderLines = draftResponse?.headers.length
+        ? draftResponse.headers
+            .map(([key, value]) => `${key}: ${value}`)
+            .join("\n") + "\n"
+        : "";
+      const responseBody = draftResponse?.body?.length
+        ? "\n" + draftResponse.body
+        : "";
+
+      let responseHeadersAndBody: string;
+
+      if (responseHeaderLines.length) {
+        if (responseBody.length) {
+          responseHeadersAndBody = responseHeaderLines + responseBody;
+        } else {
+          responseHeadersAndBody = responseHeaderLines + "\n";
+        }
+      } else if (responseBody.length) {
+        responseHeadersAndBody = responseBody + "\n";
+      } else {
+        responseHeadersAndBody = "\n";
+      }
+
+      responseBlock = `${responseBlockStart}\n${responseFirstLine}\n${responseHeadersAndBody}\n${blockEnd}`;
+    }
+
+    const configBlockStart = "```%config";
+    const secrets =
+      draftConfig.secrets === null
+        ? "secrets = []\n"
+        : `secrets = [${draftConfig.secrets.map((secret) => `"${secret}"`).join(", ")}]\n\n`;
+
+    const prompts =
+      draftConfig.prompts === null
+        ? ""
+        : `${draftConfig.prompts.map((prompt) => `[[prompts]]\nname = "${prompt.name}"\ndefault = "${prompt.default === null ? "" : prompt.default}"`).join("\n\n")}\n\n`;
+
+    const vars =
+      draftConfig.vars === null
+        ? ""
+        : draftConfig.vars
+            .map((v) =>
+              v.default === null || v.default.length === 0
+                ? `[[vars]]\nname = "${v.name}"`
+                : `[[vars]]\nname = "${v.name}"\ndefault = "${v.default}\n\n"`,
+            )
+            .join("\n");
+    const envs =
+      draftConfig.envs === null
+        ? ""
+        : Object.entries(draftConfig.envs)
+            .map(([envName, envVars]) => {
+              const vars = Object.entries(envVars ?? {})
+                .map((v) => `${v[0]} = "${v[1]}"`)
+                .join("\n");
+              return `[envs.${envName}]\n${vars}\n\n`;
+            })
+            .join("\n\n");
+    const configBlock = `${configBlockStart}\n${secrets}${prompts}\n${vars}\n\n${envs}\n${blockEnd}\n`;
+
+    // console.log(configBlock);
+
+    setResult(configBlock + "\n" + requestBlock + "\n" + responseBlock + "\n");
+  }, [draftRequest, draftResponse, draftConfig]);
+};
+
 type SaveToFileModalProps = {
   draftFileName: string;
   fileContentToSave: string;
@@ -337,6 +412,7 @@ const SaveToFileModal: FC<SaveToFileModalProps> = ({
         file_content: fileContentToSave,
         file_path: fileName,
       },
+
       {
         onSuccess() {
           openRequestFilesStore.openFile(fileName);
@@ -354,6 +430,14 @@ const SaveToFileModal: FC<SaveToFileModalProps> = ({
           });
 
           modals.closeAll();
+        },
+        onError(error) {
+          notifications.show({
+            color: "red",
+            icon: <IconAlertCircleFilled />,
+            title: "Error Saving Draft",
+            message: `Error saving file: ${error}`,
+          });
         },
       },
     );

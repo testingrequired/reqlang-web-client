@@ -1,7 +1,7 @@
 import { createStore } from "zustand";
 import { persist } from "zustand/middleware";
 import { v4 as uuid } from "uuid";
-import { HttpRequest, HttpResponse } from "reqlang-types";
+import { HttpRequest, HttpResponse, ParsedConfig } from "reqlang-types";
 
 export const DFAULT_REQUEST = {
   verb: "GET",
@@ -9,6 +9,14 @@ export const DFAULT_REQUEST = {
   http_version: "1.1",
   headers: [],
   body: null,
+};
+
+export const DEFAULT_CONFIG = {
+  secrets: null,
+  envs: null,
+  prompts: null,
+  vars: null,
+  auth: null,
 };
 
 export const DFAULT_RESPONSE: HttpResponse = {
@@ -23,7 +31,7 @@ export type DraftFile = {
   path: string;
   request: HttpRequest;
   response: HttpResponse | null;
-  config: string;
+  config: ParsedConfig;
 };
 
 export type Data = {
@@ -96,7 +104,7 @@ export const useRequestFilesStore = createStore<Store>()(
                 path: newPath,
                 request: DFAULT_REQUEST,
                 response: null,
-                config: "",
+                config: DEFAULT_CONFIG,
               },
             ],
             activeFile: newPath,
