@@ -196,31 +196,50 @@ export const ActiveDraftFile = (props: Props) => {
 
             {usingResponse ? (
               <>
-                <Switch
-                  label="Enable Response Assertion"
-                  checked={usingResponse}
-                  onChange={(event) => {
-                    if (event.target.checked) {
-                      if (draftResponseFromStore) {
-                        setDraftResponse(draftResponseFromStore);
+                <Button.Group>
+                  <Button
+                    color="red"
+                    variant="light"
+                    onClick={() => {
+                      if (draftResponse) {
+                        setDraftResponse(null);
                       } else {
-                        setDraftResponse(DFAULT_RESPONSE);
+                        setDraftResponse(
+                          draftResponseFromStore ?? DFAULT_RESPONSE,
+                        );
                       }
-                    } else {
-                      setDraftResponse(null);
-                    }
-                  }}
-                />
+                    }}
+                  >
+                    Remove Response Assertion
+                  </Button>
+                </Button.Group>
+
                 <EditHttpResponseForm
                   value={draftResponse}
                   onChange={setDraftResponse}
                 />
               </>
             ) : (
-              <Alert title="Response Assertion">
-                <Text size="sm">You can define an expected HTTP Response.</Text>
+              <Alert title="Response Assertion" variant="transparent">
+                <Text size="sm">
+                  You can define an expected HTTP Response as a test.
+                </Text>
 
-                <Switch
+                <Button
+                  onClick={() => {
+                    if (draftResponse) {
+                      setDraftResponse(null);
+                    } else {
+                      setDraftResponse(
+                        draftResponseFromStore ?? DFAULT_RESPONSE,
+                      );
+                    }
+                  }}
+                >
+                  Add Response Assertion
+                </Button>
+
+                {/* <Switch
                   label="Enable Response Assertion"
                   checked={usingResponse}
                   onChange={(event) => {
@@ -234,7 +253,7 @@ export const ActiveDraftFile = (props: Props) => {
                       setDraftResponse(null);
                     }
                   }}
-                />
+                /> */}
               </Alert>
             )}
           </Stack>
