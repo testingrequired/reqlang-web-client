@@ -151,6 +151,7 @@ export function EditHttpRequestForm({ onChange, value }: Props) {
                 <Button.Group>
                   <Button
                     variant="light"
+                    color="gray"
                     leftSection={<IconPlus size={16} />}
                     onClick={() =>
                       field.handleChange([...field.state.value, ["", ""]])

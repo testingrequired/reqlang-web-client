@@ -5,7 +5,6 @@ import {
   Card,
   Loader,
   Stack,
-  Switch,
   Tabs,
   Text,
   TextInput,
@@ -238,22 +237,6 @@ export const ActiveDraftFile = (props: Props) => {
                 >
                   Add Response Assertion
                 </Button>
-
-                {/* <Switch
-                  label="Enable Response Assertion"
-                  checked={usingResponse}
-                  onChange={(event) => {
-                    if (event.target.checked) {
-                      if (draftResponseFromStore) {
-                        setDraftResponse(draftResponseFromStore);
-                      } else {
-                        setDraftResponse(DFAULT_RESPONSE);
-                      }
-                    } else {
-                      setDraftResponse(null);
-                    }
-                  }}
-                /> */}
               </Alert>
             )}
           </Stack>

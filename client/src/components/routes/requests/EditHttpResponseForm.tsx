@@ -7,7 +7,6 @@ import {
   Group,
   Stack,
   Card,
-  Divider,
   ActionIcon,
   NumberInput,
   Text,
@@ -26,6 +25,9 @@ export function EditHttpResponseForm({ value, onChange }: Props) {
     defaultValues: value,
     listeners: {
       async onChange(form) {
+        if (form.formApi.state.values.body?.length === 0) {
+          form.formApi.state.values.body = null;
+        }
         onChange?.(form.formApi.state.values);
       },
     },
@@ -95,11 +97,9 @@ export function EditHttpResponseForm({ value, onChange }: Props) {
             />
           </Group>
 
-          <Divider label="Headers" labelPosition="center" />
-
           <form.Field name="headers">
             {(field) => (
-              <Stack gap="xs">
+              <Stack>
                 {field.state.value.map((_, index) => (
                   <Group key={index} align="end" wrap="nowrap">
                     <TextInput
@@ -146,6 +146,7 @@ export function EditHttpResponseForm({ value, onChange }: Props) {
                 <Button.Group>
                   <Button
                     variant="light"
+                    color="gray"
                     leftSection={<IconPlus size={16} />}
                     onClick={() =>
                       field.handleChange([...field.state.value, ["", ""]])
@@ -158,22 +159,56 @@ export function EditHttpResponseForm({ value, onChange }: Props) {
             )}
           </form.Field>
 
-          <Divider label="Body" labelPosition="center" />
+          <form.Subscribe>
+            {(f) => {
+              return (
+                <form.Field
+                  name="body"
+                  children={(field) => (
+                    <>
+                      {f.values.body?.length === 0 ? (
+                        <Button.Group>
+                          <Button
+                            color="gray"
+                            variant="light"
+                            onClick={() => {
+                              field.setValue(" ");
+                            }}
+                          >
+                            Add Body
+                          </Button>
+                        </Button.Group>
+                      ) : (
+                        <>
+                          <Textarea
+                            label="Body"
+                            minRows={6}
+                            autosize
+                            value={field.state.value ?? ""}
+                            onChange={(e) =>
+                              field.handleChange(e.currentTarget.value || null)
+                            }
+                          />
 
-          <form.Field
-            name="body"
-            children={(field) => (
-              <Textarea
-                label="Body"
-                minRows={6}
-                autosize
-                value={field.state.value ?? ""}
-                onChange={(e) =>
-                  field.handleChange(e.currentTarget.value || null)
-                }
-              />
-            )}
-          />
+                          <Button.Group>
+                            <Button
+                              color="red"
+                              variant="light"
+                              onClick={() => {
+                                field.setValue("");
+                              }}
+                            >
+                              Remove Body
+                            </Button>
+                          </Button.Group>
+                        </>
+                      )}
+                    </>
+                  )}
+                />
+              );
+            }}
+          </form.Subscribe>
         </Stack>
       </form>
     </Card>
