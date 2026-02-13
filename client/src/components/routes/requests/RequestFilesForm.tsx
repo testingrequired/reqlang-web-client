@@ -79,23 +79,32 @@ export const RequestFilesForm = () => {
           radius="xs"
         >
           <Indicator
-            offset={5}
-            radius="xl"
+            offset={openRequestFilesStore.draftFiles.length === 0 ? 5 : 0}
+            radius="sm"
+            zIndex={1}
             position="bottom-end"
-            label={
-              newSelectedFiles.length + openRequestFilesStore.draftFiles.length
-            }
-            disabled={
-              newSelectedFiles.length === 0 &&
-              openRequestFilesStore.draftFiles.length === 0
-            }
+            label={newSelectedFiles.length}
+            disabled={newSelectedFiles.length === 0}
           >
-            {newSelectedFiles.length === 0 &&
-            openRequestFilesStore.draftFiles.length === 0 ? (
-              <IconFileText stroke={1.5} />
-            ) : (
-              <IconFileTextFilled stroke={1} />
-            )}
+            <Indicator
+              offset={newSelectedFiles.length === 0 ? 5 : 0}
+              color="teal"
+              zIndex={1}
+              radius="sm"
+              position={
+                newSelectedFiles.length === 0 ? "bottom-end" : "middle-end"
+              }
+              label={openRequestFilesStore.draftFiles.length}
+              disabled={openRequestFilesStore.draftFiles.length === 0}
+            >
+              {newSelectedFiles.length +
+                openRequestFilesStore.draftFiles.length ===
+              0 ? (
+                <IconFileText stroke={1.5} />
+              ) : (
+                <IconFileTextFilled stroke={1} />
+              )}
+            </Indicator>
           </Indicator>
         </ActionIcon>
       </TooltipFloating>
