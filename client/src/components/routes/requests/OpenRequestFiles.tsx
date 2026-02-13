@@ -30,6 +30,7 @@ export const OpenRequestFiles = () => {
         {openRequestFilesStore.draftFiles.map((draftFile) => {
           return (
             <Tabs.Tab
+              key={draftFile.path}
               value={draftFile.path}
               fw={
                 openRequestFilesStore.activeFile === draftFile.path
@@ -37,12 +38,7 @@ export const OpenRequestFiles = () => {
                   : "normal"
               }
               aria-label={draftFile.path}
-            >
-              <Group gap="xs">
-                <Text mb={0} size="sm">
-                  {draftFile.path}
-                </Text>
-
+              rightSection={
                 <CloseButton
                   size="sm"
                   onClick={() => {
@@ -63,6 +59,12 @@ export const OpenRequestFiles = () => {
                   }}
                   aria-label={`Close ${draftFile.path}`}
                 />
+              }
+            >
+              <Group gap="xs">
+                <Text mb={0} size="sm">
+                  {draftFile.path}
+                </Text>
               </Group>
             </Tabs.Tab>
           );
@@ -91,6 +93,7 @@ export const OpenRequestFiles = () => {
 
           return (
             <Tabs.Tab
+              key={openRequestFile}
               value={openRequestFile}
               fw={
                 openRequestFilesStore.activeFile === openRequestFile
@@ -98,12 +101,7 @@ export const OpenRequestFiles = () => {
                   : "normal"
               }
               aria-label={openRequestFile}
-            >
-              <Group gap="xs">
-                <Text mb={0} size="sm">
-                  {label}
-                </Text>
-
+              rightSection={
                 <CloseButton
                   size="sm"
                   onClick={() => {
@@ -111,6 +109,12 @@ export const OpenRequestFiles = () => {
                   }}
                   aria-label={`Close ${label}`}
                 />
+              }
+            >
+              <Group gap="xs">
+                <Text mb={0} size="sm">
+                  {label}
+                </Text>
               </Group>
             </Tabs.Tab>
           );
