@@ -23,6 +23,10 @@ export class PageObject implements IPageObject {
     await expect(this.getLocator()).toBeVisible();
   }
 
+  async expectNotToBeVisible() {
+    await expect(this.getLocator()).not.toBeVisible();
+  }
+
   async click() {
     await this.click();
   }

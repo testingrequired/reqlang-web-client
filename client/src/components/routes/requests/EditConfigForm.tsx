@@ -47,7 +47,7 @@ export function EditConfigForm({ onChange, value }: Props) {
   }, [value]);
 
   return (
-    <Card>
+    <Card data-testid="edit-config-form">
       <Text fw="bold" mb="xl">
         Config
       </Text>
@@ -87,6 +87,7 @@ export function EditConfigForm({ onChange, value }: Props) {
                 children={(field) => (
                   <TagsInput
                     label="Environment Names"
+                    data-testid="config-env-names"
                     placeholder="dev, qa, prod"
                     data={["dev", "qa", "prod"]}
                     clearable
@@ -132,6 +133,7 @@ export function EditConfigForm({ onChange, value }: Props) {
                                                 key={index}
                                                 align="end"
                                                 wrap="nowrap"
+                                                data-testid={`env-${envName}-variable-${varName}`}
                                               >
                                                 <TextInput
                                                   label={
@@ -140,8 +142,8 @@ export function EditConfigForm({ onChange, value }: Props) {
                                                       : undefined
                                                   }
                                                   value={varName}
-                                                  disabled
                                                   style={{ flex: 1 }}
+                                                  data-testid={`env-${envName}-variable-name-${varName}`}
                                                 />
 
                                                 <TextInput
@@ -155,6 +157,7 @@ export function EditConfigForm({ onChange, value }: Props) {
                                                   value={
                                                     envVars?.[varName] ?? ""
                                                   }
+                                                  data-testid={`env-${envName}-variable-value-${varName}`}
                                                   onChange={(e) => {
                                                     const nextEnvs = {
                                                       ...(envsField.state
@@ -219,7 +222,12 @@ export function EditConfigForm({ onChange, value }: Props) {
                   <Stack gap="xs">
                     {field.state.value?.map((_, index) => {
                       return (
-                        <Group key={index} align="end" wrap="nowrap">
+                        <Group
+                          key={index}
+                          align="end"
+                          wrap="nowrap"
+                          data-testid="variable"
+                        >
                           <TextInput
                             label={index === 0 ? "Variable" : undefined}
                             placeholder=""
@@ -233,6 +241,7 @@ export function EditConfigForm({ onChange, value }: Props) {
                               field.handleChange(next);
                             }}
                             style={{ flex: 1 }}
+                            data-testid="variable-name"
                           />
 
                           <TextInput
@@ -247,6 +256,7 @@ export function EditConfigForm({ onChange, value }: Props) {
                               field.handleChange(next);
                             }}
                             style={{ flex: 2 }}
+                            data-testid="variable-default-value"
                           />
 
                           <ActionIcon
@@ -367,7 +377,12 @@ export function EditConfigForm({ onChange, value }: Props) {
                   <Stack gap="xs">
                     {field.state.value?.map((_, index) => {
                       return (
-                        <Group key={index} align="end" wrap="nowrap">
+                        <Group
+                          key={index}
+                          align="end"
+                          wrap="nowrap"
+                          data-testid="prompt"
+                        >
                           <TextInput
                             label={index === 0 ? "Prompt" : undefined}
                             placeholder=""
@@ -381,6 +396,7 @@ export function EditConfigForm({ onChange, value }: Props) {
                               field.handleChange(next);
                             }}
                             style={{ flex: 1 }}
+                            data-testid={`prompt-name`}
                           />
 
                           <TextInput
@@ -395,6 +411,7 @@ export function EditConfigForm({ onChange, value }: Props) {
                               field.handleChange(next);
                             }}
                             style={{ flex: 2 }}
+                            data-testid={`prompt-name-default-value`}
                           />
 
                           <ActionIcon
@@ -462,6 +479,7 @@ export function EditConfigForm({ onChange, value }: Props) {
                 children={(field) => (
                   <TagsInput
                     label="Secrets"
+                    data-testid="config-secrets"
                     placeholder="alot, of, secret, values"
                     value={field.state.value ?? []}
                     onChange={(value) => field.handleChange(value)}

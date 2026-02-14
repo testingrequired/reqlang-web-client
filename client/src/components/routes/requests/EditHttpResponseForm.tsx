@@ -38,7 +38,7 @@ export function EditHttpResponseForm({ value, onChange }: Props) {
   }, [value]);
 
   return (
-    <Card>
+    <Card data-testid="edit-http-response-form">
       <Text fw="bold" mb="xl">
         HTTP Response Assertion
       </Text>
@@ -100,48 +100,55 @@ export function EditHttpResponseForm({ value, onChange }: Props) {
           <form.Field name="headers">
             {(field) => (
               <Stack>
-                {field.state.value.map((_, index) => (
-                  <Group key={index} align="end" wrap="nowrap">
-                    <TextInput
-                      label={index === 0 ? "Header" : undefined}
-                      placeholder="content-type"
-                      required
-                      value={field.state.value[index][0]}
-                      onChange={(e) => {
-                        const next = [...field.state.value];
-                        next[index] = [e.currentTarget.value, next[index][1]];
-                        field.handleChange(next);
-                      }}
-                      style={{ flex: 1 }}
-                    />
-
-                    <TextInput
-                      label={index === 0 ? "Value" : undefined}
-                      placeholder="application/json"
-                      required
-                      value={field.state.value[index][1]}
-                      onChange={(e) => {
-                        const next = [...field.state.value];
-                        next[index] = [next[index][0], e.currentTarget.value];
-                        field.handleChange(next);
-                      }}
-                      style={{ flex: 2 }}
-                    />
-
-                    <ActionIcon
-                      color="red"
-                      variant="subtle"
-                      onClick={() => {
-                        const next = field.state.value.filter(
-                          (_, i) => i !== index,
-                        );
-                        field.handleChange(next.length ? next : []);
-                      }}
+                <div data-testid="response-headers">
+                  {field.state.value.map((_, index) => (
+                    <Group
+                      key={index}
+                      align="end"
+                      wrap="nowrap"
+                      data-testid="response-header"
                     >
-                      <IconTrash size={16} />
-                    </ActionIcon>
-                  </Group>
-                ))}
+                      <TextInput
+                        label={index === 0 ? "Header" : undefined}
+                        placeholder="content-type"
+                        required
+                        value={field.state.value[index][0]}
+                        onChange={(e) => {
+                          const next = [...field.state.value];
+                          next[index] = [e.currentTarget.value, next[index][1]];
+                          field.handleChange(next);
+                        }}
+                        style={{ flex: 1 }}
+                      />
+
+                      <TextInput
+                        label={index === 0 ? "Value" : undefined}
+                        placeholder="application/json"
+                        required
+                        value={field.state.value[index][1]}
+                        onChange={(e) => {
+                          const next = [...field.state.value];
+                          next[index] = [next[index][0], e.currentTarget.value];
+                          field.handleChange(next);
+                        }}
+                        style={{ flex: 2 }}
+                      />
+
+                      <ActionIcon
+                        color="red"
+                        variant="subtle"
+                        onClick={() => {
+                          const next = field.state.value.filter(
+                            (_, i) => i !== index,
+                          );
+                          field.handleChange(next.length ? next : []);
+                        }}
+                      >
+                        <IconTrash size={16} />
+                      </ActionIcon>
+                    </Group>
+                  ))}
+                </div>
 
                 <Button.Group>
                   <Button

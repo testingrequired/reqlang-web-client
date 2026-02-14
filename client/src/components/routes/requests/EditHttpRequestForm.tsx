@@ -46,7 +46,7 @@ export function EditHttpRequestForm({ onChange, value }: Props) {
   }, [value]);
 
   return (
-    <Card>
+    <Card data-testid="edit-http-request-form">
       <Text fw="bold" mb="xl">
         HTTP Request
       </Text>
@@ -103,50 +103,59 @@ export function EditHttpRequestForm({ onChange, value }: Props) {
           <form.Field name="headers">
             {(field) => (
               <Stack gap="xs">
-                {field.state.value.map((_, index) => (
-                  <Group key={index} align="end" wrap="nowrap">
-                    <TextInput
-                      label={index === 0 ? "Header" : undefined}
-                      placeholder="content-type"
-                      required
-                      value={field.state.value[index][0]}
-                      onChange={(e) => {
-                        const next = [...field.state.value];
-                        next[index] = [e.currentTarget.value, next[index][1]];
-
-                        field.handleChange(next);
-                      }}
-                      style={{ flex: 1 }}
-                    />
-
-                    <TextInput
-                      label={index === 0 ? "Value" : undefined}
-                      placeholder="application/json"
-                      value={field.state.value[index][1]}
-                      required
-                      onChange={(e) => {
-                        let next = [...field.state.value];
-                        next[index] = [next[index][0], e.currentTarget.value];
-
-                        field.handleChange(next);
-                      }}
-                      style={{ flex: 2 }}
-                    />
-
-                    <ActionIcon
-                      color="red"
-                      variant="subtle"
-                      onClick={() => {
-                        const next = field.state.value.filter(
-                          (_, i) => i !== index,
-                        );
-                        field.handleChange(next.length ? next : []);
-                      }}
+                <div data-testid="request-headers">
+                  {field.state.value.map((_, index) => (
+                    <Group
+                      key={index}
+                      align="end"
+                      wrap="nowrap"
+                      data-testid="request-header"
                     >
-                      <IconTrash size={16} />
-                    </ActionIcon>
-                  </Group>
-                ))}
+                      <TextInput
+                        label={index === 0 ? "Header" : undefined}
+                        placeholder="content-type"
+                        data-testid="request-header-key"
+                        required
+                        value={field.state.value[index][0]}
+                        onChange={(e) => {
+                          const next = [...field.state.value];
+                          next[index] = [e.currentTarget.value, next[index][1]];
+
+                          field.handleChange(next);
+                        }}
+                        style={{ flex: 1 }}
+                      />
+
+                      <TextInput
+                        label={index === 0 ? "Value" : undefined}
+                        placeholder="application/json"
+                        data-testid="request-header-value"
+                        value={field.state.value[index][1]}
+                        required
+                        onChange={(e) => {
+                          let next = [...field.state.value];
+                          next[index] = [next[index][0], e.currentTarget.value];
+
+                          field.handleChange(next);
+                        }}
+                        style={{ flex: 2 }}
+                      />
+
+                      <ActionIcon
+                        color="red"
+                        variant="subtle"
+                        onClick={() => {
+                          const next = field.state.value.filter(
+                            (_, i) => i !== index,
+                          );
+                          field.handleChange(next.length ? next : []);
+                        }}
+                      >
+                        <IconTrash size={16} />
+                      </ActionIcon>
+                    </Group>
+                  ))}
+                </div>
 
                 <Button.Group>
                   <Button

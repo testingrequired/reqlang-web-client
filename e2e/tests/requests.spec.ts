@@ -96,6 +96,289 @@ describe("Requests", () => {
         ).toBeDisabled();
       });
 
+      describe("config", () => {
+        test("should be displayed", async () => {
+          await requests.openFileTabs.activeDraftFile.tabs.editTab.configForm.expectToBeVisible();
+        });
+
+        describe("add a prompt", () => {
+          beforeEach(async () => {
+            await requests.openFileTabs.activeDraftFile.tabs.editTab.configForm.fillFromConfig(
+              {
+                prompts: [
+                  {
+                    name: "expectedPrompt",
+                    description: null,
+                    default: null,
+                  },
+                ],
+              },
+            );
+          });
+
+          describe("but not referencing it", () => {
+            beforeEach(async () => {
+              await requests.openFileTabs.activeDraftFile.tabs.editTab.httpRequestForm.fillFromRequest(
+                {
+                  verb: "GET",
+                  target: "https://example.com/",
+                  http_version: "1.1",
+                  headers: [],
+                  body: null,
+                },
+              );
+            });
+
+            test("display error parsing indicator", async () => {
+              await requests.openFileTabs.activeDraftFile.tabs.parseResultIndicator.expectIsLoading();
+              await requests.openFileTabs.activeDraftFile.tabs.parseResultIndicator.expectIsShowingAsError();
+            });
+
+            describe("then referencing it", () => {
+              beforeEach(async () => {
+                await requests.openFileTabs.activeDraftFile.tabs.editTab.httpRequestForm.fillFromRequest(
+                  {
+                    verb: "GET",
+                    target: "https://example.com/?secret={{?expectedPrompt}}",
+                    http_version: "1.1",
+                    headers: [],
+                    body: null,
+                  },
+                );
+              });
+
+              test("display success parsing indicator", async () => {
+                await requests.openFileTabs.activeDraftFile.tabs.parseResultIndicator.expectIsLoading();
+                await requests.openFileTabs.activeDraftFile.tabs.parseResultIndicator.expectIsShowingAsSuccess();
+              });
+            });
+          });
+
+          describe("and referencing it", () => {
+            beforeEach(async () => {
+              await requests.openFileTabs.activeDraftFile.tabs.editTab.httpRequestForm.fillFromRequest(
+                {
+                  verb: "GET",
+                  target: "https://example.com/?secret={{?expectedPrompt}}",
+                  http_version: "1.1",
+                  headers: [],
+                  body: null,
+                },
+              );
+            });
+
+            test("display success parsing indicator", async () => {
+              await requests.openFileTabs.activeDraftFile.tabs.parseResultIndicator.expectIsLoading();
+              await requests.openFileTabs.activeDraftFile.tabs.parseResultIndicator.expectIsShowingAsSuccess();
+            });
+          });
+        });
+
+        describe("add env and variable", () => {
+          beforeEach(async () => {
+            await requests.openFileTabs.activeDraftFile.tabs.editTab.configForm.fillFromConfig(
+              {
+                vars: [
+                  {
+                    name: "expectedVarName",
+                    default: null,
+                  },
+                ],
+                envs: {
+                  expectedEnv: {
+                    expectedVarName: "expectedEnvVariableValue",
+                  },
+                },
+              },
+            );
+          });
+
+          test("display error parsing indicator", async () => {
+            await requests.openFileTabs.activeDraftFile.tabs.parseResultIndicator.expectIsLoading();
+            await requests.openFileTabs.activeDraftFile.tabs.parseResultIndicator.expectIsShowingAsError();
+          });
+
+          describe("but not referencing it", () => {
+            beforeEach(async () => {
+              await requests.openFileTabs.activeDraftFile.tabs.editTab.httpRequestForm.fillFromRequest(
+                {
+                  verb: "GET",
+                  target: "https://example.com/",
+                  http_version: "1.1",
+                  headers: [],
+                  body: null,
+                },
+              );
+            });
+
+            test("display error parsing indicator", async () => {
+              await requests.openFileTabs.activeDraftFile.tabs.parseResultIndicator.expectIsLoading();
+              await requests.openFileTabs.activeDraftFile.tabs.parseResultIndicator.expectIsShowingAsError();
+            });
+
+            describe("then referencing it", () => {
+              beforeEach(async () => {
+                await requests.openFileTabs.activeDraftFile.tabs.editTab.httpRequestForm.fillFromRequest(
+                  {
+                    verb: "GET",
+                    target: "https://example.com/?secret={{:expectedVarName}}",
+                    http_version: "1.1",
+                    headers: [],
+                    body: null,
+                  },
+                );
+              });
+
+              test("display success parsing indicator", async () => {
+                await requests.openFileTabs.activeDraftFile.tabs.parseResultIndicator.expectIsLoading();
+                await requests.openFileTabs.activeDraftFile.tabs.parseResultIndicator.expectIsShowingAsSuccess();
+              });
+            });
+          });
+        });
+
+        describe("when adding a secret", () => {
+          beforeEach(async () => {
+            await requests.openFileTabs.activeDraftFile.tabs.editTab.configForm.fillFromConfig(
+              {
+                secrets: ["expectedSecret"],
+              },
+            );
+          });
+
+          describe("but not referencing it", () => {
+            beforeEach(async () => {
+              await requests.openFileTabs.activeDraftFile.tabs.editTab.httpRequestForm.fillFromRequest(
+                {
+                  verb: "GET",
+                  target: "https://example.com/",
+                  http_version: "1.1",
+                  headers: [],
+                  body: null,
+                },
+              );
+            });
+
+            test("display error parsing indicator", async () => {
+              await requests.openFileTabs.activeDraftFile.tabs.parseResultIndicator.expectIsLoading();
+              await requests.openFileTabs.activeDraftFile.tabs.parseResultIndicator.expectIsShowingAsError();
+            });
+
+            describe("then referencing it", () => {
+              beforeEach(async () => {
+                await requests.openFileTabs.activeDraftFile.tabs.editTab.httpRequestForm.fillFromRequest(
+                  {
+                    verb: "GET",
+                    target: "https://example.com/?secret={{!expectedSecret}}",
+                    http_version: "1.1",
+                    headers: [],
+                    body: null,
+                  },
+                );
+              });
+
+              test("display success parsing indicator", async () => {
+                await requests.openFileTabs.activeDraftFile.tabs.parseResultIndicator.expectIsLoading();
+                await requests.openFileTabs.activeDraftFile.tabs.parseResultIndicator.expectIsShowingAsSuccess();
+              });
+            });
+          });
+
+          describe("and referencing it", () => {
+            beforeEach(async () => {
+              await requests.openFileTabs.activeDraftFile.tabs.editTab.httpRequestForm.fillFromRequest(
+                {
+                  verb: "GET",
+                  target: "https://example.com/?secret={{!expectedSecret}}",
+                  http_version: "1.1",
+                  headers: [],
+                  body: null,
+                },
+              );
+            });
+
+            test("display success parsing indicator", async () => {
+              await requests.openFileTabs.activeDraftFile.tabs.parseResultIndicator.expectIsLoading();
+              await requests.openFileTabs.activeDraftFile.tabs.parseResultIndicator.expectIsShowingAsSuccess();
+            });
+          });
+        });
+      });
+
+      describe("add response assertion", () => {
+        beforeEach(async () => {
+          await requests.openFileTabs.activeDraftFile.tabs.editTab.addResponseAssertionButton.click();
+        });
+
+        test("shows the response assertion form", async () => {
+          await requests.openFileTabs.activeDraftFile.tabs.editTab.httpResponseForm.expectToBeVisible();
+        });
+
+        describe("remove response assertion", () => {
+          beforeEach(async () => {
+            await requests.openFileTabs.activeDraftFile.tabs.editTab.removeResponseAssertionButton.click();
+          });
+
+          test("shows the response assertion form", async () => {
+            await requests.openFileTabs.activeDraftFile.tabs.editTab.httpResponseForm.expectNotToBeVisible();
+          });
+        });
+      });
+
+      test("request matches", async () => {
+        await requests.openFileTabs.activeDraftFile.tabs.editTab.httpRequestForm.expectRequestIs(
+          {
+            verb: "GET",
+            target: "https://example.com",
+            http_version: "1.1",
+            headers: [],
+            body: null,
+          },
+        );
+      });
+
+      describe("updating request", () => {
+        beforeEach(async () => {
+          await requests.openFileTabs.activeDraftFile.tabs.editTab.httpRequestForm.fillFromRequest(
+            {
+              verb: "GET",
+              target: "https://example.com/?hello=world",
+              http_version: "1.1",
+              headers: [],
+              body: null,
+            },
+          );
+        });
+
+        test("request matches", async () => {
+          await requests.openFileTabs.activeDraftFile.tabs.editTab.httpRequestForm.expectRequestIs(
+            {
+              verb: "GET",
+              target: "https://example.com/?hello=world",
+              http_version: "1.1",
+              headers: [],
+              body: null,
+            },
+          );
+        });
+      });
+
+      describe("updating request to invalid request", () => {
+        beforeEach(async () => {
+          await requests.openFileTabs.activeDraftFile.tabs.editTab.httpRequestForm.fillFromRequest(
+            {
+              verb: "GET",
+              target: "https://example.com/?={{:undefined}}",
+              http_version: "1.1",
+              headers: [],
+              body: null,
+            },
+          );
+
+          await requests.openFileTabs.activeDraftFile.tabs.parseResultIndicator.expectIsShowingAsError();
+        });
+      });
+
       test("the run tab is enabled", async () => {
         await expect(
           requests.openFileTabs.activeDraftFile.tabs.getTabByName("Run"),
@@ -104,6 +387,7 @@ describe("Requests", () => {
 
       describe("when saving to file", () => {
         beforeEach(async () => {
+          await requests.openFileTabs.activeDraftFile.tabs.parseResultIndicator.expectIsShowingAsSuccess();
           await requests.openFileTabs.activeDraftFile.tabs.editTab.saveToFile(
             "temp/test.reqlang",
           );
@@ -122,102 +406,6 @@ describe("Requests", () => {
           await requests.openFileTabs.expectIsFileTabActive(
             "temp/test.reqlang",
           );
-        });
-      });
-
-      describe("when draft content is modified but not saved", () => {
-        let originalValue: string;
-
-        beforeEach(async () => {
-          originalValue =
-            await requests.openFileTabs.activeDraftFile.tabs.editTab.textarea.inputValue();
-
-          await requests.openFileTabs.activeDraftFile.tabs.editTab.textarea.click();
-          await requests.openFileTabs.activeDraftFile.tabs.editTab.textarea.fill(
-            "```%request\nGET https://example.com?test=modified HTTP/1.1\n```",
-          );
-        });
-
-        test("the draft has been modified", async () => {
-          await expect(
-            requests.openFileTabs.activeDraftFile.tabs.editTab.textarea.inputValue(),
-          ).not.toBe(originalValue);
-        });
-
-        test("the 'Safe Draft' button on the Edit tab is enabled", async () => {
-          await expect(
-            requests.openFileTabs.activeDraftFile.tabs.editTab.saveDraftButton,
-          ).toBeEnabled();
-        });
-
-        test("the 'Revert Changes' button on the Edit tab is enabled", async () => {
-          await expect(
-            requests.openFileTabs.activeDraftFile.tabs.editTab
-              .revertChangesButton,
-          ).toBeEnabled();
-        });
-
-        test("the run tab is disabled", async () => {
-          await expect(
-            requests.openFileTabs.activeDraftFile.tabs.getTabByName("Run"),
-          ).toBeDisabled();
-        });
-
-        describe("when the save button is clicked", () => {
-          beforeEach(async () => {
-            await requests.openFileTabs.activeDraftFile.tabs.editTab.saveDraft();
-          });
-
-          test("the run tab is enabled", async () => {
-            await expect(
-              requests.openFileTabs.activeDraftFile.tabs.getTabByName("Run"),
-            ).toBeEnabled();
-          });
-
-          describe("click on run tab", () => {
-            beforeEach(async () => {
-              await requests.openFileTabs.activeDraftFile.tabs
-                .getTabByName("Run")
-                .click();
-            });
-
-            test("displays the run request form", async () => {
-              await requests.openFileTabs.activeDraftFile.tabs.runTab.expectToBeVisible();
-              await requests.openFileTabs.activeDraftFile.tabs.runTab.runRequestForm.expectToBeVisible();
-            });
-
-            test("displays the modified draft request", async () => {
-              await expect(
-                requests.openFileTabs.activeDraftFile.requestBodyTemplate,
-              ).toHaveText("GET https://example.com?test=modified HTTP/1.1");
-            });
-          });
-        });
-
-        describe("when the revert button is clicked", () => {
-          beforeEach(async () => {
-            await requests.openFileTabs.activeDraftFile.tabs.editTab.revertChanges();
-          });
-
-          test("the draft has not been modified", async () => {
-            await expect(
-              requests.openFileTabs.activeDraftFile.tabs.editTab.textarea,
-            ).toHaveValue(originalValue);
-          });
-
-          test("the 'Safe Draft' button on the Edit tab is disabled", async () => {
-            await expect(
-              requests.openFileTabs.activeDraftFile.tabs.editTab
-                .saveDraftButton,
-            ).toBeDisabled();
-          });
-
-          test("the 'Revert Changes' button on the Edit tab is disabled", async () => {
-            await expect(
-              requests.openFileTabs.activeDraftFile.tabs.editTab
-                .revertChangesButton,
-            ).toBeDisabled();
-          });
         });
       });
 

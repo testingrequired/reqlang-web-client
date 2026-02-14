@@ -183,34 +183,49 @@ export const ActiveDraftFile = (props: Props) => {
           <Tabs.Tab
             value="edit"
             rightSection={
-              parseFileQuery.isSuccess || parseFileQuery.isError ? (
-                <HoverCard closeDelay={1000}>
-                  <HoverCard.Target>
-                    {parseFileQuery.isError ? (
-                      <ThemeIcon color="red" variant="subtle" size="xs">
-                        <IconExclamationCircle />
-                      </ThemeIcon>
-                    ) : (
-                      <Tooltip
-                        label="Draft was parsed successfully"
-                        color="dark"
-                        position="bottom"
-                      >
-                        <ThemeIcon color="green" variant="subtle" size="xs">
-                          <IconCheck />
+              <div data-testid="parse-result-indicator">
+                {parseFileQuery.isSuccess || parseFileQuery.isError ? (
+                  <HoverCard closeDelay={1000}>
+                    <HoverCard.Target>
+                      {parseFileQuery.isError ? (
+                        <ThemeIcon
+                          color="red"
+                          variant="subtle"
+                          size="xs"
+                          data-testid="parse-result-indicator-failure"
+                        >
+                          <IconExclamationCircle />
                         </ThemeIcon>
-                      </Tooltip>
+                      ) : (
+                        <Tooltip
+                          label="Draft was parsed successfully"
+                          color="dark"
+                          position="bottom"
+                        >
+                          <ThemeIcon
+                            color="green"
+                            variant="subtle"
+                            size="xs"
+                            data-testid="parse-result-indicator-success"
+                          >
+                            <IconCheck />
+                          </ThemeIcon>
+                        </Tooltip>
+                      )}
+                    </HoverCard.Target>
+                    {parseFileQuery.isError && (
+                      <HoverCard.Dropdown>
+                        <RequestFilParseError error={parseFileQuery.error} />
+                      </HoverCard.Dropdown>
                     )}
-                  </HoverCard.Target>
-                  {parseFileQuery.isError && (
-                    <HoverCard.Dropdown>
-                      <RequestFilParseError error={parseFileQuery.error} />
-                    </HoverCard.Dropdown>
-                  )}
-                </HoverCard>
-              ) : (
-                <Loader size="xs" />
-              )
+                  </HoverCard>
+                ) : (
+                  <Loader
+                    size="xs"
+                    data-testid="parse-result-indicator-loading"
+                  />
+                )}
+              </div>
             }
             style={{
               fontStyle:
@@ -472,6 +487,7 @@ const SaveToFileModal: FC<SaveToFileModalProps> = ({
           modals.closeAll();
         },
         onError(error) {
+          console.log(JSON.stringify(error.cause));
           notifications.show({
             color: "red",
             icon: <IconAlertCircleFilled />,

@@ -1,5 +1,6 @@
 import { expect, Locator, Page } from "@playwright/test";
 import { PageObject } from "..";
+import { HttpRequest, HttpResponse, ParsedConfig } from "reqlang-types";
 
 export class OpenedRequestFilesForm extends PageObject {
   readonly openFileSelectorButton: Locator;
@@ -120,12 +121,42 @@ export class ActiveDraftFile extends PageObject {
   }
 }
 
+export class ParseResultIndicator extends PageObject {
+  readonly loadingIcon: Locator;
+  readonly successIcon: Locator;
+  readonly failureIcon: Locator;
+
+  constructor(page: Page) {
+    super(page, page.getByTestId("parse-result-indicator"));
+
+    this.loadingIcon = this.root.getByTestId("parse-result-indicator-loading");
+    this.successIcon = this.root.getByTestId("parse-result-indicator-success");
+    this.failureIcon = this.root.getByTestId("parse-result-indicator-failure");
+  }
+
+  public async expectIsLoading() {
+    await this.loadingIcon.scrollIntoViewIfNeeded();
+    await expect(this.loadingIcon).toBeVisible();
+  }
+
+  public async expectIsShowingAsError() {
+    await this.failureIcon.scrollIntoViewIfNeeded();
+    await expect(this.failureIcon).toBeVisible();
+  }
+
+  public async expectIsShowingAsSuccess() {
+    await this.successIcon.scrollIntoViewIfNeeded();
+    await expect(this.successIcon).toBeVisible();
+  }
+}
+
 export class ActiveDraftFileTabs extends PageObject {
   readonly tabList: Locator;
   readonly tabs: Locator;
   readonly tabPanel: Locator;
   readonly editTab: ActiveDraftFileEditTab;
   readonly runTab: ActiveDraftFileRunTab;
+  readonly parseResultIndicator: ParseResultIndicator;
 
   constructor(page: Page) {
     super(page, page.getByTestId("active-draft-file-tabs"));
@@ -136,6 +167,8 @@ export class ActiveDraftFileTabs extends PageObject {
 
     this.editTab = new ActiveDraftFileEditTab(page);
     this.runTab = new ActiveDraftFileRunTab(page);
+
+    this.parseResultIndicator = new ParseResultIndicator(page);
   }
 
   getTabByName(requestFile: string): Locator {
@@ -194,8 +227,12 @@ export class ActiveDraftFileEditTab extends PageObject {
   readonly saveDraftButton: Locator;
   readonly revertChangesButton: Locator;
   readonly saveToFileButton: Locator;
-  readonly textarea: Locator;
   readonly saveToFileModal: SaveToFileModal;
+  readonly httpRequestForm: HttpRequestForm;
+  readonly httpResponseForm: HttpResponseForm;
+  readonly configForm: ConfigForm;
+  readonly addResponseAssertionButton: Locator;
+  readonly removeResponseAssertionButton: Locator;
 
   constructor(page: Page) {
     super(page, page.getByTestId("active-draft-file-edit-tab"));
@@ -212,9 +249,18 @@ export class ActiveDraftFileEditTab extends PageObject {
       name: "Save To File",
     });
 
-    this.textarea = this.root.getByRole("textbox");
-
     this.saveToFileModal = new SaveToFileModal(page);
+
+    this.httpRequestForm = new HttpRequestForm(page);
+    this.httpResponseForm = new HttpResponseForm(page);
+    this.configForm = new ConfigForm(page);
+    this.addResponseAssertionButton = page.getByRole("button", {
+      name: "Add Response Assertion",
+    });
+
+    this.removeResponseAssertionButton = page.getByRole("button", {
+      name: "Remove Response Assertion",
+    });
   }
 
   public async saveDraft() {
@@ -230,6 +276,215 @@ export class ActiveDraftFileEditTab extends PageObject {
     await this.saveToFileModal.expectToBeVisible();
     await this.saveToFileModal.filenameInput.fill(filePathToSaveAs);
     await this.saveToFileModal.saveButton.click();
+  }
+}
+
+export class HttpRequestForm extends PageObject {
+  readonly method: Locator;
+  readonly url: Locator;
+  readonly httpVersion: Locator;
+  readonly addHeaderButton: Locator;
+  readonly body: Locator;
+  readonly headers: Locator;
+
+  constructor(page: Page) {
+    super(page, page.getByTestId("edit-http-request-form"));
+
+    this.method = page.getByRole("textbox", { name: "Method" });
+    this.url = page.getByRole("textbox", {
+      name: "URL",
+    });
+    this.httpVersion = page.getByRole("textbox", { name: "HTTP Version" });
+    this.headers = page.getByTestId("request-header");
+    this.body = page.getByRole("textbox", {
+      name: "Body",
+    });
+  }
+
+  public async fillFromRequest(request: HttpRequest) {
+    await this.url.clear();
+    await this.url.fill(request.target);
+  }
+
+  public async expectRequestIs(expected: HttpRequest) {
+    await expect.soft(this.method).toHaveValue(expected.verb);
+    await expect.soft(this.url).toHaveValue(expected.target);
+    await expect.soft(this.httpVersion).toHaveValue(expected.http_version);
+
+    for (const [
+      expected_header_key,
+      expected_header_value,
+    ] of expected.headers) {
+      await expect
+        .soft(this.getHeaderByKey(expected_header_key))
+        .resolves.toBe(expected_header_value);
+    }
+
+    if (expected.body !== null) {
+      await expect.soft(this.body).toHaveValue(expected.body);
+    }
+  }
+
+  async getHeaderByKey(key: string): Promise<string> {
+    return this.headers
+      .filter({
+        hasText: key,
+      })
+      .getByTestId("request-header-value")
+      .textContent();
+  }
+}
+
+export class HttpResponseForm extends PageObject {
+  readonly httpVersion: Locator;
+  readonly statusCode: Locator;
+  readonly statusText: Locator;
+  readonly addHeaderButton: Locator;
+  readonly headers: Locator;
+  readonly body: Locator;
+
+  constructor(page: Page) {
+    super(page, page.getByTestId("edit-http-response-form"));
+
+    this.httpVersion = page.getByRole("textbox", { name: "HTTP Version" });
+
+    this.headers = page.getByTestId("response-header");
+
+    this.body = page.getByRole("textbox", {
+      name: "Body",
+    });
+  }
+
+  public async fillFromResponse(response: HttpResponse) {
+    await this.body.clear();
+    await this.body.fill(response.body);
+  }
+
+  public async expectRequestIs(expected: HttpResponse) {
+    await expect.soft(this.httpVersion).toHaveValue(expected.http_version);
+
+    for (const [
+      expected_header_key,
+      expected_header_value,
+    ] of expected.headers) {
+      await expect
+        .soft(this.getHeaderByKey(expected_header_key))
+        .resolves.toBe(expected_header_value);
+    }
+
+    if (expected.body !== null) {
+      await expect.soft(this.body).toHaveValue(expected.body);
+    }
+  }
+
+  async getHeaderByKey(key: string): Promise<string> {
+    return this.headers
+      .filter({
+        hasText: key,
+      })
+      .getByTestId("request-header-value")
+      .textContent();
+  }
+}
+
+export class ConfigForm extends PageObject {
+  readonly secretsInput: Locator;
+  readonly envsInput: Locator;
+  readonly addVariableButton: Locator;
+  readonly vars: Locator;
+  readonly addPromptButton: Locator;
+  readonly promptNameInput: Locator;
+
+  constructor(page: Page) {
+    super(page, page.getByTestId("edit-config-form"));
+
+    this.secretsInput = this.root.getByTestId("config-secrets");
+    this.envsInput = this.page.getByTestId("config-env-names");
+    this.addVariableButton = this.root.getByRole("button", {
+      name: "Add variable",
+    });
+    this.vars = this.root.getByTestId("variable");
+    this.addPromptButton = this.root.getByRole("button", {
+      name: "Add prompt",
+    });
+    this.promptNameInput = this.root.getByTestId("prompt-name").last();
+  }
+
+  public async fillFromConfig(config: Partial<ParsedConfig>) {
+    for (const secret of config.secrets ?? []) {
+      await this.addSecret(secret);
+    }
+
+    for (const prompt of config.prompts ?? []) {
+      await this.addPrompt(prompt.name);
+    }
+
+    for (const env of Object.keys(config.envs ?? {})) {
+      await this.addEnv(env);
+    }
+
+    for (const variable of config.vars ?? []) {
+      await this.addVariable(variable.name, variable.default);
+    }
+
+    for (const env of Object.keys(config.envs ?? {})) {
+      const envVars = config.envs[env] ?? {};
+
+      for (const [key, value] of Object.entries(envVars)) {
+        await this.addEnvVariable(env, key, value);
+      }
+    }
+  }
+
+  public async addSecret(secretName: string) {
+    await this.secretsInput.fill(secretName);
+    await this.page.keyboard.press("Enter");
+  }
+
+  public async addPrompt(promptName: string) {
+    await this.addPromptButton.click();
+    await this.promptNameInput.fill(promptName);
+  }
+
+  public async addEnv(envName: string) {
+    await this.envsInput.fill(envName);
+    await this.page.keyboard.press("Enter");
+  }
+
+  public async addVariable(variableName: string, defaultValue?: string) {
+    await this.addVariableButton.scrollIntoViewIfNeeded();
+    await this.addVariableButton.click();
+    const last = this.vars.last();
+
+    await last.getByTestId("variable-name").fill(variableName);
+
+    if (defaultValue) {
+      await last.getByTestId("variable-default-value").fill(defaultValue);
+    }
+  }
+
+  public async addEnvVariable(
+    envName: string,
+    variableName: string,
+    value: string,
+  ) {
+    await this.getEnvVariableValueInput(envName, variableName).fill(value);
+  }
+
+  public getVariableValueTextValue(
+    envName: string,
+    variableName: string,
+  ): Promise<string> {
+    return this.getEnvVariableValueInput(envName, variableName).textContent();
+  }
+
+  private getEnvVariableValueInput(
+    envName: string,
+    variableName: string,
+  ): Locator {
+    return this.page.getByTestId(
+      `env-${envName}-variable-value-${variableName}`,
+    );
   }
 }
 

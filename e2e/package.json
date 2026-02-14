@@ -14,5 +14,8 @@
   "devDependencies": {
     "@playwright/test": "^1.51.1",
     "@types/node": "^22.19.3"
+  },
+  "dependencies": {
+    "reqlang-types": "1.0.2"
   }
 }
